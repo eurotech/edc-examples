@@ -28,7 +28,9 @@
 		<module>edc-rest-endpoint</module>
 	</modules>
 
+<!--
 	<scm>
 		<connection>scm:git:ssh://git@github.com/eurotech/edc-examples.git</connection>
 	</scm>
+-->
 </project>

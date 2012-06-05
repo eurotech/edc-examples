@@ -11,9 +11,11 @@
         <repositories>
                 <repository>
                         <id>edc-snapshots</id>
-                        <url>https://github.com/eurotech/edc-mvn-repo/raw/master/snapshots</url>
-                        <releases><enabled>true</enabled><updatePolicy>always</updatePolicy></releases>
-                        <snapshots><enabled>true</enabled><updatePolicy>always</updatePolicy></snapshots>
+                        <url>https://repository-eurotech.forge.cloudbees.com/snapshot/</url>
+                        <snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
                 </repository>
         </repositories>
 
