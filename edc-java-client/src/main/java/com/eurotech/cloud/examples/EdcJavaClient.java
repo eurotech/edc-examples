@@ -33,7 +33,7 @@ public class EdcJavaClient implements EdcCallbackHandler
 {
     // >>>>>> Set these variables according to your Cloud user account
     //
-    private static final String ACCOUNT_NAME = "myEdcUserName";                                   // Your Account name in Cloud
+    private static final String ACCOUNT_NAME = "myEdcAccount";                                    // Your Account name in Cloud
     private static final String ASSET_ID     = "my-Device";                                       // Unique Asset ID of this client device
     private static final String BROKER_URL   = "mqtt://broker-sandbox.everyware-cloud.com:1883";  // URL address of broker 
     private static final String CLIENT_ID    = "my-Device-client";                                // Unique Client ID of this client device
@@ -65,7 +65,7 @@ public class EdcJavaClient implements EdcCallbackHandler
         
         EdcDeviceProfileFactory profFactory = EdcDeviceProfileFactory.getInstance();
         EdcDeviceProfile prof = profFactory.newEdcDeviceProfile();
-        prof.setDisplayName(ASSET_ID);
+        prof.setDisplayName("MyDisplayName");			// this might be set to the ASSET_ID, for display in the Cloud
         prof.setModelName("Eclipse Java Client");
 
         //set GPS position in device profile - this is sent only once, with the birth certificate
