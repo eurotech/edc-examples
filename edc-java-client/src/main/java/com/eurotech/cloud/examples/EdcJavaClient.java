@@ -6,8 +6,7 @@ import com.eurotech.cloud.client.EdcCallbackHandler;
 import com.eurotech.cloud.client.EdcClientFactory;
 import com.eurotech.cloud.client.EdcCloudClient;
 import com.eurotech.cloud.client.EdcConfiguration;
-import com.eurotech.cloud.client.EdcConfigurationFactory;
-import com.eurotech.cloud.client.EdcDeviceProfile;
+import com.eurotech.cloud.client.EdcConfigurationFactory;import com.eurotech.cloud.client.EdcDeviceProfile;
 import com.eurotech.cloud.client.EdcDeviceProfileFactory;
 import com.eurotech.cloud.message.EdcBirthPayload;
 import com.eurotech.cloud.message.EdcPayload;
@@ -65,7 +64,7 @@ public class EdcJavaClient implements EdcCallbackHandler
         
         EdcDeviceProfileFactory profFactory = EdcDeviceProfileFactory.getInstance();
         EdcDeviceProfile prof = profFactory.newEdcDeviceProfile();
-        prof.setDisplayName("MyDisplayName");			// this might be set to the ASSET_ID, for display in the Cloud
+        prof.setDisplayName("MyDisplayName");			// friendly name for this CLIENT_ID, for display in the Cloud
         prof.setModelName("Eclipse Java Client");
 
         //set GPS position in device profile - this is sent only once, with the birth certificate
@@ -239,3 +238,4 @@ public class EdcJavaClient implements EdcCallbackHandler
         // TODO Auto-generated method stub
     }
 }
+
