@@ -1,5 +1,12 @@
 package com.eurotech.cloud.examples;
 
+// This example class demonstrates the use of REST calls to query the Everyware Cloud
+// First, several REST APIs are called to read devices, messages, etc. (assumes that the MQTT publish example has previously been run).
+// Next, we create a Rule in the Everyware Cloud, and publish a message that triggers that rule.
+// The Rule, in turn, republishes another message, and sends an e-mail notification.
+// A REST call stores another message directly into the database.
+// Then the REST API is used to read back all three messages: 1) original publish, 2) republish, and 3) direct data store.
+// Finally, the Rule is deleted.
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,10 +58,12 @@ import com.sun.jersey.api.client.config.ClientConfig;
 public class EdcRestExample
 {
     // >>>>>> Set these variables according to your Cloud user account
-    public static final String API_URL   = "https://api-sandbox.everyware-cloud.com/v2/"; // URL for API connection
-    public static final String USERNAME  = "jpttest2";                                   // Username in account, to use for API
-    public static final String PASSWORD  = "We@come2";                                   // Password associated with Username
-    public static final String CLIENT_ID = "MyEclipseClient2";                           // Unique Client ID of this client device
+	public static final String API_URL = "https://api-sandbox.everyware-cloud.com/v2/";	// URL for API connection 
+	public static final String ACCOUNT = "myEdcAccount";				// Cloud account name
+	public static final String USERNAME = "myEdcUserName";			// Username in account, requires Administrative permissions
+	public static final String PASSWORD = "myEdcPassword3#";			// Password associated with Username
+	public static final String CLIENT_ID = "MyEclipseClient";			// Unique Client ID of this client device
+	public static final String TEST_EMAIL = "my.name@domain.com";		// E-mail address to use for this sample application
     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     static Client              client    = null;
@@ -92,7 +101,7 @@ public class EdcRestExample
         listAccounts();
         listDevices();
         listTopics();
-        listMetrics(USERNAME + "/+/sample/data");
+        listMetrics(ACCOUNT + "/+/sample/data");
         getMessageCount();
 
         System.out.println("##############\n Beginning test of listMessages()");
@@ -127,6 +136,9 @@ public class EdcRestExample
     }
 
 
+    //
+    // List Account names
+    //
     private static void listAccounts() {
         System.out.println("\n##############\n Beginning test of listAccounts()");
         String apiPath = "accounts.xml";
@@ -139,6 +151,9 @@ public class EdcRestExample
     }
 
 
+    //
+    // List devices in account
+    //
     private static void listDevices() {
         System.out.println("\n##############\n Beginning test of listDevices()");
         String apiPath = "devices.xml";
@@ -158,6 +173,9 @@ public class EdcRestExample
     }
 
 
+    //
+    // List topics that have been published
+    //
     private static void listTopics() {
         System.out.println("\n##############\n Beginning test of listTopics()");
         String apiPath = "topics.xml";
@@ -177,6 +195,9 @@ public class EdcRestExample
     }
 
 
+    //
+    // List metrics that have been published, searchByTopic()
+    //
     private static void listMetrics(String topic) {
         System.out.println("\n##############\n Beginning test of listMetrics(), search by topic: " + topic);
         String apiPath = "metrics/searchByTopic.xml";
@@ -197,6 +218,9 @@ public class EdcRestExample
     }
 
 
+    //
+    // Get count of messages in account
+    //
     private static void getMessageCount() {
         System.out.println("\n##############\n Beginning test of getMessageCount()");
         String apiPath = "messages/count.xml";
@@ -238,7 +262,7 @@ public class EdcRestExample
         }
 
         if (recentSeconds > 0) {
-            // get current date, minus 2 minutes, to use as startDate for message query
+            //get current date, minus recentSeconds, to use as startDate for message query
             startDate = (new Date()).getTime() - (recentSeconds * 1000);
             apisWeb = apisWeb.queryParam("startDate", "" + startDate);
             System.out.println("\nRead messages using startDate of: " + new Date(startDate) + " (long=" + startDate + ")\n");
@@ -264,6 +288,9 @@ public class EdcRestExample
     }
 
 
+    //
+    // Print content of a message metric
+    //
     private static void printMessageMetric(EdcMetric m) {
         String content = "";
         if (m.getType().equalsIgnoreCase("Zbase64Binary")) {
@@ -282,6 +309,9 @@ public class EdcRestExample
     }
 
 
+    //
+    // Create a new Rule
+    //
     private static void createRule() {
         System.out.println("\n##############\n Beginning test of createRule()");
 
@@ -307,7 +337,7 @@ public class EdcRestExample
         List<Parameter> emailParams = new ArrayList<Parameter>();
         Parameter emailParam1 = new Parameter();
         emailParam1.setName("to");
-        emailParam1.setValue("jon.tandy@eurotech.com");
+        emailParam1.setValue(TEST_EMAIL);
         emailParams.add(emailParam1);
 
         Parameter emailParam2 = new Parameter();
@@ -317,7 +347,8 @@ public class EdcRestExample
 
         Parameter emailParam3 = new Parameter();
         emailParam3.setName("body");
-        emailParam3.setValue("This e-mail was generated in response to receiving a publish message on topic $topic, " + "containing metric pub_double_metric= $dbl");
+        emailParam3.setValue("This e-mail was generated in response to receiving a publish message on topic $semanticTopic, " +
+                     "containing metric pub_double_metric= $dbl");
         emailParams.add(emailParam3);
 
         ParametersMapType emailParamsMap = new ParametersMapType();
@@ -337,8 +368,8 @@ public class EdcRestExample
 
         Parameter publishParam2 = new Parameter();
         publishParam2.setName("metrics");
-        publishParam2
-                .setValue("{\"metrics\":[{\"name\":\"new_string\", \"value\":\"$rule_string_metric\", \"type\":\"String\"},{\"name\":\"rule_double_metric\", \"value\":\"$dbl\", \"type\":\"Double\"}]}");
+        // value of 'metrics' parameter is a REST invocation in JSON format 
+        publishParam2.setValue("{\"metrics\":[{\"name\":\"new_string\", \"value\":\"$rule_string_metric\", \"type\":\"String\"},{\"name\":\"rule_double_metric\", \"value\":\"$dbl\", \"type\":\"Double\"}]}");
         publishParams.add(publishParam2);
 
         ParametersMapType publishParamsMap = new ParametersMapType();
@@ -390,6 +421,9 @@ public class EdcRestExample
     }
 
 
+    //
+    // Delete rule previously created
+    //
     private static void deleteRule() {
         System.out.println("\n##############\n Beginning test of deleteRule()");
 
@@ -425,6 +459,9 @@ public class EdcRestExample
     }
 
 
+    //
+    // Publish a message using REST API
+    //
     private static void restPublish() {
         // PUBLISH a message to the broker
         System.out.println("\n##############\n Beginning test of restPublish()");
@@ -438,16 +475,26 @@ public class EdcRestExample
         payload.setBody("PUBLISH - store data".getBytes());
 
         msg = new EdcMessage();
-        msg.setTopic(USERNAME + "/" + CLIENT_ID + pubTopic);
+        msg.setTopic(ACCOUNT + "/" + CLIENT_ID + pubTopic);
         msg.setTimestamp(new Date());
         msg.setEdcPayload(payload);
 
         messagesWebStore = apisWeb.path("messages").path("publish");
-        messagesWebStore.type(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(msg);
+        try {
+            messagesWebStore.type(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(msg);
+        }
+        catch (UniformInterfaceException uie) {
+            ErrorBean errorBean = uie.getResponse().getEntity(ErrorBean.class);
+            System.out.println(errorBean.getMessage());
+            throw uie;
+        }
         System.out.println("Published message using REST on topic: " + pubTopic);
     }
 
 
+    //
+    // Store message using REST API
+    //
     private static void restStore() {
         // POST a message to the data store
         System.out.println("\n##############\n Beginning test of restStore()");
@@ -461,25 +508,30 @@ public class EdcRestExample
         payload.setBody("POST - store data".getBytes());
 
         msg = new EdcMessage();
-        msg.setTopic(USERNAME + "/" + CLIENT_ID + storeTopic);
+        msg.setTopic(ACCOUNT + "/" + CLIENT_ID + storeTopic);
         msg.setTimestamp(new Date());
         msg.setEdcPayload(payload);
 
         messagesWebStore = apisWeb.path("messages").path("store");
         messagesWebStore.type(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(msg);
-        System.out.println("Published message using REST on topic: " + storeTopic);
+        System.out.println("Stored message using REST on topic: " + storeTopic);
     }
 
 
+    //
+    // Read back all messages just stored and published
+    //
     private static void restRead() {
-        // GET all recent messages back from data store using REST
         System.out.println("\n##############\n Beginning test of restRead()");
         System.out.println("Waiting several seconds, to make sure all published messages have reached the account.");
         sleep(10);
-        listMessages("", 10, 30);
+        listMessages("", 0, 30);
     }
 
 
+    //
+    // Create an EdcPayload
+    //
     private static EdcPayload createPayload(String prefix) {
         EdcMetric metric = null;
         List<EdcMetric> metrics = new ArrayList<EdcMetric>();
@@ -527,6 +579,7 @@ public class EdcRestExample
     }
 
 
+    // Sleep for a number of seconds
     private static void sleep(int seconds) {
         try {
             Thread.sleep(seconds * 1000);
