@@ -62,7 +62,7 @@ public class EdcRestExample
 	public static final String ACCOUNT = "myEdcAccount";				// Cloud account name
 	public static final String USERNAME = "myEdcUserName";			// Username in account, requires Administrative permissions
 	public static final String PASSWORD = "myEdcPassword3#";			// Password associated with Username
-	public static final String CLIENT_ID = "MyEclipseClient";			// Unique Client ID of this client device
+	public static final String ASSET_ID = "MyEclipseClient";			// Unique Client ID of this client device
 	public static final String TEST_EMAIL = "my.name@domain.com";		// E-mail address to use for this sample application
     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -467,19 +467,16 @@ public class EdcRestExample
         System.out.println("\n##############\n Beginning test of restPublish()");
 
         String pubTopic = "/pub/test";
-        EdcMessage msg = null;
-        EdcPayload payload = null;
         WebResource apisWeb = client.resource(API_URL);
-        WebResource messagesWebStore = null;
-        payload = createPayload("pub");
+        EdcPayload payload = createPayload("pub");
         payload.setBody("PUBLISH - store data".getBytes());
 
-        msg = new EdcMessage();
-        msg.setTopic(ACCOUNT + "/" + CLIENT_ID + pubTopic);
+        EdcMessage msg = new EdcMessage();
+        msg.setTopic(ACCOUNT + "/" + ASSET_ID + pubTopic);
         msg.setTimestamp(new Date());
         msg.setEdcPayload(payload);
 
-        messagesWebStore = apisWeb.path("messages").path("publish");
+        WebResource messagesWebStore = apisWeb.path("messages").path("publish");
         try {
             messagesWebStore.type(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(msg);
         }
@@ -500,19 +497,16 @@ public class EdcRestExample
         System.out.println("\n##############\n Beginning test of restStore()");
 
         String storeTopic = "/apis/test";
-        EdcMessage msg = null;
-        EdcPayload payload = null;
         WebResource apisWeb = client.resource(API_URL);
-        WebResource messagesWebStore = null;
-        payload = createPayload("api");
+        EdcPayload payload = createPayload("api");
         payload.setBody("POST - store data".getBytes());
 
-        msg = new EdcMessage();
-        msg.setTopic(ACCOUNT + "/" + CLIENT_ID + storeTopic);
+        EdcMessage msg = new EdcMessage();
+        msg.setTopic(ACCOUNT + "/" + ASSET_ID + storeTopic);
         msg.setTimestamp(new Date());
         msg.setEdcPayload(payload);
 
-        messagesWebStore = apisWeb.path("messages").path("store");
+        WebResource messagesWebStore = apisWeb.path("messages").path("store");
         messagesWebStore.type(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(msg);
         System.out.println("Stored message using REST on topic: " + storeTopic);
     }
