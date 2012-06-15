@@ -152,7 +152,7 @@ private:
 			edcCloudClient->m_messageArrived(string(topicName), payload);
 		}
 
-		return 0;
+		return 1;
 	}
 	/**
 	 * The EDC client provides a callback function
