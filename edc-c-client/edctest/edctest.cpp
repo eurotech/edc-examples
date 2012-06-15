@@ -6,8 +6,8 @@
 
 // >>>>>> Set these variables according to your Cloud user account
 #define TEST_ACCOUNT_NAME		"luca"												// Your Account name in Cloud
-//#define TEST_BROKER_URL			"tcp://broker-sandbox.everyware-cloud.com:1883/"	//https://console-sandbox.everyware-cloud.com/
-#define TEST_BROKER_URL     "tcp://localhost:1883"	//local
+#define TEST_BROKER_URL			"tcp://broker-sandbox.everyware-cloud.com:1883/"	//https://console-sandbox.everyware-cloud.com/
+//#define TEST_BROKER_URL     "tcp://localhost:1883"	//local
 
 																				// URL address of broker 
 #define TEST_CLIENT_ID			"001122DDEEFF"										// Unique Client ID of this client device
