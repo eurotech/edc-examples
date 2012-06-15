@@ -10,27 +10,38 @@
 //#define TEST_BROKER_URL     "tcp://localhost:1883"	//local
 
 																				// URL address of broker 
-#define TEST_CLIENT_ID			"001122DDEEFF"										// Unique Client ID of this client device
-#define TEST_ASSET_ID			"334455AABBCC"										// Unique Asset ID of this client device
+#define TEST_CLIENT_ID			"001122DDEEFF"									// Unique Client ID of this client device
+#define TEST_ASSET_ID			"334455AABBCC"									// Unique Asset ID of this client device
 #define TEST_USERNAME			"luca_broker"									// Username in account, to use for publishing
-#define TEST_PASSWORD			"We!come1"											// Password associated with Username
+#define TEST_PASSWORD			"We!come1"										// Password associated with Username
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-#define	DATA_SEMANTIC_TOPIC	"nativeclient/data"									// default publish topic
-#define PUBLISH_PERIOD		2000												// time between published messages, in milliseconds
-#define	MAX_PUBLISH			10													// number of times to publish
-#define LATITUDE			38.836695											// default (simulated) GPS position
-#define LONGITUDE			-99.671998
-#define PUBLISH_TIMEOUT     50000L												
+#define	DATA_SEMANTIC_TOPIC		"nativeclient/data"								// default publish topic
+#define PUBLISH_PERIOD			2000											// time between published messages, in milliseconds
+#define	MAX_PUBLISH				10												// number of times to publish
+#define LATITUDE				38.836695										// default (simulated) GPS position
+#define LONGITUDE				-99.671998
+#define PUBLISH_TIMEOUT			50000L												
+
+#define DISPLAY_TX_MSG_PAYLOAD	
+#define DISPLAY_RX_MSG_PAYLOAD	
 
 //helper function to create a sample payload
 EdcPayload * createPayload();
+
+//helper function to display a payload
+bool displayPayload (EdcPayload * payload);
+
 //callback for message arrived
 int EdcCloudClientMessageArrived(string topic, EdcPayload * payload){
-	printf("Message arrived: topic=%s\r\n", topic.c_str());
-
-	if(payload != 0){
-		payload->SerializeToOstream(&cout);
+	static int rxMsgCount = 0;
+	rxMsgCount ++;
+	printf("Message #%d arrived: topic=%s\r\n", rxMsgCount, topic.c_str());
+	
+#ifdef DISPLAY_RX_MSG_PAYLOAD
+	if (payload != 0){
+		displayPayload(payload);
 	}
+#endif
 
 	return 0;
 }
@@ -56,7 +67,8 @@ int main(){
 	string accountControlTopics = "#";
 
 	//Create client configuration, and set its properties
-    EdcConfiguration conf;    conf.setAccountName(TEST_ACCOUNT_NAME);
+    EdcConfiguration conf;    
+	conf.setAccountName(TEST_ACCOUNT_NAME);
     conf.setBrokerUrl(TEST_BROKER_URL);
     conf.setClientId(TEST_CLIENT_ID);
     conf.setDefaultAssetId(TEST_ASSET_ID);
@@ -103,19 +115,33 @@ int main(){
 	
 	rc = edcCloudClient.controlSubscribe(accountControlTopics, qoss);
 
-	if (rc != EDCCLIENT_SUCCESS){
+	if (rc != EDCCLIENT_SUCCESS) {
 		printf("controlSubscribe failed with error code %d\r\n", rc);
 		goto exit;
 	}
 
 	//publish data
 	for (int i = 0; i < MAX_PUBLISH; i++) {
-		rc = edcCloudClient.publish(pubTSemanticTopic, createPayload(), qoss, false, PUBLISH_TIMEOUT);	//call createPayload() each time
 
-		if (rc != EDCCLIENT_SUCCESS){
-			printf("publish #%d failed with error code %d\r\n", i, rc);
+		EdcPayload * payload = createPayload();
+
+		rc = edcCloudClient.publish(pubTSemanticTopic, payload, qoss, false, PUBLISH_TIMEOUT);	//call createPayload() each time
+
+		if (rc != EDCCLIENT_SUCCESS) {
+			printf("Publish #%d failed with error code %d\r\n", i, rc);
 			goto exit;
 		}
+
+		printf("Publish #%d succeeded, semantic topic=%s\r\n", i+1, pubTSemanticTopic.c_str());
+
+#ifdef DISPLAY_TX_MSG_PAYLOAD
+
+		if (payload != 0){
+			displayPayload(payload);
+		}
+#endif
+
+		EdcCloudClientSleep(1 * 1000);
 	}
 
 	//sleep to allow receipt of more publishes, then terminate connection
@@ -210,4 +236,88 @@ EdcPayload * createPayload(){
 	return edcPayload;
 }
 
+bool displayPayload (EdcPayload * payload)
+{
+	if (payload == 0)
+		return false;
+
+	if (payload->has_timestamp())
+		printf ("  timestamp: %lld\r\n", payload->timestamp());
+
+	if (payload->has_position()) {
+
+		const EdcPayload_EdcPosition position = payload->position();
+
+		printf ("  position latitude: %f\r\n", position.latitude());
+		printf ("  position longitude: %f\r\n", position.longitude());
+
+		if (position.has_altitude())
+			printf ("  position altitude: %f\r\n", position.altitude());
+	
+		if (position.has_precision())
+			printf ("  position precision: %f\r\n", position.precision());
+
+		if (position.has_heading())
+			printf ("  position heading: %f\r\n", position.heading());
+
+		if (position.has_speed())
+			printf ("  position speed: %f\r\n", position.speed());
+
+		if (position.has_timestamp())
+			printf ("  position timestamp: %lld\r\n", position.timestamp());
+
+		if (position.has_satellites())
+			printf ("  position satellites: %d\r\n", position.satellites());
+
+		if (position.has_status())
+			printf ("  position status: %d\r\n", position.status());
+	}
+
+	for (int i=0; i<payload->metric_size(); i++) {
+
+		EdcPayload_EdcMetric metrictmp = payload->metric(i);
+
+		printf ("  metric #%d name: %s\r\n", i, metrictmp.name().c_str());
+		printf ("  metric #%d type: %d\r\n", i, metrictmp.type());
+
+		if (metrictmp.has_double_value())
+			printf ("  metric #%d double_value: %f\r\n", i, metrictmp.double_value());
+
+		if (metrictmp.has_float_value())
+				printf ("  metric #%d float_value: %f\r\n", i, metrictmp.float_value());
+
+		if (metrictmp.has_long_value())
+			printf ("  metric #%d long_value: %lld\r\n", i, metrictmp.long_value());
+
+		if (metrictmp.has_int_value())
+			printf ("  metric #%d int_value: %d\r\n", i, metrictmp.int_value());
+
+		if (metrictmp.has_bool_value())
+			printf ("  metric #%d bool_value: %d\r\n", i, metrictmp.bool_value());
+
+		if (metrictmp.has_string_value())
+			printf ("  metric #%d string_value: %s\r\n", i, metrictmp.string_value().c_str());
+
+		if (metrictmp.has_bytes_value()) {
+			printf ("  metric #%d bytes_value:", i);
+			
+			for (int j=0; j<(int)(metrictmp.bytes_value().length()); j++)
+				printf (" 0x%02x", metrictmp.bytes_value().data()[j]);
+
+			printf ("\r\n");
+		}
+	}
+	
+	if (payload->has_body()) {
+
+		printf ("  body:");
+			
+		for (int i=0; i<(int)(payload->body().length()); i++)
+			printf (" 0x%02x", payload->body().data()[i]);
+
+		printf ("\n");
+	}
+
+	return true;
+}
 
