@@ -1,0 +1,322 @@
+\hypertarget{class_edc_cloud_client}{\section{Edc\-Cloud\-Client Class Reference}
+\label{class_edc_cloud_client}\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}}
+}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_edc_cloud_client_a69e35c3d8906b5c13f46c9af7d0535bd}{Edc\-Cloud\-Client} ()
+\item 
+\hyperlink{class_edc_cloud_client_a2e760410ea4cc1db2b7a9dbbce2bf932}{Edc\-Cloud\-Client} (\hyperlink{class_edc_configuration}{Edc\-Configuration} $\ast$edc\-Configuration, \hyperlink{class_edc_device_profile}{Edc\-Device\-Profile} $\ast$edc\-Device\-Profile, pfn\-Edc\-Cloud\-Client\-Message\-Arrived $\ast$message\-Arrived, pfn\-Edc\-Cloud\-Client\-Message\-Delivered $\ast$message\-Delivered, pfn\-Edc\-Cloud\-Client\-Connection\-Lost $\ast$connection\-Lost)
+\item 
+void \hyperlink{class_edc_cloud_client_abb7c5cbbe4147bd91ac787cde17b2e84}{set\-Edc\-Configuration} (\hyperlink{class_edc_configuration}{Edc\-Configuration} $\ast$edc\-Configuration)
+\item 
+void \hyperlink{class_edc_cloud_client_a0ea16b18bca2fa675568972f416052d3}{set\-Edc\-Profile} (\hyperlink{class_edc_device_profile}{Edc\-Device\-Profile} $\ast$edc\-Device\-Profile)
+\item 
+void \hyperlink{class_edc_cloud_client_a5ca4b7a98de65f9003951aacbb2d3bbb}{set\-Edc\-Cloud\-Client\-Message\-Arrived} (pfn\-Edc\-Cloud\-Client\-Message\-Arrived $\ast$message\-Arrived)
+\item 
+void \hyperlink{class_edc_cloud_client_aa7f12f5a330eba2d809c9f58ed853669}{set\-Edc\-Cloud\-Client\-Message\-Delivered} (pfn\-Edc\-Cloud\-Client\-Message\-Delivered $\ast$message\-Delivered)
+\item 
+void \hyperlink{class_edc_cloud_client_a0bd0d7186b2c98c9fb24c7e8bd56df95}{set\-Edc\-Cloud\-Client\-Connection\-Lost} (pfn\-Edc\-Cloud\-Client\-Connection\-Lost $\ast$connection\-Lost)
+\item 
+bool \hyperlink{class_edc_cloud_client_a20c77fb81d9b47f093d0198e0911cabf}{is\-Connected} ()
+\item 
+int \hyperlink{class_edc_cloud_client_a1d0be6f491848da0cadacf09a06f2f43}{start\-Session} ()
+\item 
+int \hyperlink{class_edc_cloud_client_a3280f3900fd2e67371c8bfdace723005}{stop\-Session} ()
+\item 
+int \hyperlink{class_edc_cloud_client_a710979b808649f8ff0851dfc685c2964}{publish} (string topic, \hyperlink{classedcdatatypes_1_1_edc_payload}{Edc\-Payload} $\ast$payload, int qos, bool retain, unsigned long timeout)
+\item 
+int \hyperlink{class_edc_cloud_client_a6c8964ba0052177c7c469adeb26dc90a}{subscribe} (string topic, int qos)
+\item 
+int \hyperlink{class_edc_cloud_client_ae5781b8ec7a9be553b2676aea8133c4f}{control\-Subscribe} (string topic, int qos)
+\item 
+int \hyperlink{class_edc_cloud_client_aa9b2ab93edb9046bf10232f577dc5893}{unsubscribe} (string topic)
+\item 
+int \hyperlink{class_edc_cloud_client_a0cabdc1660a6e717e56776b88f351a1a}{control\-Unsubscribe} (string topic)
+\item 
+int \hyperlink{class_edc_cloud_client_a713be75330026d382130830c8d0239a0}{unsubscribe\-All} ()
+\item 
+void \hyperlink{class_edc_cloud_client_aa5b3ec78379a6186f7f0b244f0691bb8}{terminate} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_edc_cloud_client_a69e35c3d8906b5c13f46c9af7d0535bd}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!Edc\-Cloud\-Client@{Edc\-Cloud\-Client}}
+\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{Edc\-Cloud\-Client}]{\setlength{\rightskip}{0pt plus 5cm}Edc\-Cloud\-Client\-::\-Edc\-Cloud\-Client (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_a69e35c3d8906b5c13f46c9af7d0535bd}
+Default constructor for E\-D\-C client \hypertarget{class_edc_cloud_client_a2e760410ea4cc1db2b7a9dbbce2bf932}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!Edc\-Cloud\-Client@{Edc\-Cloud\-Client}}
+\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{Edc\-Cloud\-Client}]{\setlength{\rightskip}{0pt plus 5cm}Edc\-Cloud\-Client\-::\-Edc\-Cloud\-Client (
+\begin{DoxyParamCaption}
+\item[{{\bf Edc\-Configuration} $\ast$}]{edc\-Configuration, }
+\item[{{\bf Edc\-Device\-Profile} $\ast$}]{edc\-Device\-Profile, }
+\item[{pfn\-Edc\-Cloud\-Client\-Message\-Arrived $\ast$}]{message\-Arrived, }
+\item[{pfn\-Edc\-Cloud\-Client\-Message\-Delivered $\ast$}]{message\-Delivered, }
+\item[{pfn\-Edc\-Cloud\-Client\-Connection\-Lost $\ast$}]{connection\-Lost}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_a2e760410ea4cc1db2b7a9dbbce2bf932}
+Default constructor for E\-D\-C client
+
+
+\begin{DoxyParams}{Parameters}
+{\em @param} & \\
+\hline
+{\em @param} & \\
+\hline
+{\em } & \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_edc_cloud_client_ae5781b8ec7a9be553b2676aea8133c4f}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!control\-Subscribe@{control\-Subscribe}}
+\index{control\-Subscribe@{control\-Subscribe}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{control\-Subscribe}]{\setlength{\rightskip}{0pt plus 5cm}int Edc\-Cloud\-Client\-::control\-Subscribe (
+\begin{DoxyParamCaption}
+\item[{string}]{topic, }
+\item[{int}]{qos}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_ae5781b8ec7a9be553b2676aea8133c4f}
+Subscribes to a control topic.\-The topic is inserted in the m\-\_\-subscriptions list
+
+
+\begin{DoxyParams}{Parameters}
+{\em topic} & The control topic \\
+\hline
+{\em qos} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+M\-Q\-T\-T\-C\-L\-I\-E\-N\-T\-\_\-\-S\-U\-C\-C\-E\-S\-S or one of the M\-Qtt cliene error codes 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+M\-Q\-T\-T\-Client.\-h 
+\end{DoxySeeAlso}
+\hypertarget{class_edc_cloud_client_a0cabdc1660a6e717e56776b88f351a1a}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!control\-Unsubscribe@{control\-Unsubscribe}}
+\index{control\-Unsubscribe@{control\-Unsubscribe}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{control\-Unsubscribe}]{\setlength{\rightskip}{0pt plus 5cm}int Edc\-Cloud\-Client\-::control\-Unsubscribe (
+\begin{DoxyParamCaption}
+\item[{string}]{topic}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_a0cabdc1660a6e717e56776b88f351a1a}
+Unsubscribes to a control topic. The topic is deleted from the m\-\_\-subscriptions list
+
+
+\begin{DoxyParams}{Parameters}
+{\em topic} & The control topic \\
+\hline
+{\em qos} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+M\-Q\-T\-T\-C\-L\-I\-E\-N\-T\-\_\-\-S\-U\-C\-C\-E\-S\-S or one of the M\-Qtt cliene error codes 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+M\-Q\-T\-T\-Client.\-h 
+\end{DoxySeeAlso}
+\hypertarget{class_edc_cloud_client_a20c77fb81d9b47f093d0198e0911cabf}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!is\-Connected@{is\-Connected}}
+\index{is\-Connected@{is\-Connected}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{is\-Connected}]{\setlength{\rightskip}{0pt plus 5cm}bool Edc\-Cloud\-Client\-::is\-Connected (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_a20c77fb81d9b47f093d0198e0911cabf}
+Returns the E\-D\-C client connection status to the broker \hypertarget{class_edc_cloud_client_a710979b808649f8ff0851dfc685c2964}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!publish@{publish}}
+\index{publish@{publish}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{publish}]{\setlength{\rightskip}{0pt plus 5cm}int Edc\-Cloud\-Client\-::publish (
+\begin{DoxyParamCaption}
+\item[{string}]{topic, }
+\item[{{\bf Edc\-Payload} $\ast$}]{payload, }
+\item[{int}]{qos, }
+\item[{bool}]{retain, }
+\item[{unsigned long}]{timeout}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_a710979b808649f8ff0851dfc685c2964}
+Publishes to the M\-Qtt broker
+
+
+\begin{DoxyParams}{Parameters}
+{\em topic} & The topic of the publish \\
+\hline
+{\em payload} & The payload of the publish \\
+\hline
+{\em qos} & \\
+\hline
+{\em retain} & \\
+\hline
+{\em timeout} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+M\-Q\-T\-T\-C\-L\-I\-E\-N\-T\-\_\-\-S\-U\-C\-C\-E\-S\-S or one of the M\-Qtt cliene error codes 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+M\-Q\-T\-T\-Client.\-h 
+\end{DoxySeeAlso}
+\hypertarget{class_edc_cloud_client_a0bd0d7186b2c98c9fb24c7e8bd56df95}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!set\-Edc\-Cloud\-Client\-Connection\-Lost@{set\-Edc\-Cloud\-Client\-Connection\-Lost}}
+\index{set\-Edc\-Cloud\-Client\-Connection\-Lost@{set\-Edc\-Cloud\-Client\-Connection\-Lost}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{set\-Edc\-Cloud\-Client\-Connection\-Lost}]{\setlength{\rightskip}{0pt plus 5cm}void Edc\-Cloud\-Client\-::set\-Edc\-Cloud\-Client\-Connection\-Lost (
+\begin{DoxyParamCaption}
+\item[{pfn\-Edc\-Cloud\-Client\-Connection\-Lost $\ast$}]{connection\-Lost}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_a0bd0d7186b2c98c9fb24c7e8bd56df95}
+Sets the m\-\_\-connection\-Lost callback from the application
+
+
+\begin{DoxyParams}{Parameters}
+{\em connection\-Lost} & \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_edc_cloud_client_a5ca4b7a98de65f9003951aacbb2d3bbb}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!set\-Edc\-Cloud\-Client\-Message\-Arrived@{set\-Edc\-Cloud\-Client\-Message\-Arrived}}
+\index{set\-Edc\-Cloud\-Client\-Message\-Arrived@{set\-Edc\-Cloud\-Client\-Message\-Arrived}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{set\-Edc\-Cloud\-Client\-Message\-Arrived}]{\setlength{\rightskip}{0pt plus 5cm}void Edc\-Cloud\-Client\-::set\-Edc\-Cloud\-Client\-Message\-Arrived (
+\begin{DoxyParamCaption}
+\item[{pfn\-Edc\-Cloud\-Client\-Message\-Arrived $\ast$}]{message\-Arrived}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_a5ca4b7a98de65f9003951aacbb2d3bbb}
+Sets the m\-\_\-message\-Arrived callback from the application
+
+
+\begin{DoxyParams}{Parameters}
+{\em message\-Arrived} & \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_edc_cloud_client_aa7f12f5a330eba2d809c9f58ed853669}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!set\-Edc\-Cloud\-Client\-Message\-Delivered@{set\-Edc\-Cloud\-Client\-Message\-Delivered}}
+\index{set\-Edc\-Cloud\-Client\-Message\-Delivered@{set\-Edc\-Cloud\-Client\-Message\-Delivered}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{set\-Edc\-Cloud\-Client\-Message\-Delivered}]{\setlength{\rightskip}{0pt plus 5cm}void Edc\-Cloud\-Client\-::set\-Edc\-Cloud\-Client\-Message\-Delivered (
+\begin{DoxyParamCaption}
+\item[{pfn\-Edc\-Cloud\-Client\-Message\-Delivered $\ast$}]{message\-Delivered}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_aa7f12f5a330eba2d809c9f58ed853669}
+Sets the m\-\_\-message\-Delivered callback from the application
+
+
+\begin{DoxyParams}{Parameters}
+{\em message\-Delivered} & \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_edc_cloud_client_abb7c5cbbe4147bd91ac787cde17b2e84}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!set\-Edc\-Configuration@{set\-Edc\-Configuration}}
+\index{set\-Edc\-Configuration@{set\-Edc\-Configuration}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{set\-Edc\-Configuration}]{\setlength{\rightskip}{0pt plus 5cm}void Edc\-Cloud\-Client\-::set\-Edc\-Configuration (
+\begin{DoxyParamCaption}
+\item[{{\bf Edc\-Configuration} $\ast$}]{edc\-Configuration}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_abb7c5cbbe4147bd91ac787cde17b2e84}
+Sets the \hyperlink{class_edc_configuration}{Edc\-Configuration} for E\-D\-C client
+
+
+\begin{DoxyParams}{Parameters}
+{\em edc\-Configuration} & \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_edc_cloud_client_a0ea16b18bca2fa675568972f416052d3}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!set\-Edc\-Profile@{set\-Edc\-Profile}}
+\index{set\-Edc\-Profile@{set\-Edc\-Profile}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{set\-Edc\-Profile}]{\setlength{\rightskip}{0pt plus 5cm}void Edc\-Cloud\-Client\-::set\-Edc\-Profile (
+\begin{DoxyParamCaption}
+\item[{{\bf Edc\-Device\-Profile} $\ast$}]{edc\-Device\-Profile}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_a0ea16b18bca2fa675568972f416052d3}
+Sets the \hyperlink{class_edc_device_profile}{Edc\-Device\-Profile} for E\-D\-C client
+
+
+\begin{DoxyParams}{Parameters}
+{\em edc\-Device\-Profile} & \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_edc_cloud_client_a1d0be6f491848da0cadacf09a06f2f43}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!start\-Session@{start\-Session}}
+\index{start\-Session@{start\-Session}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{start\-Session}]{\setlength{\rightskip}{0pt plus 5cm}int Edc\-Cloud\-Client\-::start\-Session (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_a1d0be6f491848da0cadacf09a06f2f43}
+Starts a connection to E\-D\-C connecting to the broker and publishing the birth certificate \hypertarget{class_edc_cloud_client_a3280f3900fd2e67371c8bfdace723005}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!stop\-Session@{stop\-Session}}
+\index{stop\-Session@{stop\-Session}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{stop\-Session}]{\setlength{\rightskip}{0pt plus 5cm}int Edc\-Cloud\-Client\-::stop\-Session (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_a3280f3900fd2e67371c8bfdace723005}
+Ends the connection to E\-D\-C disconnecting frin the broker and publishing the disconnect certificate \hypertarget{class_edc_cloud_client_a6c8964ba0052177c7c469adeb26dc90a}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!subscribe@{subscribe}}
+\index{subscribe@{subscribe}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{subscribe}]{\setlength{\rightskip}{0pt plus 5cm}int Edc\-Cloud\-Client\-::subscribe (
+\begin{DoxyParamCaption}
+\item[{string}]{topic, }
+\item[{int}]{qos}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_a6c8964ba0052177c7c469adeb26dc90a}
+Subscribes to a semantic topic. The topic is inserted in the m\-\_\-subscriptions list
+
+
+\begin{DoxyParams}{Parameters}
+{\em topic} & The semantic topic \\
+\hline
+{\em qos} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+M\-Q\-T\-T\-C\-L\-I\-E\-N\-T\-\_\-\-S\-U\-C\-C\-E\-S\-S or one of the M\-Qtt cliene error codes 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+M\-Q\-T\-T\-Client.\-h 
+\end{DoxySeeAlso}
+\hypertarget{class_edc_cloud_client_aa5b3ec78379a6186f7f0b244f0691bb8}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!terminate@{terminate}}
+\index{terminate@{terminate}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{terminate}]{\setlength{\rightskip}{0pt plus 5cm}void Edc\-Cloud\-Client\-::terminate (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_aa5b3ec78379a6186f7f0b244f0691bb8}
+Terminate the E\-D\-C client. The M\-Qtt client instance is destroyed and the protobuf library frees whatever it allocated \hypertarget{class_edc_cloud_client_aa9b2ab93edb9046bf10232f577dc5893}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!unsubscribe@{unsubscribe}}
+\index{unsubscribe@{unsubscribe}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{unsubscribe}]{\setlength{\rightskip}{0pt plus 5cm}int Edc\-Cloud\-Client\-::unsubscribe (
+\begin{DoxyParamCaption}
+\item[{string}]{topic}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_aa9b2ab93edb9046bf10232f577dc5893}
+Unsubscribes to a semantic topic. The topic is deleted from the m\-\_\-subscriptions list
+
+
+\begin{DoxyParams}{Parameters}
+{\em topic} & The semantic topic \\
+\hline
+{\em qos} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+M\-Q\-T\-T\-C\-L\-I\-E\-N\-T\-\_\-\-S\-U\-C\-C\-E\-S\-S or one of the M\-Qtt cliene error codes 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+M\-Q\-T\-T\-Client.\-h 
+\end{DoxySeeAlso}
+\hypertarget{class_edc_cloud_client_a713be75330026d382130830c8d0239a0}{\index{Edc\-Cloud\-Client@{Edc\-Cloud\-Client}!unsubscribe\-All@{unsubscribe\-All}}
+\index{unsubscribe\-All@{unsubscribe\-All}!EdcCloudClient@{Edc\-Cloud\-Client}}
+\subsubsection[{unsubscribe\-All}]{\setlength{\rightskip}{0pt plus 5cm}int Edc\-Cloud\-Client\-::unsubscribe\-All (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_edc_cloud_client_a713be75330026d382130830c8d0239a0}
+Unsubscribes to all the topics, semantic and control. The topics are deleted from the m\-\_\-subscriptions list
+
+
+\begin{DoxyParams}{Parameters}
+{\em topic} & The control topic \\
+\hline
+{\em qos} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+M\-Q\-T\-T\-C\-L\-I\-E\-N\-T\-\_\-\-S\-U\-C\-C\-E\-S\-S or one of the M\-Qtt cliene error codes 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+M\-Q\-T\-T\-Client.\-h 
+\end{DoxySeeAlso}
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Edc\-Cloud\-Client.\-h\end{DoxyCompactItemize}
