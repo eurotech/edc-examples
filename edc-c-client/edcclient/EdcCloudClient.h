@@ -252,7 +252,12 @@ private:
 		pubmsg.retained = retain;
 
 		char * ctopic = new char [topic.size()+1];
-  		strcpy (ctopic, topic.c_str());
+
+#if defined (WIN32)
+  		strcpy_s (ctopic, topic.size()+1, topic.c_str());
+#else
+		strcpy (ctopic, topic.c_str());
+#endif
 
 		rc = MQTTClient_publishMessage(m_MQTTClient, ctopic, &pubmsg, &deliveryToken);
 
@@ -272,7 +277,12 @@ private:
 
 		for(it = m_subscriptions.begin(); it!=m_subscriptions.end(); it++){
 			char * topic = new char [it->getSemanticTopic().size()+1];
+
+#if defined (WIN32)
+			strcpy_s (topic, it->getSemanticTopic().size()+1, it->getSemanticTopic().c_str());
+#else
   			strcpy (topic, it->getSemanticTopic().c_str());
+#endif
 
 			MQTTClient_subscribe(m_MQTTClient, topic, it->getQos());
 		}
@@ -500,9 +510,20 @@ public:
 	int startSession(){
 		
 		char * BrokerUrl = new char [m_edcConfiguration->getBrokerUrl().size()+1];
+
+#if defined (WIN32)
+		strcpy_s (BrokerUrl, m_edcConfiguration->getBrokerUrl().size()+1, m_edcConfiguration->getBrokerUrl().c_str());
+#else
   		strcpy (BrokerUrl, m_edcConfiguration->getBrokerUrl().c_str());
+#endif
+
 		char * ClientId = new char [m_edcConfiguration->getClientId().size()+1];
+
+#if defined (WIN32)
+		strcpy_s (ClientId, m_edcConfiguration->getClientId().size()+1, m_edcConfiguration->getClientId().c_str());
+#else
 		strcpy (ClientId, m_edcConfiguration->getClientId().c_str());
+#endif
 		
 		//setup MQtt connection parameters
 		int rc = MQTTClient_create(&m_MQTTClient, 
@@ -528,10 +549,20 @@ public:
 		conn_opts.cleansession = 1;
 
 		conn_opts.username = new char [m_edcConfiguration->getUsername().size()+1];
-  		strcpy (conn_opts.username, m_edcConfiguration->getUsername().c_str());
+
+#if defined (WIN32)
+  		strcpy_s (conn_opts.username, m_edcConfiguration->getUsername().size()+1, m_edcConfiguration->getUsername().c_str());
+#else
+		strcpy (conn_opts.username, m_edcConfiguration->getUsername().c_str());
+#endif
 			
 		conn_opts.password = new char [m_edcConfiguration->getPassword().size()+1];
-  		strcpy (conn_opts.password, m_edcConfiguration->getPassword().c_str());
+
+#if defined (WIN32)
+  		strcpy_s (conn_opts.password, m_edcConfiguration->getPassword().size()+1, m_edcConfiguration->getPassword().c_str());
+#else
+		strcpy (conn_opts.password, m_edcConfiguration->getPassword().c_str());
+#endif
 
 		rc =  MQTTClient_connect(m_MQTTClient, &conn_opts);
 
@@ -576,7 +607,12 @@ public:
 	int publish(string topic, EdcPayload * payload, int qos, bool retain, unsigned long timeout){
 
 		char * fulltopic = new char [buildTopic(topic).size()+1];
-  		strcpy (fulltopic, buildTopic(topic).c_str());
+
+#if defined (WIN32)
+  		strcpy_s (fulltopic, buildTopic(topic).size()+1, buildTopic(topic).c_str());
+#else
+		strcpy (fulltopic, buildTopic(topic).c_str());
+#endif
 
 		return _publish(fulltopic, payload, qos, retain, timeout);
 	}
@@ -593,7 +629,12 @@ public:
 		
 		int rc;
 		char * stopic = new char [buildTopic(topic).size()+1];
-  		strcpy (stopic, buildTopic(topic).c_str());
+
+#if defined (WIN32)
+  		strcpy_s (stopic, buildTopic(topic).size()+1, buildTopic(topic).c_str());
+#else
+		strcpy (stopic, buildTopic(topic).c_str());
+#endif
 
 		rc = MQTTClient_subscribe(m_MQTTClient, stopic, qos);
 
@@ -619,7 +660,12 @@ public:
 		
 		int rc;
 		char * ctopic = new char [buildControlTopic(topic).size()+1];
-  		strcpy (ctopic, buildControlTopic(topic).c_str());
+
+#if defined (WIN32)
+  		strcpy_s (ctopic, buildControlTopic(topic).size()+1, buildControlTopic(topic).c_str());
+#else
+		strcpy (ctopic, buildControlTopic(topic).c_str());
+#endif
 
 		rc = MQTTClient_subscribe(m_MQTTClient, ctopic, qos);
 
@@ -644,7 +690,12 @@ public:
 		
 		int rc;
 		char * utopic = new char [buildTopic(topic).size()+1];
-  		strcpy (utopic, buildTopic(topic).c_str());
+
+#if defined (WIN32)
+  		strcpy_s (utopic, buildTopic(topic).size()+1, buildTopic(topic).c_str());
+#else
+		strcpy (utopic, buildTopic(topic).c_str());
+#endif
 
 		rc = MQTTClient_unsubscribe(m_MQTTClient, utopic);
 
@@ -678,7 +729,12 @@ public:
 
 		int rc;
 		char * utopic = new char [buildControlTopic(topic).size()+1];
-  		strcpy (utopic, buildControlTopic(topic).c_str());
+
+#if defined (WIN32)
+  		strcpy_s (utopic, buildControlTopic(topic).size()+1, buildControlTopic(topic).c_str());
+#else
+		strcpy (utopic, buildControlTopic(topic).c_str());
+#endif
 
 		rc = MQTTClient_unsubscribe(m_MQTTClient, utopic);
 
@@ -715,7 +771,12 @@ public:
 
 		for(it = m_subscriptions.begin(); it!=m_subscriptions.end(); it++){
 			char * utopic = new char [it->getSemanticTopic().size()+1];
-  			strcpy (utopic, it->getSemanticTopic().c_str());
+
+#if defined (WIN32)
+  			strcpy_s (utopic, it->getSemanticTopic().size()+1, it->getSemanticTopic().c_str());
+#else
+			strcpy (utopic, it->getSemanticTopic().c_str());
+#endif
 
 			if(MQTTClient_unsubscribe(m_MQTTClient, utopic) == MQTTCLIENT_SUCCESS){
 				it = m_subscriptions.erase(it);
