@@ -61,6 +61,8 @@ EdcCloudClient edcCloudClient;
 
 int main(){
 
+	printf ("EDC test start\r\n");
+
 	int rc = EDCCLIENT_SUCCESS;
 	string pubTSemanticTopic = DATA_SEMANTIC_TOPIC;
 	string accountSemanticTopics = "#";
@@ -93,10 +95,61 @@ int main(){
 									0);
 
 	//Start the session.
+	printf ("Start session...\r\n");
 	rc = edcCloudClient.startSession();
 
-	if (rc != EDCCLIENT_SUCCESS){
+	if (rc != EDCCLIENT_SUCCESS) {
+
 		printf("startSession failed with error code %d\r\n", rc);
+
+		switch (rc)
+		{
+		// MQTT client errors (<0):
+		case MQTTCLIENT_FAILURE:
+			printf ("MQTT client, generic operation failure\r\n");
+			break;
+		case MQTTCLIENT_PERSISTENCE_ERROR:
+			printf ("MQTT client, persistence error\r\n");
+			break;
+		case MQTTCLIENT_DISCONNECTED:
+			printf ("MQTT client disconnected\r\n");
+			break;
+		case MQTTCLIENT_MAX_MESSAGES_INFLIGHT:
+			printf ("MQTT client, maximum number of in-flight messages has been reached\r\n");
+			break;
+		case MQTTCLIENT_BAD_UTF8_STRING:
+			printf ("MQTT client, invalid UTF-8 string\r\n");
+			break;
+		case MQTTCLIENT_NULL_PARAMETER:
+			printf ("MQTT client, NULL parameter not allowed\r\n");
+			break;
+		case MQTTCLIENT_TOPICNAME_TRUNCATED:
+			printf ("MQTT client, topic name truncated\r\n");
+			break;
+		case MQTTCLIENT_BAD_STRUCTURE:
+			printf ("MQTT client, invalid structure\r\n");
+			break;
+		// CONNACK message errors:
+		case 1:
+			printf ("Connection to MQTT broker refused, unacceptable protocol version\r\n");
+			break;
+		case 2:
+			printf ("Connection to MQTT broker refused, identifier rejected\r\n");
+			break;
+		case 3:
+			printf ("Connection to MQTT broker refused, server unavailable\r\n");
+			break;
+		case 4:
+			printf ("Connection to MQTT broker refused, bad username or password\r\n");
+			break;
+		case 5:
+			printf ("Connection to MQTT broker refused, not authorized\r\n");
+			break;
+		default:
+			printf ("Unknown error\r\n");
+			break;
+		}
+
 		edcCloudClient.terminate();
 		return rc;
 	}
@@ -155,7 +208,7 @@ exit:
 	}
 
 	edcCloudClient.terminate();
-
+	printf ("EDC test completed\r\n");
 	return rc;
 }
 
