@@ -117,7 +117,7 @@ void* mymalloc(char* file, int line, size_t size)
 		return NULL;
 	}
 	ListAppendNoMalloc(&heap, s, e, sizeof(ListElement));
-	state.current_size += size;
+	state.current_size += (int)size;
 	if (state.current_size > state.max_size)
 		state.max_size = state.current_size;
 	return s->ptr;
@@ -171,7 +171,7 @@ void Internal_heap_unlink(char* file, int line, void* p)
 		free(s->file);
 		if (s->stack)
 			free(s->stack);
-		state.current_size -= s->size;
+		state.current_size -= (int)(s->size);
 		ListRemoveCurrentItem(&heap);
 	}
 }
@@ -224,7 +224,7 @@ void *myrealloc(char* file, int line, void* p, size_t size)
 	else
 	{
 		storageElement* s = (storageElement*)(heap.current->content);
-		state.current_size += size - s->size;
+		state.current_size += (int)(size - s->size);
 		if (state.current_size > state.max_size)
 			state.max_size = state.current_size;
 		rc = s->ptr = realloc(s->ptr, size);
@@ -336,7 +336,7 @@ int HeapDumpString(FILE* file, char* str)
 	{
 		int* i = (int*)str;
 		int j;
-		int len = strlen(str);
+		int len = (int)(strlen(str));
 
 		if (fwrite(&(str), sizeof(int), 1, file) != 1)
 			rc = -1;

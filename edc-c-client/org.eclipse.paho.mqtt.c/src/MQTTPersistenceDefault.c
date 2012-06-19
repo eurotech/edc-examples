@@ -165,7 +165,7 @@ int pstput(void* handle, char* key, int bufcount, char* buffers[], int buflens[]
 		for(i=0; i<bufcount; i++)
 		{
 			bytesTotal += buflens[i];
-			bytesWritten += fwrite( buffers[i], sizeof(char), buflens[i], fp );
+			bytesWritten += (int)(fwrite( buffers[i], sizeof(char), buflens[i], fp ));
 		}
 		fclose(fp);
 		fp = NULL;
@@ -217,7 +217,7 @@ int pstget(void* handle, char* key, char** buffer, int* buflen)
 		fileLen = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
 		buf=(char *)malloc(fileLen);
-		bytesRead = fread(buf, sizeof(char), fileLen, fp);
+		bytesRead = (int)(fread(buf, sizeof(char), fileLen, fp));
 		*buffer = buf;
 		*buflen = bytesRead;
 		if ( bytesRead != fileLen )

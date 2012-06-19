@@ -336,7 +336,7 @@ char *Socket_getdata(int socket, int bytes, int* actual_len)
 
 	buf = SocketBuffer_getQueuedData(socket, bytes, actual_len);
 
-	if ((rc = recv(socket, buf + (*actual_len), (size_t)(bytes - (*actual_len)), 0)) == SOCKET_ERROR)
+	if ((rc = recv(socket, buf + (*actual_len), (int)(bytes - (*actual_len)), 0)) == SOCKET_ERROR)
 	{
 		rc = Socket_error("recv - getdata", socket);
 		if (rc != EAGAIN && rc != EWOULDBLOCK)
@@ -608,7 +608,7 @@ int Socket_new(char* addr, int port, int* sock)
 		Log(LOG_ERROR, -1, "%s is not a valid IP address", addr);
 	else
 	{
-		*sock =	socket(family, type, 0);
+		*sock =	(int)socket(family, type, 0);
 		if (*sock == INVALID_SOCKET)
 			rc = Socket_error("socket", *sock);
 		else

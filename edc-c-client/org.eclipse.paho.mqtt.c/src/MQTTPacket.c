@@ -382,7 +382,7 @@ void writeInt(char** pptr, int anInt)
  */
 void writeUTF(char** pptr, char* string)
 {
-	int len = strlen(string);
+	int len = (int)(strlen(string));
 	writeInt(pptr, len);
 	memcpy(*pptr, string, len);
 	*pptr += len;
@@ -450,7 +450,7 @@ void* MQTTPacket_publish(unsigned char aHeader, char* data, int datalen)
 	else
 		pack->msgId = 0;
 	pack->payload = curdata;
-	pack->payloadlen = datalen-(curdata-data);
+	pack->payloadlen = (int)(datalen-(curdata-data));
 exit:
 	FUNC_EXIT;
 	return pack;
@@ -632,7 +632,7 @@ int MQTTPacket_send_publish(Publish* pack, int dup, int qos, int retained, int s
 		char *buf = malloc(2);
 		char *ptr = buf;
 		char* bufs[4] = {topiclen, pack->topic, buf, pack->payload};
-		int lens[4] = {2, strlen(pack->topic), 2, pack->payloadlen};
+		int lens[4] = {2, (int)(strlen(pack->topic)), 2, pack->payloadlen};
 		writeInt(&ptr, pack->msgId);
 		ptr = topiclen;
 		writeInt(&ptr, lens[1]);
@@ -644,7 +644,7 @@ int MQTTPacket_send_publish(Publish* pack, int dup, int qos, int retained, int s
 	{
 		char* ptr = topiclen;
 		char* bufs[3] = {topiclen, pack->topic, pack->payload};
-		int lens[3] = {2, strlen(pack->topic), pack->payloadlen};
+		int lens[3] = {2, (int)(strlen(pack->topic)), pack->payloadlen};
 		writeInt(&ptr, lens[1]);
 		rc = MQTTPacket_sends(socket, header, 3, bufs, lens);
 	}

@@ -48,7 +48,7 @@ char* MQTTProtocol_addressPort(char* ip_address, int* port)
 
 	if (pos)
 	{
-		int len = pos - ip_address;
+		int len = (int)(pos - ip_address);
 		*port = atoi(pos+1);
 		strncpy(buf, ip_address, len);
 		buf[len] = '\0';
@@ -60,7 +60,7 @@ char* MQTTProtocol_addressPort(char* ip_address, int* port)
 	  pos = ip_address;
 	}
 
-	len = strlen(buf);
+	len = (int)(strlen(buf));
 	if (buf[len - 1] == ']')
 		buf[len - 1] = '\0';
 

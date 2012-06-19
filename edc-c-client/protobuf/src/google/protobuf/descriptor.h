@@ -1306,40 +1306,40 @@ inline bool FieldDescriptor::is_packable() const {
 // in the parent's array of children.
 inline int FieldDescriptor::index() const {
   if (!is_extension_) {
-    return this - containing_type_->fields_;
+    return (int)(this - containing_type_->fields_);
   } else if (extension_scope_ != NULL) {
-    return this - extension_scope_->extensions_;
+    return (int)(this - extension_scope_->extensions_);
   } else {
-    return this - file_->extensions_;
+    return (int)(this - file_->extensions_);
   }
 }
 
 inline int Descriptor::index() const {
   if (containing_type_ == NULL) {
-    return this - file_->message_types_;
+    return (int)(this - file_->message_types_);
   } else {
-    return this - containing_type_->nested_types_;
+    return (int)(this - containing_type_->nested_types_);
   }
 }
 
 inline int EnumDescriptor::index() const {
   if (containing_type_ == NULL) {
-    return this - file_->enum_types_;
+    return (int)(this - file_->enum_types_);
   } else {
-    return this - containing_type_->enum_types_;
+    return (int)(this - containing_type_->enum_types_);
   }
 }
 
 inline int EnumValueDescriptor::index() const {
-  return this - type_->values_;
+  return (int)(this - type_->values_);
 }
 
 inline int ServiceDescriptor::index() const {
-  return this - file_->services_;
+  return (int)(this - file_->services_);
 }
 
 inline int MethodDescriptor::index() const {
-  return this - service_->methods_;
+  return (int)(this - service_->methods_);
 }
 
 inline FieldDescriptor::CppType FieldDescriptor::cpp_type() const {

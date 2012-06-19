@@ -869,7 +869,7 @@ inline const uint8* CodedInputStream::ExpectTagFromArray(
 inline void CodedInputStream::GetDirectBufferPointerInline(const void** data,
                                                            int* size) {
   *data = buffer_;
-  *size = buffer_end_ - buffer_;
+  *size = (int)(buffer_end_ - buffer_);
 }
 
 inline bool CodedInputStream::ExpectAtEnd() {
@@ -1039,7 +1039,7 @@ inline MessageFactory* CodedInputStream::GetExtensionFactory() {
 }
 
 inline int CodedInputStream::BufferSize() const {
-  return buffer_end_ - buffer_;
+  return (int)(buffer_end_ - buffer_);
 }
 
 inline CodedInputStream::CodedInputStream(ZeroCopyInputStream* input)

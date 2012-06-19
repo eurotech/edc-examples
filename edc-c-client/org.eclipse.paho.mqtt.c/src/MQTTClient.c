@@ -662,7 +662,7 @@ void Protocol_processPublication(Publish* publish, Clients* client)
 		mm->dup = publish->header.bits.dup;
 	mm->msgid = publish->msgId;
 
-	ListAppend(client->messageQueue, qe, sizeof(qe) + sizeof(mm) + mm->payloadlen + strlen(qe->topicName)+1);
+	ListAppend(client->messageQueue, qe, (int)(sizeof(qe) + sizeof(mm) + mm->payloadlen + strlen(qe->topicName)+1));
 	FUNC_EXIT;
 }
 
@@ -931,7 +931,7 @@ int MQTTClient_subscribeMany(MQTTClient handle, int count, char** topic, int* qo
 
 	for (i = 0; i < count; i++)
 	{
-		ListAppend(topics, topic[i], strlen(topic[i]));
+		ListAppend(topics, topic[i], (int)(strlen(topic[i])));
 		ListAppend(qoss, &qos[i], sizeof(int));
 	}
 	rc = MQTTProtocol_subscribe(m->c, topics, qoss);
@@ -1012,7 +1012,7 @@ int MQTTClient_unsubscribeMany(MQTTClient handle, int count, char** topic)
 	}
 
 	for (i = 0; i < count; i++)
-		ListAppend(topics, topic[i], strlen(topic[i]));
+		ListAppend(topics, topic[i], (int)(strlen(topic[i])));
 	rc = MQTTProtocol_unsubscribe(m->c, topics);
 	ListFreeNoContent(topics);
 

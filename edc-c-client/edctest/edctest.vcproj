@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="edctest"
 	ProjectGUID="{A21669AA-9A54-4944-9823-E9258C01EE75}"
 	RootNamespace="edctest"
@@ -177,6 +177,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\edcclient\config.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\edcclient\edcpayload.pb.cc"
 				>
 			</File>
@@ -190,6 +194,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\edcclient\config.h"
+				>
+			</File>
 			<File
 				RelativePath="..\edcclient\EdcCloudClient.h"
 				>

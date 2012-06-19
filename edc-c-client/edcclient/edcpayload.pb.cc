@@ -332,7 +332,7 @@ bool EdcPayload_EdcMetric::MergePartialFromCodedStream(
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_name()));
           ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->name().data(), this->name().length(),
+            this->name().data(), (int)(this->name().length()),
             ::google::protobuf::internal::WireFormat::PARSE);
         } else {
           goto handle_uninterpreted;
@@ -450,7 +450,7 @@ bool EdcPayload_EdcMetric::MergePartialFromCodedStream(
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_string_value()));
           ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->string_value().data(), this->string_value().length(),
+            this->string_value().data(), (int)(this->string_value().length()),
             ::google::protobuf::internal::WireFormat::PARSE);
         } else {
           goto handle_uninterpreted;
@@ -494,7 +494,7 @@ void EdcPayload_EdcMetric::SerializeWithCachedSizes(
   // required string name = 1;
   if (has_name()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->name().data(), this->name().length(),
+      this->name().data(), (int)(this->name().length()),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     ::google::protobuf::internal::WireFormatLite::WriteString(
       1, this->name(), output);
@@ -534,7 +534,7 @@ void EdcPayload_EdcMetric::SerializeWithCachedSizes(
   // optional string string_value = 8;
   if (has_string_value()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->string_value().data(), this->string_value().length(),
+      this->string_value().data(), (int)(this->string_value().length()),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     ::google::protobuf::internal::WireFormatLite::WriteString(
       8, this->string_value(), output);
@@ -557,7 +557,7 @@ void EdcPayload_EdcMetric::SerializeWithCachedSizes(
   // required string name = 1;
   if (has_name()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->name().data(), this->name().length(),
+      this->name().data(), (int)(this->name().length()),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
@@ -598,7 +598,7 @@ void EdcPayload_EdcMetric::SerializeWithCachedSizes(
   // optional string string_value = 8;
   if (has_string_value()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->string_value().data(), this->string_value().length(),
+      this->string_value().data(), (int)(this->string_value().length()),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
