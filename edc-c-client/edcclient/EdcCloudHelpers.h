@@ -2,10 +2,13 @@
 #define _EDCCLOUDHELPERS_H
 
 #include "edcpayload.pb.h"
+#include "config.h"
 #include <list>
 
 using namespace std;
 using namespace edcdatatypes;
+
+#define CONFIG_PROPERTIES_FILE   "edc-client.properties"
 
 #define ACCOUNT_NAME             "cloud.client.account"
 #define ASSET_ID                 "cloud.asset.id"
@@ -28,11 +31,12 @@ using namespace edcdatatypes;
 #define DISCONNECT_RETAIN        "cloud.client.disconnect.retain"
 #define BIRTH_TOPIC_SUFFIX       "cloud.client.birth.topic.suffix"
 #define BIRTH_TOPIC              "cloud.client.birth.topic"
-#define BIRTH_MESSAGE            "cloud.client.will.message"
+#define BIRTH_MESSAGE            "cloud.client.birth.message"
 #define BIRTH_QOS                "cloud.client.birth.qos"
 #define BIRTH_RETAIN             "cloud.client.birth.retain"
 #define CONTROL_SUB_TOPICS       "cloud.client.control.sub.topic"
 #define CONTROL_SUB_QOS          "cloud.client.control.sub.qos"
+#define CONTROL_ROOT_TOPIC       "cloud.client.control.root.topic"
 
 
 class EdcConfiguration{
@@ -68,6 +72,92 @@ private:
 	int					m_controlSubQos;    
 	string 				m_controlRootTopic;
 
+	/**
+     * Loads EDC client configuration from property file.
+     */
+	void LoadConfPropertiesFile() {
+		Config config(CONFIG_PROPERTIES_FILE);
+		
+		if (strcmp(config.pString(ACCOUNT_NAME).c_str(),"")) 
+			m_accountName=config.pString(ACCOUNT_NAME).c_str();
+
+		if (strcmp(config.pString(ASSET_ID).c_str(),"")) 
+			m_assetId=config.pString(ASSET_ID).c_str();
+		
+		if (strcmp(config.pString(BROKER_URL).c_str(),"")) 
+			m_brokerUrl=config.pString(BROKER_URL).c_str();
+
+		if (strcmp(config.pString(CLEAN_START).c_str(),"")) 
+			m_cleanStart=config.pBool(CLEAN_START);
+
+		if (strcmp(config.pString(CLIENT_ID).c_str(),"")) 
+			m_clientId=config.pString(CLIENT_ID).c_str();
+
+		if (strcmp(config.pString(USERNAME).c_str(),"")) 
+			m_username=config.pString(USERNAME).c_str();
+
+		if (strcmp(config.pString(PASSWORD).c_str(),"")) 
+			m_password=config.pString(PASSWORD).c_str();
+
+		if (strcmp(config.pString(KEEP_ALIVE).c_str(),"")) 
+			m_keepAlive=(short)config.pInt(KEEP_ALIVE);
+
+		if (strcmp(config.pString(RECONNECT_INTERVAL).c_str(),"")) 
+			m_reconnectInterval=(short)config.pInt(RECONNECT_INTERVAL);
+
+		if (strcmp(config.pString(WILL_TOPIC_SUFFIX).c_str(),"")) 
+			m_willTopicSuffix=config.pString(WILL_TOPIC_SUFFIX).c_str();
+
+		if (strcmp(config.pString(WILL_TOPIC).c_str(),"")) 
+			m_willTopic=config.pString(WILL_TOPIC).c_str();
+
+		if (strcmp(config.pString(WILL_MESSAGE).c_str(),"")) 
+			m_willMessage=config.pString(WILL_MESSAGE).c_str();
+
+		if (strcmp(config.pString(WILL_QOS).c_str(),"")) 
+			m_willQos=(int)config.pInt(WILL_QOS);
+
+		if (strcmp(config.pString(WILL_RETAIN).c_str(),"")) 
+			m_willRetain=config.pBool(WILL_RETAIN);
+
+		if (strcmp(config.pString(DISCONNECT_TOPIC_SUFFIX).c_str(),"")) 
+			m_disconnectTopicSuffix=config.pString(DISCONNECT_TOPIC_SUFFIX).c_str();
+
+		if (strcmp(config.pString(DISCONNECT_TOPIC).c_str(),"")) 
+			m_disconnectTopic=config.pString(DISCONNECT_TOPIC).c_str();
+
+		if (strcmp(config.pString(DISCONNECT_MESSAGE).c_str(),"")) 
+			m_disconnectEdcMessage=config.pString(DISCONNECT_MESSAGE).c_str();
+
+		if (strcmp(config.pString(DISCONNECT_QOS).c_str(),"")) 
+			m_disconnectQos=(int)config.pInt(DISCONNECT_QOS);
+
+		if (strcmp(config.pString(DISCONNECT_RETAIN).c_str(),"")) 
+			m_disconnectRetain=config.pBool(DISCONNECT_RETAIN);
+
+		if (strcmp(config.pString(BIRTH_TOPIC_SUFFIX).c_str(),"")) 
+			m_birthTopicSuffix=config.pString(BIRTH_TOPIC_SUFFIX).c_str();
+
+		if (strcmp(config.pString(BIRTH_TOPIC).c_str(),"")) 
+			m_birthTopic=config.pString(BIRTH_TOPIC).c_str();
+
+		if (strcmp(config.pString(BIRTH_QOS).c_str(),"")) 
+			m_birthQos=(int)config.pInt(BIRTH_QOS);
+
+		if (strcmp(config.pString(BIRTH_RETAIN).c_str(),"")) 
+			m_birthRetain=config.pBool(BIRTH_RETAIN);
+
+		if (strcmp(config.pString(CONTROL_SUB_QOS).c_str(),"")) 
+			m_controlSubQos=(int)config.pInt(CONTROL_SUB_QOS);
+
+		if (strcmp(config.pString(CONTROL_ROOT_TOPIC).c_str(),"")) 
+			m_controlRootTopic=config.pString(CONTROL_ROOT_TOPIC).c_str();
+
+		// not yet handled:
+		//    BIRTH_MESSAGE: string to EdcPayload
+        //    CONTROL_SUB_TOPICS: numbered keys to list of strings
+	}
+
     /**
      * Creates and EdcConfiguration using the supplied parameter values.
      * 
@@ -85,7 +175,9 @@ private:
      */
 public:
 
-	EdcConfiguration(){}
+	EdcConfiguration() {
+		LoadConfPropertiesFile();
+	}
 
     EdcConfiguration(string accountName,
                             string assetId,
@@ -98,7 +190,7 @@ public:
                             string willMessage,
                             int willQos,
                             bool willRetain) {
-        
+        LoadConfPropertiesFile();
         m_accountName = accountName;
         m_assetId = assetId;
         m_brokerUrl = brokerUrl;
@@ -167,7 +259,7 @@ public:
                             bool birthRetain,
                             list<string> controlSubTopics,
                             int controlSubQos) {
-        
+        LoadConfPropertiesFile();
         m_accountName = accountName;
         m_assetId = assetId;
         m_brokerUrl = brokerUrl;
@@ -516,6 +608,8 @@ public:
     }
 };
 
+#define DEVICE_PROPERTIES_FILE   "edc-device.properties"
+
 #define UPTIME 					 "uptime"
 #define DISPLAY_NAME 			 "display_name"
 #define MODEL_NAME 				 "model_name"
@@ -557,8 +651,62 @@ private:
 	double longitude;
 	double altitude;
 
+	/**
+     * Loads EDC device profile from property file.
+     */
+	void LoadDevicePropertiesFile() {
+		Config config(DEVICE_PROPERTIES_FILE);
+
+		if (strcmp(config.pString(UPTIME).c_str(),"")) 
+			this->uptime=config.pString(UPTIME).c_str();
+
+		if (strcmp(config.pString(DISPLAY_NAME).c_str(),"")) 
+			this->displayName=config.pString(DISPLAY_NAME).c_str();
+
+		if (strcmp(config.pString(MODEL_NAME).c_str(),"")) 
+			this->modelName=config.pString(MODEL_NAME).c_str();
+
+		if (strcmp(config.pString(MODEL_ID).c_str(),"")) 
+			this->modelId=config.pString(MODEL_ID).c_str();
+
+		if (strcmp(config.pString(PART_NUMBER).c_str(),"")) 
+			this->partNumber=config.pString(PART_NUMBER).c_str();
+
+		if (strcmp(config.pString(SERIAL_NUMBER).c_str(),"")) 
+			this->serialNumber=config.pString(SERIAL_NUMBER).c_str();
+
+		if (strcmp(config.pString(FIRMWARE_VERSION).c_str(),"")) 
+			this->firmwareVersion=config.pString(FIRMWARE_VERSION).c_str();
+
+		if (strcmp(config.pString(BIOS_VERSION).c_str(),"")) 
+			this->biosVersion=config.pString(BIOS_VERSION).c_str();
+
+		if (strcmp(config.pString(OS).c_str(),"")) 
+			this->os=config.pString(OS).c_str();
+
+		if (strcmp(config.pString(OS_VERSION).c_str(),"")) 
+			this->osVersion=config.pString(OS_VERSION).c_str();
+
+		if (strcmp(config.pString(JVM_NAME).c_str(),"")) 
+			this->jvmName=config.pString(JVM_NAME).c_str();
+
+		if (strcmp(config.pString(JVM_VERSION).c_str(),"")) 
+			this->jvmVersion=config.pString(JVM_VERSION).c_str();
+
+		if (strcmp(config.pString(JVM_PROFILE).c_str(),"")) 
+			this->jvmProfile=config.pString(JVM_PROFILE).c_str();
+
+		if (strcmp(config.pString(CONNECTION_INTERFACE).c_str(),"")) 
+			this->connectionInterface=config.pString(CONNECTION_INTERFACE).c_str();
+
+		if (strcmp(config.pString(CONNECTION_IP).c_str(),"")) 
+			this->connectionIp=config.pString(CONNECTION_IP).c_str();
+	}
+
 public:
-	EdcDeviceProfile(){}
+	EdcDeviceProfile() {
+		LoadDevicePropertiesFile();
+	}
     /**
      * Constructs an EdcDeviceProfile from a Properties object that contains all the parameters 
      * that make up the profile.  
@@ -612,6 +760,7 @@ public:
 			string os, string osVersion, string jvmName, string jvmVersion,
 			string jvmProfile, string connectionInterface, string connectionIp) {
 
+		LoadDevicePropertiesFile();
 		this->uptime = uptime;
 		this->displayName = displayName;
 		this->modelName = modelName;
@@ -658,11 +807,22 @@ public:
                             string os, string osVersion, string jvmName, string jvmVersion,
                             string jvmProfile, string connectionInterface, string connectionIp,
                             double latitude, double longitude, double altitude) {
-        EdcDeviceProfile(uptime, displayName,
-             modelName, modelId, partNumber,
-             serialNumber, firmwareVersion, biosVersion,
-             os, osVersion, jvmName, jvmVersion,
-             jvmProfile, connectionInterface, connectionIp);
+		LoadDevicePropertiesFile();
+		this->uptime = uptime;
+		this->displayName = displayName;
+		this->modelName = modelName;
+		this->modelId = modelId;
+		this->partNumber = partNumber;
+		this->serialNumber = serialNumber;
+		this->firmwareVersion = firmwareVersion;
+		this->biosVersion = biosVersion;
+		this->os = os;
+		this->osVersion = osVersion;
+		this->jvmName = jvmName;
+		this->jvmVersion = jvmVersion;
+		this->jvmProfile = jvmProfile;
+		this->connectionInterface = connectionInterface;
+		this->connectionIp = connectionIp;
         this->latitude = latitude;
         this->longitude = longitude;
         this->altitude = altitude;

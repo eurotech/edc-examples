@@ -5,23 +5,25 @@
 #include <stdlib.h>
 using namespace std;
 
-#include "log.h"
+//#include "log.h"
 
 Config::Config(string name, string parentDebugInfo) {
 	debugInfo = parentDebugInfo + ", " + name;
 }
 
 Config::Config(string configFile, char** envp) {
-	while (*envp) {
-		string envEntry = *envp;
-		size_t pos = envEntry.find('=');
-		if (pos != string::npos) {
-			string name = envEntry.substr(0, pos);
-			string value = envEntry.substr(pos+1, string::npos);
-			envSymbols[name] = value;
-			//logDebug(cout << "environment symbol: '" << name << "' = '" << value << "'" << endl);
+	if (envp != 0) {
+		while (*envp) {
+			string envEntry = *envp;
+			size_t pos = envEntry.find('=');
+			if (pos != string::npos) {
+				string name = envEntry.substr(0, pos);
+				string value = envEntry.substr(pos+1, string::npos);
+				envSymbols[name] = value;
+				//logDebug(cout << "environment symbol: '" << name << "' = '" << value << "'" << endl);
+			}
+			++envp;
 		}
-		++envp;
 	}
 
 	debugInfo = configFile;
@@ -32,15 +34,17 @@ Config::Config(string configFile, char** envp) {
 	errno_t err = fopen_s (&in, configFile.c_str(), "r");
 
 	if (err) {
-		cerr << "cannot open input file '" << configFile << "'" << endl;
-		exit(2);
+		//cerr << "Cannot open input file '" << configFile << "'" << endl;
+		//exit(2);
+		return;
 	}
 #else
 	FILE* in = fopen(configFile.c_str(), "r");
 
 	if (!in) {
-		cerr << "cannot open input file '" << configFile << "'" << endl;
-		exit(2);
+		//cerr << "Cannot open input file '" << configFile << "'" << endl;
+		//exit(2);
+		return;
 	}
 #endif
 
@@ -97,7 +101,8 @@ void Config::split(string in, string& left, string& right, char c) {
 		right = in.substr(pos+1, string::npos);
 		trim(right);
 	} else {
-		left = in.substr(0, pos-1);
+		//left = in.substr(0, pos-1);
+		left = in.substr(0, pos);
 		trim(left);
 		right = in.substr(pos+1, string::npos);
 		trim(right);
@@ -151,7 +156,8 @@ string Config::pString(string name) {
 	map<string, string>::iterator i = symbols.find(name);
 	if (i == symbols.end()) {
 		//logError(cout << "access of missing property '" << name << "' (" << debugInfo << ")" << endl);
-		exit(4);
+		//exit(4);
+		return "";
 	}
 	return i->second;
 }

@@ -203,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\edcclient\EdcCloudHelpers.h"
+				>
+			</File>
+			<File
 				RelativePath="..\edcclient\edcpayload.pb.h"
 				>
 			</File>
