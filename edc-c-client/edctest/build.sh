@@ -3,8 +3,8 @@
 . ./mqttlib_dir.sh
 
 gcc -Wall \
- -I../edcclient/ -I../protobuf/src/ -I../org.eclipse.paho.mqtt.c/src/ \
+ -I../edcclient/ -I../protobuf/src/ -I../org.eclipse.paho.mqtt.c/src/ -I../config \
  -L../protobuf/src/.libs/ -L../org.eclipse.paho.mqtt.c/build/${MQTTLIB_DIR}/ \
  -o edctest \
- edctest.cpp ../edcclient/edcpayload.pb.cc \
+ edctest.cpp ../edcclient/edcpayload.pb.cc ../edcclient/config.cpp \
  -lmqttv3c -lprotobuf
