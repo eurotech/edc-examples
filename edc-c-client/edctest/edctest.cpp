@@ -5,15 +5,15 @@
 #include "EdcCloudClient.h"
 
 // >>>>>> Set these variables according to your Cloud user account
-#define TEST_ACCOUNT_NAME		"luca"												// Your Account name in Cloud
+#define TEST_ACCOUNT_NAME		"edcguest"											// Your Account name in Cloud
 #define TEST_BROKER_URL			"tcp://broker-sandbox.everyware-cloud.com:1883/"	//https://console-sandbox.everyware-cloud.com/
 //#define TEST_BROKER_URL     "tcp://localhost:1883"	//local
 
 																				// URL address of broker 
 #define TEST_CLIENT_ID			"001122DDEEFF"									// Unique Client ID of this client device
 #define TEST_ASSET_ID			"334455AABBCC"									// Unique Asset ID of this client device
-#define TEST_USERNAME			"luca_broker"									// Username in account, to use for publishing
-#define TEST_PASSWORD			"We!come1"										// Password associated with Username
+#define TEST_USERNAME			"edcguest_broker"								// Username in account, to use for publishing
+#define TEST_PASSWORD			"Welcome1"										// Password associated with Username
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #define	DATA_SEMANTIC_TOPIC		"nativeclient/data"								// default publish topic
 #define PUBLISH_PERIOD			2000											// time between published messages, in milliseconds
