@@ -5,22 +5,21 @@
 #include "EdcCloudClient.h"
 
 // >>>>>> Set these variables according to your Cloud user account
-#define TEST_ACCOUNT_NAME		"edcguest"											// Your Account name in Cloud
-#define TEST_BROKER_URL			"tcp://broker-sandbox.everyware-cloud.com:1883/"	//https://console-sandbox.everyware-cloud.com/
-//#define TEST_BROKER_URL     "tcp://localhost:1883"	//local
+#define TEST_ACCOUNT_NAME		"myEdcAccount"		// Your Account name in Cloud
+#define TEST_BROKER_URL		"tcp://broker-sandbox.everyware-cloud.com:1883/"		// URL address of broker
+//#define TEST_BROKER_URL     	"tcp://localhost:1883"	//local
 
-																				// URL address of broker 
-#define TEST_CLIENT_ID			"001122DDEEFF"									// Unique Client ID of this client device
-#define TEST_ASSET_ID			"334455AABBCC"									// Unique Asset ID of this client device
-#define TEST_USERNAME			"edcguest_broker"								// Username in account, to use for publishing
-#define TEST_PASSWORD			"Welcome1"										// Password associated with Username
+#define TEST_CLIENT_ID		"001122DDEEFF"		// Unique Client ID of this client device
+#define TEST_ASSET_ID		"334455AABBCC"		// Unique Asset ID of this client device
+#define TEST_USERNAME		"myEdcUserName_broker"	// Username in account, to use for publishing
+#define TEST_PASSWORD		"myEdcPassword3#"		// Password associated with Username
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-#define	DATA_SEMANTIC_TOPIC		"nativeclient/data"								// default publish topic
-#define PUBLISH_PERIOD			2000											// time between published messages, in milliseconds
-#define	MAX_PUBLISH				10												// number of times to publish
-#define LATITUDE				38.836695										// default (simulated) GPS position
-#define LONGITUDE				-99.671998
-#define PUBLISH_TIMEOUT			50000L												
+#define	DATA_SEMANTIC_TOPIC		"nativeclient/data"		// default publish topic
+#define PUBLISH_PERIOD		10000			// time between published messages, in milliseconds
+#define	MAX_PUBLISH		10			// number of times to publish
+#define LATITUDE			46.369079			// default (simulated) GPS position
+#define LONGITUDE			13.076729
+#define PUBLISH_TIMEOUT		50000L			
 
 #define DISPLAY_TX_MSG_PAYLOAD	
 #define DISPLAY_RX_MSG_PAYLOAD	
