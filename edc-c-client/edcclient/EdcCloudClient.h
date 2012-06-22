@@ -61,14 +61,14 @@ const string EdcBirthPayloadNames[] = {
 
 const string EdcBirthPayloadValues[] = {
 	"123",
-	"Windows client",
+	"C client",
 	"test model_name",
 	"test model_id",
 	"test part_number",
 	"test serial_number",
 	"test firmware_version",
 	"test bios_version",
-	"Windows XP SP3",
+	"test_os_version",
 	"test jvm_name",
 	"test jvm_version",
 	"test jvm_profile",
