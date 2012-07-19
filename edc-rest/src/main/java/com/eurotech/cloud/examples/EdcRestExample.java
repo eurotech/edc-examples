@@ -17,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 
 //import API model types used in examples
 import com.eurotech.cloud.apis.v2.model.Account;
+import com.eurotech.cloud.apis.v2.model.AccountsResult;
 import com.eurotech.cloud.apis.v2.model.CountResult;
 import com.eurotech.cloud.apis.v2.model.Device;
 import com.eurotech.cloud.apis.v2.model.DevicesResult;
@@ -32,6 +33,7 @@ import com.eurotech.cloud.apis.v2.model.MetricsResult;
 import com.eurotech.cloud.apis.v2.model.Rule;
 import com.eurotech.cloud.apis.v2.model.RuleActionConfiguration;
 import com.eurotech.cloud.apis.v2.model.RuleCreator;
+import com.eurotech.cloud.apis.v2.model.RulesResult;
 import com.eurotech.cloud.apis.v2.model.TopicsResult;
 import com.eurotech.cloud.apis.v2.model.xml.Parameter;
 import com.eurotech.cloud.apis.v2.model.xml.ParametersMapType;
@@ -60,10 +62,11 @@ public class EdcRestExample
     // >>>>>> Set these variables according to your Cloud user account
 	public static final String API_URL = "https://api-sandbox.everyware-cloud.com/v2/";	// URL for API connection 
 	public static final String ACCOUNT = "myEdcAccount";				// Cloud account name
-	public static final String USERNAME = "myEdcUserName";			// Username in account, requires Administrative permissions
+	public static final String USERNAME = "myEdcUserName";				// Username in account, requires Administrative permissions
 	public static final String PASSWORD = "myEdcPassword3#";			// Password associated with Username
 	public static final String ASSET_ID = "MyEclipseClient";			// Unique Client ID of this client device
 	public static final String TEST_EMAIL = "my.name@domain.com";		// E-mail address to use for this sample application
+	public static final String TEST_EMAIL2 = "rule.changed@domain.com";		// E-mail address to test rule update
     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     static Client              client    = null;
@@ -116,6 +119,9 @@ public class EdcRestExample
         // Store data to Cloud directly using REST
         restStore();
 
+        // Update Rule using REST
+        updateRule();
+        
         // Read the above data back from data store
         restRead();
 
@@ -143,8 +149,8 @@ public class EdcRestExample
         System.out.println("\n##############\n Beginning test of listAccounts()");
         String apiPath = "accounts.xml";
         WebResource apisWeb = client.resource(API_URL).path(apiPath);
-        List<Account> accounts = (List<Account>) apisWeb.get(new GenericType<List<Account>>() {
-        });
+        AccountsResult  result = apisWeb.get(AccountsResult.class);
+        List<Account> accounts = result.getAccounts();
         System.out.println("Accounts.size(): " + accounts.size());
         System.out.println("Account name: " + accounts.get(0).getName());
         sleep(1);
@@ -318,8 +324,8 @@ public class EdcRestExample
         // First get Account ID
         String apiPath = "accounts.xml";
         WebResource apisWeb = client.resource(API_URL).path(apiPath);
-        List<Account> accounts = (List<Account>) apisWeb.get(new GenericType<List<Account>>() {
-        });
+        AccountsResult  result = apisWeb.get(AccountsResult.class);
+        List<Account> accounts = result.getAccounts();
         long accountID = accounts.get(0).getId();
 
         // Create the rule
@@ -422,6 +428,68 @@ public class EdcRestExample
 
 
     //
+    // Update rule previously created
+    //
+    private static void updateRule() {
+        System.out.println("\n##############\n Beginning test of updateRule()");
+    	
+        WebResource apisWeb = client.resource(API_URL);
+        WebResource rulesWeb = apisWeb.path("rules.xml");
+        RulesResult result = rulesWeb.get(RulesResult.class);
+        List<Rule> rules = result.getRules();
+        Rule localRule = rules.get(0);
+        
+        // change email address
+        RuleActionConfiguration config = localRule.getRuleActionConfigurations().get(0);
+        for (Parameter param : config.getParameterValues().getParameters()) {
+            if ("to".equals(param.getName())) {
+                System.out.println("Change "+param.getValue()+" to "+TEST_EMAIL2);
+                param.setValue(TEST_EMAIL2);
+            }
+        }
+        Rule updatedRule = null;
+        WebResource rulesUpdateWeb = apisWeb.path("rules/"+localRule.getId()+".xml");
+        try {
+            
+            updatedRule = rulesUpdateWeb.accept(MediaType.APPLICATION_XML)        
+                                        .type(MediaType.APPLICATION_XML)
+                                        .put(Rule.class, localRule);
+            System.out.println("Rule updated");
+        }
+        catch (UniformInterfaceException uie) {
+            boolean handled = false;
+            if (uie.getResponse().getClientResponseStatus().getStatusCode() == 500) {                
+                ErrorBean errorBean = uie.getResponse().getEntity(ErrorBean.class);
+                if (errorBean.getMessage().contains("MqttBrokerUnavailableException")) {
+                    System.err.println("RULES_TEST_WARNING: Rules not confirmed.");
+                    handled = true;
+                }
+            }
+            if (!handled) {
+                throw uie;
+            }
+        }
+        
+        // Read back rule to verify that it was updated
+        rulesWeb = client.resource(API_URL).path("rules/" + localRule.getId() + ".xml");
+        Rule ruleCheck;
+        try {
+        	ruleCheck = rulesWeb.accept(MediaType.APPLICATION_XML).type(MediaType.APPLICATION_XML).get(Rule.class);
+        	config = ruleCheck.getRuleActionConfigurations().get(0);
+        	for (Parameter param : config.getParameterValues().getParameters()) {
+        		if ("to".equals(param.getName())) {
+        			System.out.println("email = "+param.getValue());
+        		}
+        	}
+        }
+        catch (UniformInterfaceException uie) {
+            ErrorBean errorBean = uie.getResponse().getEntity(ErrorBean.class);
+            System.out.println(errorBean.getMessage());
+            throw uie;
+        }
+    }
+    
+   //
     // Delete rule previously created
     //
     private static void deleteRule() {
@@ -434,6 +502,22 @@ public class EdcRestExample
         catch (NullPointerException e) {
             System.err.println("deleteRule(): Couldn't get rule ID from previous createRule().");
             // ruleID = 41; //use this to force a delete of specific rule
+        }
+        // if Couldn't get rule ID from previous createRule() get ID of the first rule if any
+        if(ruleID==0){
+            WebResource apisWeb = client.resource(API_URL);
+            WebResource rulesWeb = apisWeb.path("rules.xml");
+            RulesResult result = rulesWeb.get(RulesResult.class);
+            List<Rule> rules = result.getRules();
+            if(rules.size()>0){
+	            rule = rules.get(0);
+	            ruleID = rule.getId();
+            }
+            else
+            {
+                System.err.println("deleteRule(): no rule.");
+                return;
+            }
         }
 
         WebResource rulesWeb = client.resource(API_URL).path("rules/" + ruleID + ".xml");
