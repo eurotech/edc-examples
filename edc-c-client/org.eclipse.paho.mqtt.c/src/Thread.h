@@ -13,7 +13,7 @@
 #if !defined(THREAD_H)
 #define THREAD_H
 
-#if defined(WIN32)
+#if defined(WIN32) || defined(_WIN32_WCE)
 	#include <Windows.h>
 	#define thread_type HANDLE
 	#define thread_id_type DWORD

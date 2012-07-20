@@ -118,7 +118,9 @@
   #if _MSC_VER >= 1300
     // If MSVC has "/RTCc" set, it will complain about truncating casts at
     // runtime.  This file contains some intentional truncating casts.
+#if !defined(_WIN32_WCE)
     #pragma runtime_checks("c", off)
+#endif
   #endif
 #else
   #include <sys/param.h>   // __BYTE_ORDER
@@ -1095,7 +1097,9 @@ inline CodedInputStream::~CodedInputStream() {
 
 
 #if defined(_MSC_VER) && _MSC_VER >= 1300
+#if !defined(_WIN32_WCE)
   #pragma runtime_checks("c", restore)
+#endif
 #endif  // _MSC_VER
 
 }  // namespace google

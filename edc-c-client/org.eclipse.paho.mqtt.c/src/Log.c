@@ -24,7 +24,7 @@
 #include <time.h>
 #include <string.h>
 
-#if !defined(WIN32)
+#if !defined(WIN32) && !defined(_WIN32_WCE)
 #include <syslog.h>
 #define GETTIMEOFDAY 1
 #else
@@ -37,6 +37,11 @@
 	#include <sys/timeb.h>
 #endif
 
+#if defined(_WIN32_WCE)
+#include <wce_stdlib.h>
+#define vsnprintf _vsnprintf
+#define getenv wceex_getenv
+#endif
 
 #if !defined(min)
 #define min(A,B) ( (A) < (B) ? (A):(B))
@@ -56,7 +61,11 @@ typedef struct
 #if defined(GETTIMEOFDAY)
 	struct timeval ts;
 #else
+#if defined(_WIN32_WCE)
+	SYSTEMTIME ts;
+#else
 	struct timeb ts;
+#endif
 #endif
 	int sametime_count;
 	int number;
@@ -81,7 +90,11 @@ static int sametime_count = 0;
 #if defined(GETTIMEOFDAY)
 struct timeval ts, last_ts;
 #else
+#if defined(_WIN32_WCE)
+SYSTEMTIME ts, last_ts;
+#else
 struct timeb ts, last_ts;
+#endif
 #endif
 static char msg_buf[512];
 
@@ -144,8 +157,15 @@ static traceEntry* Log_pretrace()
 		gettimeofday(&ts, NULL);
 		if (ts.tv_sec != last_ts.tv_sec || ts.tv_usec != last_ts.tv_usec)
 #else
+#if defined(_WIN32_WCE)
+		GetLocalTime(&ts);
+		if (ts.wDay!=last_ts.wDay || ts.wHour!=last_ts.wHour || ts.wMilliseconds!=last_ts.wMilliseconds 
+			|| ts.wMinute!=last_ts.wMinute || ts.wMonth!=last_ts.wMonth || ts.wSecond!=last_ts.wSecond 
+			|| ts.wYear!=last_ts.wYear) 
+#else
 		ftime(&ts);
 		if (ts.time != last_ts.time || ts.millitm != last_ts.millitm)
+#endif
 #endif
 		{
 			sametime_count = 0;
@@ -193,13 +213,35 @@ static char* Log_formatTraceEntry(traceEntry* cur_entry)
 #if defined(GETTIMEOFDAY)
 	timeinfo = localtime(&cur_entry->ts.tv_sec);
 #else
+#if defined(_WIN32_WCE)
+	timeinfo = malloc (sizeof(struct tm));
+	timeinfo->tm_sec = cur_entry->ts.wSecond;
+	timeinfo->tm_min = cur_entry->ts.wMinute;
+	timeinfo->tm_hour = cur_entry->ts.wHour;
+	timeinfo->tm_mday = cur_entry->ts.wDay;
+	timeinfo->tm_mon = (cur_entry->ts.wMonth)-1;
+	timeinfo->tm_year = (cur_entry->ts.wYear)-1900;
+	timeinfo->tm_wday = cur_entry->ts.wDayOfWeek;
+	timeinfo->tm_yday = 0;
+	timeinfo->tm_isdst = 0;
+#else
 	timeinfo = localtime(&cur_entry->ts.time);
 #endif
+#endif
+#if defined(_WIN32_WCE)
+	sprintf(&msg_buf[7], "%04d%02d%02d %2d%2d%2d ", timeinfo->tm_year, timeinfo->tm_mon, timeinfo->tm_mday
+		, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+#else
 	strftime(&msg_buf[7], 80, "%Y%m%d %H%M%S ", timeinfo);
+#endif
 #if defined(GETTIMEOFDAY)
 	sprintf(&msg_buf[22], ".%.3lu ", cur_entry->ts.tv_usec / 1000L);
 #else
+#if defined(_WIN32_WCE)
+	sprintf(&msg_buf[22], ".%.3hu ", cur_entry->ts.wMilliseconds);
+#else
 	sprintf(&msg_buf[22], ".%.3hu ", cur_entry->ts.millitm);
+#endif
 #endif
 	buf_pos = 27;
 

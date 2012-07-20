@@ -13,7 +13,7 @@
 #if !defined(SOCKETBUFFER_H)
 #define SOCKETBUFFER_H
 
-#if defined(WIN32)
+#if defined(WIN32) || defined(_WIN32_WCE)
 #include "winsock2.h"
 #else
 #include <sys/socket.h>

@@ -11,8 +11,13 @@
  *******************************************************************************/
 
 #include <stdlib.h>
-#if !defined(WIN32)
+#if !defined(WIN32) && !defined(_WIN32_WCE)
 	#include <sys/time.h>
+#endif
+
+#if defined(_WIN32_WCE)
+#include <wce_time.h>
+#define time wceex_time
 #endif
 
 #if !defined(NO_PERSISTENCE)
@@ -615,6 +620,7 @@ int MQTTClient_cleanSession(Clients* client)
 	int rc = 0;
 
 	FUNC_ENTRY;
+
 #if !defined(NO_PERSISTENCE)
 	rc = MQTTPersistence_clear(client);
 #endif
@@ -675,6 +681,7 @@ int MQTTClient_connect(MQTTClient handle, MQTTClient_connectOptions* options)
 	long millisecsTimeout = 30000L;
 
 	FUNC_ENTRY;
+
 	Thread_lock_mutex(mqttclient_mutex);
 
 	if (options == NULL)
@@ -1177,6 +1184,7 @@ void MQTTClient_retry(void)
 
 	FUNC_ENTRY;
 	time(&(now));
+
 	if (difftime(now, last) > 5)
 	{
 		time(&(last));

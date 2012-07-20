@@ -33,16 +33,28 @@
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
 #ifdef _MSC_VER
+#if defined (_WIN32_WCE)
+#include "..\..\os\wince\libce\include\io.h"
+#else
 #include <io.h>
+#endif
 #else
 #include <unistd.h>
 #endif
+
+#include <algorithm>
+
+#if defined (_WIN32_WCE)
+#include "..\..\os\wince\libce\include\sys\types.h"
+#include "..\..\os\wince\libce\include\sys\stat.h"
+#include "..\..\os\wince\libce\include\fcntl.h"
+#include "..\..\os\wince\libce\include\errno.h"
+#else
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
-
-#include <algorithm>
+#endif
 
 #include <google/protobuf/compiler/importer.h>
 
@@ -50,6 +62,10 @@
 #include <google/protobuf/io/tokenizer.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/stubs/strutil.h>
+
+#if defined _WIN32_WCE
+#pragma warning( disable : 4355 )
+#endif
 
 namespace google {
 namespace protobuf {
@@ -242,7 +258,7 @@ static string CanonicalizePath(string path) {
   vector<string> parts;
   vector<string> canonical_parts;
   SplitStringUsing(path, "/", &parts);  // Note:  Removes empty parts.
-  for (int i = 0; i < parts.size(); i++) {
+  for (int i = 0; i < (int)(parts.size()); i++) {
     if (parts[i] == ".") {
       // Ignore.
     } else {
@@ -355,7 +371,7 @@ DiskSourceTree::DiskFileToVirtualFile(
   int mapping_index = -1;
   string canonical_disk_file = CanonicalizePath(disk_file);
 
-  for (int i = 0; i < mappings_.size(); i++) {
+  for (int i = 0; i < (int)(mappings_.size()); i++) {
     // Apply the mapping in reverse.
     if (ApplyMapping(canonical_disk_file, mappings_[i].disk_path,
                      mappings_[i].virtual_path, virtual_file)) {
@@ -415,7 +431,7 @@ io::ZeroCopyInputStream* DiskSourceTree::OpenVirtualFile(
     return NULL;
   }
 
-  for (int i = 0; i < mappings_.size(); i++) {
+  for (int i = 0; i < (int)(mappings_.size()); i++) {
     string temp_disk_file;
     if (ApplyMapping(virtual_file, mappings_[i].virtual_path,
                      mappings_[i].disk_path, &temp_disk_file)) {
@@ -443,7 +459,11 @@ io::ZeroCopyInputStream* DiskSourceTree::OpenDiskFile(
     const string& filename) {
   int file_descriptor;
   do {
+#if defined _WIN32_WCE
+	file_descriptor = open(filename.c_str(), O_RDONLY, 0);
+#else
     file_descriptor = open(filename.c_str(), O_RDONLY);
+#endif
   } while (file_descriptor < 0 && errno == EINTR);
   if (file_descriptor >= 0) {
     io::FileInputStream* result = new io::FileInputStream(file_descriptor);

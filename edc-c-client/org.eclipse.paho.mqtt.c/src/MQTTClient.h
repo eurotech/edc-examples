@@ -68,7 +68,7 @@
 #if !defined(MQTTCLIENT_H)
 #define MQTTCLIENT_H
 
-#if defined(WIN32)
+#if defined(WIN32) || defined(_WIN32_WCE)
   #define DLLImport __declspec(dllimport)
   #define DLLExport __declspec(dllexport)
 #else

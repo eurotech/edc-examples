@@ -23,6 +23,10 @@
 #include "StackTrace.h"
 #include "Heap.h"
 
+#if defined (_WIN32_WCE)
+#include <wce_time.h>
+#endif
+
 extern MQTTProtocol state;
 extern ClientStates* bstate;
 
@@ -87,7 +91,11 @@ int MQTTProtocol_connect(char* ip_address, Clients* aClient)
 
 	FUNC_ENTRY;
 	aClient->good = 1;
+#if defined(_WIN32_WCE)
+	wceex_time(&(aClient->lastContact));
+#else
 	time(&(aClient->lastContact));
+#endif
 
 	addr = MQTTProtocol_addressPort(ip_address, &port);
 	rc = Socket_new(addr, port, &(aClient->socket));

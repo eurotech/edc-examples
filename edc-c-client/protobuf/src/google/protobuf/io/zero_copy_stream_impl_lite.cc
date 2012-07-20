@@ -154,7 +154,7 @@ bool StringOutputStream::Next(void** data, int* size) {
   int old_size = target_->size();
 
   // Grow the string.
-  if (old_size < target_->capacity()) {
+  if (old_size < (int)(target_->capacity())) {
     // Resize the string to match its capacity, since we can get away
     // without a memory allocation this way.
     STLStringResizeUninitialized(target_, target_->capacity());
@@ -174,7 +174,7 @@ bool StringOutputStream::Next(void** data, int* size) {
 
 void StringOutputStream::BackUp(int count) {
   GOOGLE_CHECK_GE(count, 0);
-  GOOGLE_CHECK_LE(count, target_->size());
+  GOOGLE_CHECK_LE(count, (int)(target_->size()));
   target_->resize(target_->size() - count);
 }
 

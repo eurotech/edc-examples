@@ -9,8 +9,11 @@ extern "C"{
 #include <list>
 
 //For OS specific stuff
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32_WCE)
 #include <windows.h>
+#if defined(_WIN32_WCE)
+#define _countof(a) (sizeof((a))/sizeof((a)[0]))
+#endif
 #else
 #include <unistd.h>
 #ifndef _countof
@@ -29,7 +32,7 @@ typedef int (pfnEdcCloudClientConnectionLost)(char* cause);
 
 //Currently the only OS specific function
 void EdcCloudClientSleep(unsigned long milliseconds){
-#if defined(WIN32)
+#if defined(WIN32) || defined(_WIN32_WCE)
 	Sleep(milliseconds);
 #else	
 	usleep(milliseconds*1000);

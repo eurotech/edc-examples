@@ -148,6 +148,7 @@ int MQTTPersistence_clear(Clients *c)
 	int rc = 0;
 
 	FUNC_ENTRY;
+
 	if (c->persistence != NULL)
 		rc = c->persistence->pclear(c->phandle);
 

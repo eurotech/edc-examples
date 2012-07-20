@@ -1,8 +1,15 @@
+
 #include <time.h>
 #include <stdio.h>
 #include <iostream>
 #include <math.h>
 #include "EdcCloudClient.h"
+
+#if defined _WIN32_WCE
+#include "..\os\wince\wcelibcex-1.0\src\wce_time.h"
+#undef time
+#define time wceex_time
+#endif
 
 // >>>>>> Set these variables according to your Cloud user account
 #define TEST_ACCOUNT_NAME		"myEdcAccount"		// Your Account name in Cloud
@@ -24,6 +31,10 @@
 #define DISPLAY_TX_MSG_PAYLOAD	
 #define DISPLAY_RX_MSG_PAYLOAD	
 
+#if defined _WIN32_WCE
+CRITICAL_SECTION cs;
+#endif
+
 //helper function to create a sample payload
 EdcPayload * createPayload();
 
@@ -34,6 +45,9 @@ bool displayPayload (EdcPayload * payload);
 int EdcCloudClientMessageArrived(string topic, EdcPayload * payload){
 	static int rxMsgCount = 0;
 	rxMsgCount ++;
+#if defined _WIN32_WCE
+	EnterCriticalSection(&cs);
+#endif
 	printf("Message #%d arrived: topic=%s\r\n", rxMsgCount, topic.c_str());
 	
 #ifdef DISPLAY_RX_MSG_PAYLOAD
@@ -42,6 +56,9 @@ int EdcCloudClientMessageArrived(string topic, EdcPayload * payload){
 	}
 #endif
 
+#if defined _WIN32_WCE
+	LeaveCriticalSection(&cs);
+#endif
 	return 0;
 }
 //callback for message delivered
@@ -58,9 +75,17 @@ int EdcCloudClientConnectionLost(char * cause){
 //the client instance
 EdcCloudClient edcCloudClient;
 
+#if defined _WIN32_WCE
+int _tmain(int argc, _TCHAR* argv[]){
+#else
 int main(){
+#endif
 
 	printf ("EDC test start\r\n");
+
+#if defined _WIN32_WCE
+	InitializeCriticalSection(&cs);
+#endif
 
 	int rc = EDCCLIENT_SUCCESS;
 	string pubTSemanticTopic = DATA_SEMANTIC_TOPIC;
@@ -175,6 +200,9 @@ int main(){
 	//publish data
 	for (int i = 0; i < MAX_PUBLISH; i++) {
 
+#if defined _WIN32_WCE
+		EnterCriticalSection(&cs);
+#endif
 		EdcPayload * payload = createPayload();
 
 		rc = edcCloudClient.publish(pubTSemanticTopic, payload, qoss, false, PUBLISH_TIMEOUT);	//call createPayload() each time
@@ -193,6 +221,9 @@ int main(){
 		}
 #endif
 
+#if defined _WIN32_WCE
+		LeaveCriticalSection(&cs);
+#endif
 		EdcCloudClientSleep(1 * 1000);
 	}
 
@@ -208,6 +239,9 @@ exit:
 
 	edcCloudClient.terminate();
 	printf ("EDC test completed\r\n");
+#if defined _WIN32_WCE
+	DeleteCriticalSection(&cs);
+#endif
 	return rc;
 }
 
@@ -239,7 +273,7 @@ EdcPayload * createPayload(){
 	metric = edcPayload->add_metric();
 	metric->set_name("flt");
 	metric->set_type(EdcPayload_EdcMetric_ValueType_FLOAT);
-	metric->set_float_value(exp((float)counter));	
+	metric->set_float_value((float)exp((float)counter));	
 
 	metric = edcPayload->add_metric();
 	metric->set_name("dbl");

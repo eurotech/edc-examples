@@ -1,0 +1,3 @@
+
+Windows CE 5.0: Standard Software Development Kit (SDK)
+http://www.microsoft.com/en-us/download/details.aspx?id=17310

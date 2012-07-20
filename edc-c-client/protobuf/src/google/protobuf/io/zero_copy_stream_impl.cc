@@ -33,16 +33,31 @@
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
 #ifdef _MSC_VER
+#if defined (_WIN32_WCE)
+#include "..\..\os\wince\libce\include\io.h"
+#else
 #include <io.h>
+#endif
 #else
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #endif
-#include <errno.h>
 #include <iostream>
 #include <algorithm>
+#if defined (_WIN32_WCE)
+#include "..\..\os\wince\libce\include\errno.h"
+#if !defined x86
+#include "..\..\os\wince\libce\include\string.h"
+#endif
+#include "..\..\os\wince\libce\include\sys\stat.h"
+#define off_t _off_t
+#include "..\..\os\wince\wcelibcex-1.0\src\wce_string.h"
+#define strerror wceex_strerror
+#else
+#include <errno.h>
+#endif
 
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/stubs/common.h>
@@ -55,6 +70,9 @@ namespace io {
 #ifdef _WIN32
 // Win32 lseek is broken:  If invoked on a non-seekable file descriptor, its
 // return value is undefined.  We re-define it to always produce an error.
+#if defined _WIN32_WCE
+#undef lseek
+#endif
 #define lseek(fd, offset, origin) ((off_t)-1)
 #endif
 
@@ -64,7 +82,11 @@ namespace {
 int close_no_eintr(int fd) {
   int result;
   do {
+#if defined _WIN32_WCE
+    result = 0;
+#else
     result = close(fd);
+#endif
   } while (result < 0 && errno == EINTR);
   return result;
 }
@@ -138,7 +160,11 @@ int FileInputStream::CopyingFileInputStream::Read(void* buffer, int size) {
 
   int result;
   do {
+#if defined _WIN32_WCE
+	result = 0;
+#else
     result = read(file_, buffer, size);
+#endif
   } while (result < 0 && errno == EINTR);
 
   if (result < 0) {
@@ -241,7 +267,11 @@ bool FileOutputStream::CopyingFileOutputStream::Write(
   while (total_written < size) {
     int bytes;
     do {
+#ifdef _WIN32_WCE
+      bytes = 0;
+#else
       bytes = write(file_, buffer_base + total_written, size - total_written);
+#endif
     } while (bytes < 0 && errno == EINTR);
 
     if (bytes <= 0) {
@@ -388,7 +418,7 @@ bool ConcatenatingInputStream::Skip(int count) {
     // to skip.
     int64 final_byte_count = streams_[0]->ByteCount();
     GOOGLE_DCHECK_LT(final_byte_count, target_byte_count);
-    count = target_byte_count - final_byte_count;
+    count = (int)(target_byte_count - final_byte_count);
 
     // That stream is done.  Advance to the next one.
     bytes_retired_ += final_byte_count;
@@ -416,7 +446,7 @@ LimitingInputStream::LimitingInputStream(ZeroCopyInputStream* input,
 
 LimitingInputStream::~LimitingInputStream() {
   // If we overshot the limit, back up.
-  if (limit_ < 0) input_->BackUp(-limit_);
+  if (limit_ < 0) input_->BackUp((int)(-limit_));
 }
 
 bool LimitingInputStream::Next(const void** data, int* size) {
@@ -426,14 +456,14 @@ bool LimitingInputStream::Next(const void** data, int* size) {
   limit_ -= *size;
   if (limit_ < 0) {
     // We overshot the limit.  Reduce *size to hide the rest of the buffer.
-    *size += limit_;
+    *size += (int)(limit_);
   }
   return true;
 }
 
 void LimitingInputStream::BackUp(int count) {
   if (limit_ < 0) {
-    input_->BackUp(count - limit_);
+    input_->BackUp((int)(count - limit_));
     limit_ = count;
   } else {
     input_->BackUp(count);
@@ -444,7 +474,7 @@ void LimitingInputStream::BackUp(int count) {
 bool LimitingInputStream::Skip(int count) {
   if (count > limit_) {
     if (limit_ < 0) return false;
-    input_->Skip(limit_);
+    input_->Skip((int)(limit_));
     limit_ = 0;
     return false;
   } else {

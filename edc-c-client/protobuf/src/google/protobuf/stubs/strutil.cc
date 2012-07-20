@@ -31,7 +31,11 @@
 // from google3/strings/strutil.cc
 
 #include <google/protobuf/stubs/strutil.h>
+#if defined (_WIN32_WCE)
+#include "..\..\os\wince\libce\include\errno.h"
+#else
 #include <errno.h>
+#endif
 #include <float.h>    // FLT_DIG and DBL_DIG
 #include <limits>
 #include <limits.h>
@@ -578,7 +582,7 @@ char *FastInt64ToBuffer(int64 i, char* buffer) {
   *p-- = '\0';
   if (i >= 0) {
     do {
-      *p-- = '0' + i % 10;
+      *p-- = '0' + (int)i % 10;
       i /= 10;
     } while (i > 0);
     return p + 1;
@@ -588,18 +592,18 @@ char *FastInt64ToBuffer(int64 i, char* buffer) {
     // we don't divide negative numbers.
     if (i > -10) {
       i = -i;
-      *p-- = '0' + i;
+      *p-- = '0' + (int)i;
       *p = '-';
       return p;
     } else {
       // Make sure we aren't at MIN_INT, in which case we can't say i = -i
       i = i + 10;
       i = -i;
-      *p-- = '0' + i % 10;
+      *p-- = '0' + (int)i % 10;
       // Undo what we did a moment ago
       i = i / 10 + 1;
       do {
-        *p-- = '0' + i % 10;
+        *p-- = '0' + (int)i % 10;
         i /= 10;
       } while (i > 0);
       *p = '-';
@@ -830,7 +834,7 @@ char* FastUInt64ToBufferLeft(uint64 u64, char* buffer) {
 
   uint64 top_11_digits = u64 / 1000000000;
   buffer = FastUInt64ToBufferLeft(top_11_digits, buffer);
-  u = u64 - (top_11_digits * 1000000000);
+  u = (uint32)(u64 - (top_11_digits * 1000000000));
 
   digits = u / 10000000;  // 10,000,000
   GOOGLE_DCHECK_LT(digits, 100);
@@ -910,14 +914,14 @@ string SimpleItoa(unsigned long i) {
 string SimpleItoa(long long i) {
   char buffer[kFastToBufferSize];
   return (sizeof(i) == 4) ?
-    FastInt32ToBuffer(i, buffer) :
+    FastInt32ToBuffer((int32)i, buffer) :
     FastInt64ToBuffer(i, buffer);
 }
 
 string SimpleItoa(unsigned long long i) {
   char buffer[kFastToBufferSize];
   return string(buffer, (sizeof(i) == 4) ?
-    FastUInt32ToBufferLeft(i, buffer) :
+    FastUInt32ToBufferLeft((uint32)i, buffer) :
     FastUInt64ToBufferLeft(i, buffer));
 }
 
@@ -1053,7 +1057,7 @@ bool safe_strtof(const char* str, float* value) {
   char* endptr;
   errno = 0;  // errno only gets set on errors
 #if defined(_WIN32) || defined (__hpux)  // has no strtof()
-  *value = strtod(str, &endptr);
+  *value = (float)(strtod(str, &endptr));
 #else
   *value = strtof(str, &endptr);
 #endif

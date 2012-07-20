@@ -207,6 +207,10 @@ void ExtensionSet::ClearExtension(int number) {
 // ===================================================================
 // Field accessors
 
+#if defined _WIN32_WCE
+#undef OPTIONAL
+#endif
+
 namespace {
 
 enum Cardinality {

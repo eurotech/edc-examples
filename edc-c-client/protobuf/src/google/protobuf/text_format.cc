@@ -50,6 +50,10 @@
 #include <google/protobuf/io/tokenizer.h>
 #include <google/protobuf/stubs/strutil.h>
 
+#if defined _WIN32_WCE
+#pragma warning( disable : 4355 )
+#endif
+
 namespace google {
 namespace protobuf {
 
@@ -420,7 +424,7 @@ class TextFormat::Parser::ParserImpl {
         if (LookingAtType(io::Tokenizer::TYPE_INTEGER)) {
           uint64 value;
           DO(ConsumeUnsignedInteger(&value, 1));
-          SET_FIELD(Bool, value);
+          SET_FIELD(Bool, value!=0);
         } else {
           string value;
           DO(ConsumeIdentifier(&value));
@@ -452,7 +456,7 @@ class TextFormat::Parser::ParserImpl {
           int64 int_value;
           DO(ConsumeSignedInteger(&int_value, kint32max));
           value = SimpleItoa(int_value);        // for error reporting
-          enum_value = enum_type->FindValueByNumber(int_value);
+          enum_value = enum_type->FindValueByNumber((int)(int_value));
         } else {
           ReportError("Expected integer or identifier.");
           return false;
@@ -715,7 +719,7 @@ class TextFormat::Printer::TextGenerator {
   // level is zero.
   void Outdent() {
     if (indent_.empty() ||
-        indent_.size() < initial_indent_level_ * 2) {
+        (int)(indent_.size()) < initial_indent_level_ * 2) {
       GOOGLE_LOG(DFATAL) << " Outdent() without matching Indent().";
       return;
     }
@@ -943,7 +947,7 @@ void TextFormat::Printer::Print(const Message& message,
   const Reflection* reflection = message.GetReflection();
   vector<const FieldDescriptor*> fields;
   reflection->ListFields(message, &fields);
-  for (int i = 0; i < fields.size(); i++) {
+  for (int i = 0; i < (int)(fields.size()); i++) {
     PrintField(message, reflection, fields[i], generator);
   }
   PrintUnknownFields(reflection->GetUnknownFields(message), generator);

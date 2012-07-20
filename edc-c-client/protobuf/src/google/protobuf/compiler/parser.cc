@@ -165,7 +165,7 @@ bool Parser::ConsumeInteger(int* output, const char* error) {
       AddError("Integer out of range.");
       // We still return true because we did, in fact, parse an integer.
     }
-    *output = value;
+    *output = (int)value;
     input_->Next();
     return true;
   } else {
@@ -204,7 +204,7 @@ bool Parser::ConsumeNumber(double* output, const char* error) {
       AddError("Integer out of range.");
       // We still return true because we did, in fact, parse a number.
     }
-    *output = value;
+    *output = (double)value;
     input_->Next();
     return true;
   } else if (LookingAt("inf")) {

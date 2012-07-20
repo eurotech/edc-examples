@@ -33,7 +33,11 @@
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/stubs/once.h>
 #include <stdio.h>
+#if defined (_WIN32_WCE)
+#include "..\..\os\wince\libce\include\errno.h"
+#else
 #include <errno.h>
+#endif
 #include <vector>
 
 #include "config.h"
@@ -356,7 +360,7 @@ void ShutdownProtobufLibrary() {
   // Make it safe to call this multiple times.
   if (internal::shutdown_functions == NULL) return;
 
-  for (int i = 0; i < internal::shutdown_functions->size(); i++) {
+  for (int i = 0; i < (int)(internal::shutdown_functions->size()); i++) {
     internal::shutdown_functions->at(i)();
   }
   delete internal::shutdown_functions;
