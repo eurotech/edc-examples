@@ -1145,8 +1145,8 @@ inline ExtensionSet* GeneratedMessageReflection::MutableExtensionSet(
 // Simple accessors for manipulating has_bits_.
 inline bool GeneratedMessageReflection::HasBit(
     const Message& message, const FieldDescriptor* field) const {
-  return ((GetHasBits(message)[field->index() / 32])!=0) &
-    (1 << (field->index() % 32));
+  return (GetHasBits(message)[field->index() / 32] &
+    (1 << (field->index() % 32))) != 0;
 }
 
 inline void GeneratedMessageReflection::SetBit(
