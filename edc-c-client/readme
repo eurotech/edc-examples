@@ -1,16 +1,17 @@
-=============================================================
-EDC C++ Cloud Client for Linux and Windows NT based platforms
-=============================================================
+====================================================
+EDC C++ Cloud Client for Linux and Windows platforms
+====================================================
 
 =Content=
 
 This folder contains all the necessary source code to build an EDC C++ Cloud 
-Client for Linux and Windows NT based platforms:
+Client for Linux and Windows platforms:
 
 [org.eclipse.paho.mqtt.c]
 [protobuf]
 [edcclient]
 [edctest]
+[os]
 build.sh
 EDC.sln
 readme
@@ -47,6 +48,11 @@ readme
   or you can downloaded it from
   http://code.google.com/p/protobuf/downloads/detail?name=protobuf-2.4.1.tar.gz.
 
+* os folder
+
+  Contains os-specific files. 
+  It is currently used only by Windows CE.
+
 * edcclient folder
 
   Contains the EDC C++ Cloud Client implementation (EdcCloudClient.h) and the 
@@ -60,7 +66,7 @@ readme
   a sample payload. The application subscribes to the root account topic thus
   it will receive everything it publishes. The application uses some hardcoded
   credentials which you may need to change appropriately (see code comments).
-  
+ 
   
 =Building and running the EDC C++ Cloud Client=
 
@@ -72,7 +78,15 @@ Under Windows NT based system you need Visual Studio 2005 or higher: open the
 EDC.sln VS2005 solution file and rebuild it. The application executable will be
 placed in the 'debug' or 'release' folder according to the build configuration
 you select. 
-  
+ 
+Under Windows CE you need Visual Studio 2005 and the standard SDK for Windows 
+CE 5.0 installed. The SDK can be downloaded from
+http://www.microsoft.com/en-us/download/details.aspx?id=17310
+The os\wince\projects directory includes two "Smart Device" project files, 
+one for standard x86 target and one for ARM. The demo executable will be 
+placed under edctest\standardsdk_500, the required mqtt client dll will be 
+placed under org.eclipse.paho.mqtt.c\STANDARDSDK_500.
+
 The current EDC C++ Cloud Client implementation is functionally equivalent to
 the EDC Java Cloud Client since:
 
@@ -86,10 +100,11 @@ the EDC Java Cloud Client since:
   not hand in its own callback for 'connection lost')
   
 * It handles google protocol buffers
- 
+
+* It supports client and device profile configuration data loading from property
+  file
+
 Missing features: 
 
 * Some overload methods for publish and subscribe
  
-* EdcConfiguration and EdcDeviceProfile classes are boilerplate code: the info
-  are neither retreived from the underlying OS neither from .config files
