@@ -79,8 +79,8 @@ EDC.sln VS2005 solution file and rebuild it. The application executable will be
 placed in the 'debug' or 'release' folder according to the build configuration
 you select. 
  
-Under Windows CE you need Visual Studio 2005 and the standard SDK for Windows 
-CE 5.0 installed. The SDK can be downloaded from
+For Windows CE you need a development pc with Visual Studio 2005 SP1 and the 
+standard SDK for Windows CE 5.0 installed. The SDK can be downloaded from
 http://www.microsoft.com/en-us/download/details.aspx?id=17310
 The os\wince\projects directory includes two "Smart Device" project files, 
 one for standard x86 target and one for ARM. The demo executable will be 
