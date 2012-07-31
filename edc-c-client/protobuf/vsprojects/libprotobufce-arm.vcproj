@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalOptions=" /subsystem:windowsce,6.00"
+				AdditionalOptions=" /subsystem:windowsce,5.00"
 				OutputFile="$(OutDir)/libprotobuf.lib"
 			/>
 			<Tool
@@ -141,7 +141,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalOptions=" /subsystem:windowsce,6.00"
+				AdditionalOptions=" /subsystem:windowsce,5.00"
 				OutputFile="$(OutDir)/libprotobuf.lib"
 			/>
 			<Tool

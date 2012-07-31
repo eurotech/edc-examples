@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions=" /subsystem:windowsce,6.00"
+				AdditionalOptions=" /subsystem:windowsce,5.00"
 				OutputFile="$(OutDir)/edctest.exe"
 				LinkIncremental="2"
 				DelayLoadDLLs="$(NOINHERIT)"
@@ -146,7 +146,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions=" /subsystem:windowsce,6.00"
+				AdditionalOptions=" /subsystem:windowsce,5.00"
 				OutputFile="$(OutDir)/edctest.exe"
 				LinkIncremental="1"
 				DelayLoadDLLs="$(NOINHERIT)"

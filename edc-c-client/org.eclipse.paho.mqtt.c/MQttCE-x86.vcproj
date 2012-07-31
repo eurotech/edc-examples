@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions=" /subsystem:windowsce,6.00"
+				AdditionalOptions=" /subsystem:windowsce,5.00"
 				AdditionalDependencies="Ws2.lib"
 				OutputFile="$(OutDir)/MQtt.dll"
 				LinkIncremental="2"
@@ -148,7 +148,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions=" /subsystem:windowsce,6.00"
+				AdditionalOptions=" /subsystem:windowsce,5.00"
 				AdditionalDependencies="Ws2.lib"
 				OutputFile="$(OutDir)/MQtt.dll"
 				LinkIncremental="1"

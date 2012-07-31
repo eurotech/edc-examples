@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions=" /subsystem:windowsce,6.00"
+				AdditionalOptions=" /subsystem:windowsce,5.00"
 				OutputFile="$(OutDir)/MQttTest.exe"
 				LinkIncremental="2"
 				IgnoreDefaultLibraryNames="LIBC.LIB"
@@ -147,7 +147,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions=" /subsystem:windowsce,6.00"
+				AdditionalOptions=" /subsystem:windowsce,5.00"
 				OutputFile="$(OutDir)/MQttTest.exe"
 				LinkIncremental="1"
 				IgnoreDefaultLibraryNames="LIBC.LIB"
