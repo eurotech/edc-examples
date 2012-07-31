@@ -13,7 +13,9 @@
 #if !defined(SOCKET_H)
 #define SOCKET_H
 
+#if !defined(_WIN32_WCE)
 #include <sys/types.h>
+#endif
 
 #if defined(WIN32) || defined(_WIN32_WCE)
 #include <winsock2.h>

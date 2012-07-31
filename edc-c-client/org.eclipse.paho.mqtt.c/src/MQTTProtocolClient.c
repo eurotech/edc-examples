@@ -28,10 +28,6 @@
 #include "StackTrace.h"
 #include "Heap.h"
 
-#if defined (_WIN32_WCE)
-#include <wce_time.h>
-#endif
-
 #if !defined(min)
 #define min(A,B) ( (A) < (B) ? (A):(B))
 #endif
@@ -175,11 +171,7 @@ Messages* MQTTProtocol_createMessage(Publish* publish, Messages **mm, int qos, i
 	m->msgid = publish->msgId;
 	m->qos = qos;
 	m->retain = retained;
-#if defined(_WIN32_WCE)
-	wceex_time(&(m->lastTouch));
-#else
 	time(&(m->lastTouch));
-#endif
 	if (qos == 2)
 		m->nextMessageType = PUBREC;
 	FUNC_EXIT;
@@ -200,7 +192,7 @@ Publications* MQTTProtocol_storePublication(Publish* publish, int* len)
 	FUNC_ENTRY;
 	p->refcount = 1;
 
-	*len = (int)(strlen(publish->topic)+1);
+	*len = strlen(publish->topic)+1;
 	if (Heap_findItem(publish->topic))
 		p->topic = publish->topic;
 	else
@@ -373,11 +365,7 @@ int MQTTProtocol_handlePubrecs(void* pack, int sock)
 		{
 			rc = MQTTPacket_send_pubrel(pubrec->msgId, 0, sock, client->clientID);
 			m->nextMessageType = PUBCOMP;
-#if defined (_WIN32_WCE)
-			wceex_time(&(m->lastTouch));
-#else
 			time(&(m->lastTouch));
-#endif
 		}
 	}
 	free(pack);
@@ -563,11 +551,7 @@ void MQTTProtocol_retries(time_t now, Clients* client)
 				{
 					if (m->qos == 0 && rc == TCPSOCKET_INTERRUPTED)
 						MQTTProtocol_storeQoS0(client, &publish);
-#if defined(_WIN32_WCE)
-					wceex_time(&(m->lastTouch));
-#else
 					time(&(m->lastTouch));
-#endif
 				}
 			}
 			else if (m->qos && m->nextMessageType == PUBCOMP)
@@ -582,11 +566,7 @@ void MQTTProtocol_retries(time_t now, Clients* client)
 					client = NULL;
 				}
 				else
-#if defined(_WIN32_WCE)
-					wceex_time(&(m->lastTouch));
-#else
 					time(&(m->lastTouch));
-#endif
 			}
 			/* break; why not do all retries at once? */
 		}

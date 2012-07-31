@@ -24,7 +24,11 @@
 #include <time.h>
 #include <string.h>
 
-#if !defined(WIN32) && !defined(_WIN32_WCE)
+#if defined(_WIN32_WCE)
+#include "wincehelper.h"
+#endif
+
+#if !defined(WIN32)
 #include <syslog.h>
 #define GETTIMEOFDAY 1
 #else
@@ -34,14 +38,11 @@
 #if defined(GETTIMEOFDAY)
 	#include <sys/time.h>
 #else
+#if !defined(_WIN32_WCE)
 	#include <sys/timeb.h>
 #endif
-
-#if defined(_WIN32_WCE)
-#include <wce_stdlib.h>
-#define vsnprintf _vsnprintf
-#define getenv wceex_getenv
 #endif
+
 
 #if !defined(min)
 #define min(A,B) ( (A) < (B) ? (A):(B))

@@ -44,13 +44,13 @@ int MQTTPacket_send_connect(Clients* client)
 	packet.header.bits.type = CONNECT;
 	packet.header.bits.qos = 1;
 
-	len = 12 + (int)(strlen(client->clientID))+2;
+	len = 12 + strlen(client->clientID)+2;
 	if (client->will)
-		len += (int)(strlen(client->will->topic))+2 + (int)(strlen(client->will->msg))+2;
+		len += strlen(client->will->topic)+2 + strlen(client->will->msg)+2;
 	if (client->username)
-		len += (int)(strlen(client->username))+2;
+		len += strlen(client->username)+2;
 	if (client->password)
-		len += (int)(strlen(client->password))+2;
+		len += strlen(client->password)+2;
 
 	ptr = buf = malloc(len);
 	writeUTF(&ptr, "MQIsdp");
@@ -159,7 +159,7 @@ int MQTTPacket_send_subscribe(List* topics, List* qoss, int msgid, int dup, int 
 
 	datalen = 2 + topics->count * 3; // utf length + char qos == 3
 	while (ListNextElement(topics, &elem))
-		datalen += (int)(strlen((char*)(elem->content)));
+		datalen += strlen((char*)(elem->content));
 	ptr = data = malloc(datalen);
 
 	writeInt(&ptr, msgid);
@@ -231,7 +231,7 @@ int MQTTPacket_send_unsubscribe(List* topics, int msgid, int dup, int socket, ch
 
 	datalen = 2 + topics->count * 2; // utf length == 2
 	while (ListNextElement(topics, &elem))
-		datalen += (int)(strlen((char*)(elem->content)));
+		datalen += strlen((char*)(elem->content));
 	ptr = data = malloc(datalen);
 
 	writeInt(&ptr, msgid);

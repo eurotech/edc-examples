@@ -8,16 +8,13 @@
  *
  * Contributors:
  *    Ian Craggs - initial API and implementation and/or initial documentation
+ *    Ian Craggs - bug 384016 - segv setting will message
+ *    Ian Craggs - bug 384053 - v1.0.0.7 - stop MQTTClient_receive on socket error 
  *******************************************************************************/
 
 #include <stdlib.h>
 #if !defined(WIN32) && !defined(_WIN32_WCE)
 	#include <sys/time.h>
-#endif
-
-#if defined(_WIN32_WCE)
-#include <wce_time.h>
-#define time wceex_time
 #endif
 
 #if !defined(NO_PERSISTENCE)
@@ -34,15 +31,15 @@
 
 #define URI_TCP "tcp://"
 
-char* MQTTClient_Level = "MQTTClientV3_Level ##MICROBROKER_LEVEL_TAG##";
-char* MQTTClient_Version = "MQTTClientV3_Version ##MICROBROKER_VERSION_TAG##";
-
 #define BUILD_TIMESTAMP __DATE__ " " __TIME__ /* __TIMESTAMP__ */
+#define CLIENT_VERSION "1.0.0.7" /* __VERSION__ */
+
 char* client_timestamp_eye = "MQTTClientV3_Timestamp " BUILD_TIMESTAMP;
+char* client_version_eye = "MQTTClientV3_Version " CLIENT_VERSION;
 
 static ClientStates ClientState =
 {
-	"1.0.0.5", /* version */
+	CLIENT_VERSION, /* version */
 	NULL /* client list */
 };
 
@@ -620,7 +617,6 @@ int MQTTClient_cleanSession(Clients* client)
 	int rc = 0;
 
 	FUNC_ENTRY;
-
 #if !defined(NO_PERSISTENCE)
 	rc = MQTTPersistence_clear(client);
 #endif
@@ -668,7 +664,7 @@ void Protocol_processPublication(Publish* publish, Clients* client)
 		mm->dup = publish->header.bits.dup;
 	mm->msgid = publish->msgId;
 
-	ListAppend(client->messageQueue, qe, (int)(sizeof(qe) + sizeof(mm) + mm->payloadlen + strlen(qe->topicName)+1));
+	ListAppend(client->messageQueue, qe, sizeof(qe) + sizeof(mm) + mm->payloadlen + strlen(qe->topicName)+1);
 	FUNC_EXIT;
 }
 
@@ -681,7 +677,6 @@ int MQTTClient_connect(MQTTClient handle, MQTTClient_connectOptions* options)
 	long millisecsTimeout = 30000L;
 
 	FUNC_ENTRY;
-
 	Thread_lock_mutex(mqttclient_mutex);
 
 	if (options == NULL)
@@ -731,6 +726,7 @@ int MQTTClient_connect(MQTTClient handle, MQTTClient_connectOptions* options)
 
 	if (options->will && options->will->struct_version == 0)
 	{
+		m->c->will = malloc(sizeof(willMessages));
 		m->c->will->msg = options->will->message;
 		m->c->will->qos = options->will->qos;
 		m->c->will->retained = options->will->retained;
@@ -817,6 +813,11 @@ int MQTTClient_connect(MQTTClient handle, MQTTClient_connectOptions* options)
 	}
 
 exit:
+	if (m->c->will)
+	{
+		free(m->c->will);
+		m->c->will = NULL;
+	}
 	Thread_unlock_mutex(mqttclient_mutex);
 	FUNC_EXIT_RC(rc);
 	return rc;
@@ -938,7 +939,7 @@ int MQTTClient_subscribeMany(MQTTClient handle, int count, char** topic, int* qo
 
 	for (i = 0; i < count; i++)
 	{
-		ListAppend(topics, topic[i], (int)(strlen(topic[i])));
+		ListAppend(topics, topic[i], strlen(topic[i]));
 		ListAppend(qoss, &qos[i], sizeof(int));
 	}
 	rc = MQTTProtocol_subscribe(m->c, topics, qoss);
@@ -1019,7 +1020,7 @@ int MQTTClient_unsubscribeMany(MQTTClient handle, int count, char** topic)
 	}
 
 	for (i = 0; i < count; i++)
-		ListAppend(topics, topic[i], (int)(strlen(topic[i])));
+		ListAppend(topics, topic[i], strlen(topic[i]));
 	rc = MQTTProtocol_unsubscribe(m->c, topics);
 	ListFreeNoContent(topics);
 
@@ -1184,7 +1185,6 @@ void MQTTClient_retry(void)
 
 	FUNC_ENTRY;
 	time(&(now));
-
 	if (difftime(now, last) > 5)
 	{
 		time(&(last));
@@ -1359,6 +1359,15 @@ int MQTTClient_receive(MQTTClient handle, char** topicName, int* topicLen, MQTTC
 	{
 		int sock = 0;
 		MQTTClient_cycle(&sock, (timeout > elapsed) ? timeout - elapsed : 0L, &rc);
+
+	
+		if (rc == SOCKET_ERROR)
+		{
+			if (ListFindItem(handles, &sock, clientSockCompare) && 	/* find client corresponding to socket */
+			  (MQTTClient)(handles->current->content) == handle)
+				break; /* there was an error on the socket we are interested in */
+		}
+
 		elapsed = MQTTClient_elapsed(start);
 	}
 	while (elapsed < timeout && m->c->messageQueue->count == 0);

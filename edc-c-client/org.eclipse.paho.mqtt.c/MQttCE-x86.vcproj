@@ -40,7 +40,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\os\wince\libce\include; ..\os\wince\wcelibcex-1.0\src;"
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="_DEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;DEBUG;_WINDOWS;_USRDLL;MQTTCEX86_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				RuntimeLibrary="1"
@@ -126,7 +126,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\os\wince\libce\include; ..\os\wince\wcelibcex-1.0\src;"
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;_WINDOWS;_USRDLL;MQTTCEX86_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
@@ -264,6 +264,10 @@
 				RelativePath=".\src\utf-8.c"
 				>
 			</File>
+			<File
+				RelativePath=".\src\WinCEHelper.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -344,6 +348,10 @@
 			</File>
 			<File
 				RelativePath=".\src\utf-8.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\WinCEHelper.h"
 				>
 			</File>
 		</Filter>
