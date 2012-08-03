@@ -5,7 +5,7 @@
         <parent>
                 <artifactId>edc-examples</artifactId>
                 <groupId>edc-examples</groupId>
-                <version>1.5.1-SNAPSHOT</version>
+                <version>2.0.1</version>
         </parent>
 
         <repositories>
@@ -17,11 +17,15 @@
 				<updatePolicy>always</updatePolicy>
 			</snapshots>
                 </repository>
+                <repository>
+                        <id>edc-release</id>
+                        <url>https://repository-eurotech.forge.cloudbees.com/release/</url>
+                </repository>
         </repositories>
 
 	<groupId>com.eurotech.cloud.examples</groupId>
 	<artifactId>edc-rest</artifactId>
-	<version>1.5.1-SNAPSHOT</version>
+	<version>2.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>edc-rest</name>
@@ -35,7 +39,7 @@
 		<dependency>
                         <groupId>com.eurotech.cloud</groupId>
                         <artifactId>edc-apis-client</artifactId>
-                        <version>1.5.1-SNAPSHOT</version>
+                        <version>2.0.1</version>
                 </dependency>
 
 		<dependency>
