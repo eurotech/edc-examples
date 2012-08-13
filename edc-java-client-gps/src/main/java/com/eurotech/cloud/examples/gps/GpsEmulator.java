@@ -4,12 +4,6 @@
 
 package com.eurotech.cloud.examples.gps;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -76,21 +70,8 @@ public class GpsEmulator {
 				// Create the builder and parse the file
 				SAXParser parser = factory.newSAXParser();
 
-				InputStream is = this.getClass().getResourceAsStream("/resources/" + fileName);
-				File tmpFile = new File("/tmp/" + fileName);
-
-				if(is != null) {
-					copyFile(is, tmpFile);
-
-					try {
-						is.close();
-						is = null;
-					} catch(Exception e) {
-						e.printStackTrace();
-					}
-				}
-
-				parser.parse(getByteArrayInputStream("/tmp/" + fileName), handler);
+				InputStream is = this.getClass().getResourceAsStream("/" + fileName);
+				parser.parse(is, handler);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -182,53 +163,6 @@ public class GpsEmulator {
 		}
 
 		return -1;
-	}
-
-	private ByteArrayInputStream getByteArrayInputStream(String file) {
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(file));
-			StringBuffer buffer = new StringBuffer();
-			String temp = null;
-
-			while((temp = br.readLine()) != null) {
-
-				buffer.append(temp);
-			}
-			br.close();
-
-			String string = new String(buffer);
-			byte[] data = string.getBytes();
-
-			ByteArrayInputStream bais = new ByteArrayInputStream(data);
-			return bais;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-
-	private void copyFile(InputStream is, File destination) {
-		try {
-			int bytesAvailable = is.available();
-			int bufferSize = Math.min(bytesAvailable, 1024);
-			byte[] buffer = new byte[bufferSize];
-
-			if(destination.exists()) {
-				destination.delete();
-			}
-
-			DataOutputStream dos = new DataOutputStream(new FileOutputStream(destination));
-			int bytesRead = is.read(buffer, 0, bufferSize);
-			while (bytesRead > 0) {
-				dos.write(buffer, 0, bufferSize);
-				bytesAvailable = is.available();
-				bufferSize = Math.min(bytesAvailable, 1024);				
-				bytesRead = is.read(buffer, 0, bufferSize);
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
 	}
 }
 

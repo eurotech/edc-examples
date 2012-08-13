@@ -17,15 +17,15 @@ import com.eurotech.cloud.message.EdcPosition;
 
 public class Publisher {
 
-	private static final String ACCOUNT_NAME = "myEdcAccount";					// Your Account name in Cloud
-	private static final String ASSET_ID = "my-device";						// Unique Asset ID of this client device
-	private static final String BROKER_URL = "mqtt://broker-sandbox.everyware-cloud.com:1883/";	// URL address of broker
-	private static final String CLIENT_ID = "my-Device-client";					// Unique Client ID of this client device
-	private static final String BROKER_USERNAME = "myEdcUserName_broker";				// Username in account, to use for publishing
-	private static final String PASSWORD = "myEdcPassword";						// Password associated with Username
-
-	private static final int    MAX_PUBLISH    = 20000;         // number of times to publish
-	private static final int    PUBLISH_PERIOD = 1000;       // time between published messages, in milliseconds
+	private static final String ACCOUNT_NAME = "myEdcAccount";										// Your Account name in Cloud
+	private static final String ASSET_ID = "my-device";												// Unique Asset ID of this client device
+	private static final String BROKER_URL = "mqtt://broker-sandbox.everyware-cloud.com:1883/";		// URL address of broker
+	private static final String CLIENT_ID = "my-Device-client";										// Unique Client ID of this client device
+	private static final String BROKER_USERNAME = "myEdcUserName_broker";							// Username in account, to use for publishing
+	private static final String PASSWORD = "myEdcPassword";											// Password associated with Username
+	
+	private static final int    MAX_PUBLISH    = 20000;         									// number of times to publish
+	private static final int    PUBLISH_PERIOD = 1000;       										// time between published messages, in milliseconds
 
 	public static void main(String[] args) {
 

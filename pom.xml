@@ -24,6 +24,7 @@
 
 	<modules>
 		<module>edc-java-client</module>
+		<module>edc-java-client-gps</module>
 		<module>edc-rest</module>
 		<module>edc-rest-endpoint</module>
 	</modules>
