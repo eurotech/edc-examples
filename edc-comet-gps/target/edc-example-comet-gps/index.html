@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<!--
+<title>EUROTECH Everyware Device Cloud Dashboard Example</title>
+-->
+<title>Mercurio Dashboard</title>
+
+<!--Load the CSS -->
+<link type="text/css" href="css/dashboard.css" rel="Stylesheet" />
+<link type="text/css" href="css/cupertino/jquery-ui-1.8.21.custom.css" rel="Stylesheet" />
+
+<!--Load the AJAX API-->
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.21.custom.min.js"></script>
+<script type="text/javascript" src="js/base64.js"></script>
+<script type="text/javascript" src="jquery/base64.js"></script>
+<script type="text/javascript" src="jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="jquery/jquery.atmosphere.js"></script>
+<link type="text/css" href="css/jquery-ui-1.8.22.custom.css" rel="stylesheet" />
+<script src="ui/jquery.ui.core.js"></script>
+<script src="ui/jquery.ui.widget.js"></script>
+<script src="ui/jquery.ui.mouse.js"></script>
+<script src="ui/jquery.ui.draggable.js"></script>
+<script src="ui/jquery.ui.position.js"></script>
+<script src="ui/jquery.ui.resizable.js"></script>
+<script src="ui/jquery.ui.dialog.js"></script>
+
+<script>
+   $(window).unload(function() {
+           onUnload();
+   });
+</script>
+
+<script>
+var subSocket;
+var socket = $.atmosphere;
+var defaultLatlng = new google.maps.LatLng(49.00,10.00);
+var defaultZoom = 2;
+var map;
+var infowindow
+
+function onUnload () {
+	socket.unsubscribe();
+}
+
+google.load('visualization', '1', {'packages':['table', 'map']});
+
+// Set a callback to run when the API is loaded.
+google.setOnLoadCallback($.init);
+
+// Send the query to the data source.
+$(function init() {
+
+	//
+	// use the jquery sortable plugin to give the page a dashboard look and feel
+    $( ".portlet" ).addClass( "ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" )
+        .find( ".portlet-header" )
+            .addClass( "ui-widget-header ui-corner-all" )
+            .prepend( "<span class='ui-icon ui-icon-minusthick'></span>")
+            .end()
+        .find( ".portlet-content" );
+
+    $( ".portlet-header .ui-icon" ).click(function() {
+        $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
+        $( this ).parents( ".portlet:first" ).find( ".portlet-content" ).toggle();
+    });
+
+    //$( ".column" ).disableSelection();
+
+    $('#dialog').dialog({
+	//autoOpen: false,
+	modal: true,
+	width: 300,
+	buttons: {
+                                                
+	"Login": function() {
+	    $(this).dialog("close");
+	    var dsUrl    = "https://api-sandbox.everyware-cloud.com/gvds";
+	    var account  = $("input#account").attr("value");
+	    var username = $("input#username").attr("value");
+	    var password = $("input#password").attr("value");
+	    var asset    = $("input#asset").attr("value");
+	    var topic    = account+"/"+asset+"/gps/data";
+
+	    $.ajax({
+		type: "GET",
+		url:  dsUrl+"/login",
+		xhrFields: {
+		    withCredentials: true
+		},
+		beforeSend : function(req) {
+		    req.setRequestHeader('Authorization', "Basic " +Base64.encode(username+":"+password))
+		}
+	    }).done(function( msg ) {
+		//alert("You successfully logged in");
+		$("p").html("Welcome, "+username);
+
+		// Upon successfull login, build all the charts contained in the page
+		var mapOptions = {
+		    zoom: defaultZoom,
+		    center: defaultLatlng,
+		    mapTypeId: google.maps.MapTypeId.HYBRID
+		};
+
+		map = new google.maps.Map(document.getElementById("viz_map"), mapOptions);
+		infowindow = new google.maps.InfoWindow();
+
+		// Table
+		var wrapper = new google.visualization.ChartWrapper({
+		    chartType: 'Table',
+		    dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(topic),
+		    query: "SELECT account, asset, semanticTopic, receivedOn, `position.latitude`, `position.longitude`, `position.speed`, `position.heading`, `position.altitude`, `position.satellites`, `position.status`, `position.precision` FORMAT receivedOn 'MMM dd, yyyy HH:mm:ss.SSS', `position.altitude` '#.##'",
+		    refreshInterval: 5,
+		    options: {
+			height: 200
+		    },
+		    containerId: 'table'
+		});
+		wrapper.draw();
+
+		// Gauge
+		var wrapper = new google.visualization.ChartWrapper({
+		chartType: 'Gauge',
+		dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(topic)+'&limit=1',
+		query: "SELECT `position.speed` LABEL `position.speed` 'Speed (KPH)' FORMAT `position.speed` '#.##'",
+		refreshInterval: 5,
+		options: {
+		    min: 0, max: 100,
+		    minorTicks: 2,   
+		    greenFrom: 0.6, greenTo: 0.75,
+		    yellowFrom: 0.75, yellowTo: 0.9,
+		    redFrom: 0.9, redTo: 1,
+		    height: 200
+		},
+		containerId: 'gauge0'
+		});
+		wrapper.draw();
+
+		var wrapper = new google.visualization.ChartWrapper({
+		chartType: 'Gauge',
+		dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(topic)+'&limit=1',
+		query: "SELECT `position.heading` LABEL `position.heading` 'Heading'",
+		refreshInterval: 5,
+		options: {
+		    min: 0, max: 360,
+		    minorTicks: 2,   
+		    greenFrom: 0.6, greenTo: 0.75,
+		    yellowFrom: 0.75, yellowTo: 0.9,
+		    redFrom: 0.9, redTo: 1,
+		    height: 200
+		},
+		containerId: 'gauge1'
+		});
+		wrapper.draw();
+
+		var wrapper = new google.visualization.ChartWrapper({
+		chartType: 'Gauge',
+		dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(topic)+'&limit=1',
+		query: "SELECT `position.altitude` LABEL `position.altitude` 'Altitude' FORMAT `position.altitude` '#.##'",
+		refreshInterval: 5,
+		options: {
+		    min: 0, max: 1000,
+		    minorTicks: 2,   
+		    greenFrom: 0.6, greenTo: 0.75,
+		    yellowFrom: 0.75, yellowTo: 0.9,
+		    redFrom: 0.9, redTo: 1,
+		    height: 200
+		},
+		containerId: 'gauge2'
+		});
+		wrapper.draw();
+
+		doDemo(username, password, topic);
+	})
+	.fail(function( msg ) {    	
+	    alert("Failed to login: "+msg.status+" - "+msg.statusText);
+	});
+      }
+    }
+    });
+});
+
+function doDemo (username, password, topic) {
+    "use strict";
+
+    var content = $('#content');
+    var submit  = $("input#subscribe").attr("value");
+    if (submit == 'Stop Tracking') {
+    	socket.unsubscribe();
+    	$("input#subscribe").attr("value", "Track");
+    	//content.html($('<p>', { text: 'Disconnected' }));
+    	return;
+    }
+    
+    var input = $('#input');
+    var status = $('#status');
+    var myName = false;
+    var author = null;
+    var logged = false;
+    var url      = "https://api-sandbox.everyware-cloud.com/v2/streams/subscribe.json";
+    var auth     = make_base_auth(username, password);
+    var topics   = topic;
+    var topicQuery  = '';
+    var topicsArray = topics.split(',');
+    for (var t in topicsArray) {
+    	topicQuery = topicQuery + 'topic='+topicsArray[t]+'&';
+    }
+
+    var request = { url: url+'?'+topicQuery,
+    				enableXDR: true,
+    				withCredentials: true,    				
+    				dropAtmosphereHeaders: false,
+    				attachHeadersAsQueryString: false,
+    				executeCallbackBeforeReconnect: false,
+    				headers: {'Authorization':auth},
+    				logLevel : 'debug',
+                    transport : 'long-polling' ,
+                    fallbackTransport: 'streaming'};
+
+
+    request.onOpen = function(response) {
+        content.html($('<p>', { text: 'Atmosphere connected using ' + response.transport }));
+    };
+
+    
+    request.onMessage = function (response) {        
+    	var message = response.responseBody;
+    	if (message.length != 0) {
+	        try {        	
+	            var jsonMessage = jQuery.parseJSON(message);
+	        } catch (e) {
+	            console.log('This doesn\'t look like a valid JSON: ', message.data);
+	            return;
+	        }
+	        var msg = jsonMessage.receivedOn+"-"+jsonMessage.topic+"\n";
+
+		if(jsonMessage.payload.metrics != null) {
+		        for (var metricIdx in jsonMessage.payload.metrics.metric) {
+		        	var metric = jsonMessage.payload.metrics.metric[metricIdx];
+		        	msg = msg+"  "+metric.name+" "+metric.type+" "+metric.value+"\n"; 
+			}
+	        }
+
+		msg = msg+"  latitude "+jsonMessage.payload.position.latitude+"\n";
+		msg = msg+"  longitude "+jsonMessage.payload.position.longitude+"\n";
+		msg = msg+"  speed "+jsonMessage.payload.position.speed+"\n";
+		msg = msg+"  heading "+jsonMessage.payload.position.heading+"\n";
+		msg = msg+"  altitude "+jsonMessage.payload.position.altitude+"\n";
+		msg = msg+"  sats "+jsonMessage.payload.position.sats+"\n";
+		msg = msg+"  stat "+jsonMessage.payload.position.stat+"\n";
+		msg = msg+"  pacc "+jsonMessage.payload.position.pacc+"\n";
+
+	        //$('div#messages').prepend("<pre>"+msg+"</pre>");
+
+		loadMarker(jsonMessage.payload.position.latitude, jsonMessage.payload.position.longitude, msg);
+    	}
+    };
+
+    
+    request.onError = function(response) {
+        content.html($('<p>', { text: 'Sorry, but there\'s some problem with your '
+            + 'socket or the server is down' + response}));
+    };
+
+    
+    var subSocket = socket.subscribe(request);
+    $("input#subscribe").attr("value", "Stop Tracking");
+    
+    
+
+    function make_base_auth(user, password) {
+    	  var tok = user + ':' + password;
+    	  var hash = Base64.encode(tok);
+    	  return "Basic " + hash;
+    }
+}
+
+function loadMarker(latitude, longitude, asset){
+	// create new marker location
+	var newLatlng = new google.maps.LatLng(latitude, longitude);
+
+	//alert("latitude: " + latitude + " longitude: " + longitude);
+ 
+	// create new marker
+	var marker = new google.maps.Marker({
+	    id: asset,
+	    map: map,
+	    title: asset,
+	    position: newLatlng
+	});
+
+	//map.setCenter(marker);
+	map.setCenter(newLatlng); 
+ 	map.setZoom(15);
+}
+
+$(document).ready(function() {
+
+    $('#logout').click(
+        function(e){
+        e.preventDefault();
+
+    $('<div id="confirmLogout" title="Logout">Are you sure you want to log out?</div>').dialog(
+            {
+            modal: true,
+            height: 120,
+            width:350,
+            show:"blind",
+            hide: "blind",
+            buttons:{
+                "Yes":function() {
+                    $.ajax({
+                         url: "https://api-sandbox.everyware-cloud.com/gvds/logout",
+//                        url: 'someActionCall.cfm',
+                        complete:
+                                function() {
+//                             $('#confirmLogout').html("See you next time!");
+//                             $('.ui-dialog-buttonpane').css('display','none');
+//                             var dlg = $("#confirmLogout").parents(".ui-dialog:first");
+//                             dlg.animate({ width: 200},50);
+//                             setTimeout(function(){$("#confirmLogout").dialog("close")},3000);
+//                             setTimeout(function(){location.reload();},1500);
+                            $('#confirmLogout').html("Logged out!");
+                                  $('.ui-dialog-buttonpane').css('display','none');
+                            var dlg = $("#confirmLogout").parents(".ui-dialog:first");
+                            dlg.animate({ width: 250},120);
+                            setTimeout(function(){$("#confirmLogout").dialog("close")},1000);
+                            setTimeout(function(){location.reload();},1000);
+                            }
+                        });
+                    },
+                "No":function() {
+                    $("#confirmLogout").dialog("close");
+                    }                           
+            },
+            close:function(){
+                 $("#confirmLogout").remove();
+            }
+            });
+                                                        
+	    return false;
+    });
+});
+
+</script>
+
+</head>
+<body>
+
+<div id="header" class="portlet" >
+    <h1 style="margin-bottom: 5px; font-family : Tahoma">Mercurio Dashboard</h1>
+    <div id="logout"  style="position: absolute; left :1200px; top: 10px; font-size: 12px; color : blue; text-decoration:underline; cursor: hand; cursor: pointer; ">logout</div>
+</div>
+
+<div>
+<div class="row">
+    <div class="portlet">
+        <div class="portlet-header">Map</div>
+        <div id="viz_map" class="portlet-map-content"></div>
+    </div>
+</div>
+
+<div class="column">
+
+    <div class="portlet">
+        <div class="portlet-header">Table</div>
+        <div id="table" class="portlet-content"></div>
+    </div>
+</div>
+
+<div class="column">
+
+    <div class="portlet">
+        <div class="portlet-header">Gauge</div>
+	    <div class="column-left">
+		<div id="gauge0" class="portlet-content"></div>
+	    </div>
+	    <div class="column-center">
+		<div id="gauge1" class="portlet-content"></div>
+	    </div>
+	    <div class="column-right">
+		<div id="gauge2" class="portlet-content"></div>
+	    </div>
+	</div>
+    </div>
+</div>
+
+
+                <!-- ui-dialog -->
+                <div id="dialog" title="Everyware Cloud Login">
+                <div id="form">
+                        <br />
+			    <table>
+			        <tr>
+			            <td>account name:</td>
+			            <td><input type="text" id="account" size="25" value=""/></td>
+				        <tr>
+			        <tr>
+			            <td>username:</td>
+			            <td><input type="text" id="username" size="25" value=""/></td>
+			        <tr>
+			        <tr>
+			            <td>password:</td>
+			            <td><input type="password" id="password" size="25" value=""/></td>
+			        <tr>
+			        <tr>
+			            <td>asset:</td>
+			            <td><input type="text" id="asset" size="25" value=""/></td>
+			        <tr>
+			    </table>
+                </div>
+                </div>
+</div>
+
+</body>
+</html>

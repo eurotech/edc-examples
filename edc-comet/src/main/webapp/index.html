@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+
+<script type="text/javascript" src="jquery/base64.js"></script>
+<script type="text/javascript" src="jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="jquery/jquery.atmosphere.js"></script>
+<script type="text/javascript" src="jquery/application.js"></script>
+<script>
+   $(window).unload(function() {
+	   onUnload();
+   });
+</script>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Atmosphere Chat</title>
+
+    <style>
+        * {
+            font-family: tahoma;
+            font-size: 12px;
+            padding: 0px;
+            margin: 0px;
+        }
+
+        p {
+            line-height: 18px;
+        }
+
+        div {
+            width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #content {
+            padding: 5px;
+            background: #ddd;
+            border-radius: 5px;
+            border: 1px solid #CCC;
+            margin-top: 10px;
+        }
+
+         #header {
+            padding: 5px;
+            background: #f5deb3;
+            border-radius: 5px;
+            border: 1px solid #CCC;
+            margin-top: 10px;
+        }
+
+        #input {
+            border-radius: 2px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            padding: 5px;
+            width: 400px;
+        }
+
+        #status {
+            width: 88px;
+            display: block;
+            float: left;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<div id="header"><h3>Everyware Cloud Comet API</h3></div>
+<div id="form">
+    <br/>
+    <table>
+        <tr>
+            <td>apis endpoint:</td>
+            <td><input type="text" id="url" size="60" value="https://api-sandbox.everyware-cloud.com/v2/streams/subscribe.json"/></td>
+        <tr>
+        <tr>
+            <td>username:</td>
+            <td><input type="text" id="username" size="60" value="my_username"/></td>
+        <tr>
+        <tr>
+            <td>password:</td>
+            <td><input type="password" id="password" size="60" value="my_password"/></td>
+        <tr>
+        <tr>
+            <td>topic:</td>
+            <td><input type="text" id="topic" size="60" value="my_accountname/%2B/%23"/></td>
+        <tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" id="subscribe" size="60" value="Subscribe" onclick="onSubmit();"/></td>
+        <tr>
+    </table>
+</div>
+<div id="content"></div>
+<div id="messages">
+</div>
+
+</body>
+</html>
