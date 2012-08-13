@@ -23,6 +23,7 @@
 	</dependencies>
 
 	<modules>
+		<module>edc-comet-gps</module>
 		<module>edc-java-client</module>
 		<module>edc-java-client-gps</module>
 		<module>edc-rest</module>

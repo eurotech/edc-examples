@@ -18,7 +18,7 @@ Please complete the following steps before starting this tutorial:
 ## Quick Start
 Open `index.html` with the Firefox or Safari browser and enjoy your dashboard.  You will need to enter your account name, user name, password, and the specific 'asset' you want to track.
 
-![screenshot](https://github.com/eurotech/edc/raw/release-2.0.0/examples/edc-java-client-gps/doc/screenshot.jpg)
+![screenshot](https://github.com/eurotech/edc-examples/blob/master/edc-comet-gps/doc/screenshot.jpg)
 
 
 ## Next Steps
