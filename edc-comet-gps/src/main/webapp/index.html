@@ -2,25 +2,21 @@
 <html>
 <head>
 <meta charset="utf-8">
-<!--
-<title>EUROTECH Everyware Device Cloud Dashboard Example</title>
--->
 <title>GPS/Comet Example Dashboard</title>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
 
 <!--Load the CSS -->
 <link type="text/css" href="css/dashboard.css" rel="Stylesheet" />
-<link type="text/css" href="css/cupertino/jquery-ui-1.8.21.custom.css" rel="Stylesheet" />
+<link type="text/css" href="css/jquery-ui-1.8.22.custom.css"
+	rel="stylesheet" />
 
 <!--Load the AJAX API-->
-<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true"></script>
+<script type="text/javascript"
+	src="http://maps.googleapis.com/maps/api/js?sensor=true"></script>
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="js/jquery-ui-1.8.21.custom.min.js"></script>
-<script type="text/javascript" src="js/base64.js"></script>
 <script type="text/javascript" src="jquery/base64.js"></script>
-<script type="text/javascript" src="jquery/jquery-1.6.4.js"></script>
 <script type="text/javascript" src="jquery/jquery.atmosphere.js"></script>
-<link type="text/css" href="css/jquery-ui-1.8.22.custom.css" rel="stylesheet" />
 <script src="ui/jquery.ui.core.js"></script>
 <script src="ui/jquery.ui.widget.js"></script>
 <script src="ui/jquery.ui.mouse.js"></script>
@@ -46,6 +42,8 @@ var infowindow
 function onUnload () {
 	socket.unsubscribe();
 }
+
+jQuery.support.cors = true;
 
 google.load('visualization', '1', {'packages':['table', 'map']});
 
@@ -351,70 +349,72 @@ $(document).ready(function() {
 </head>
 <body>
 
-<div id="header" class="portlet" >
-    <h1 style="margin-bottom: 5px; font-family : Tahoma">GPS/Comet Example Dashboard</h1>
-    <div id="logout"  style="position: absolute; left :1200px; top: 10px; font-size: 12px; color : blue; text-decoration:underline; cursor: hand; cursor: pointer; ">logout</div>
-</div>
-
-<div>
-<div class="row">
-    <div class="portlet">
-        <div class="portlet-header">Map</div>
-        <div id="viz_map" class="portlet-map-content"></div>
-    </div>
-</div>
-
-<div class="column">
-
-    <div class="portlet">
-        <div class="portlet-header">Table</div>
-        <div id="table" class="portlet-content"></div>
-    </div>
-</div>
-
-<div class="column">
-
-    <div class="portlet">
-        <div class="portlet-header">Gauge</div>
-	    <div class="column-left">
-		<div id="gauge0" class="portlet-content"></div>
-	    </div>
-	    <div class="column-center">
-		<div id="gauge1" class="portlet-content"></div>
-	    </div>
-	    <div class="column-right">
-		<div id="gauge2" class="portlet-content"></div>
-	    </div>
+	<div id="header" class="portlet">
+		<h1 style="margin-bottom: 5px; font-family: Tahoma">GPS/Comet
+			Example Dashboard</h1>
+		<div id="logout"
+			style="position: absolute; left: 1200px; top: 10px; font-size: 12px; color: blue; text-decoration: underline; cursor: hand; cursor: pointer;">logout</div>
 	</div>
-    </div>
-</div>
+
+	<div>
+		<div class="row">
+			<div class="portlet">
+				<div class="portlet-header">Map</div>
+				<div id="viz_map" class="portlet-map-content"></div>
+			</div>
+		</div>
+
+		<div class="column">
+
+			<div class="portlet">
+				<div class="portlet-header">Table</div>
+				<div id="table" class="portlet-content"></div>
+			</div>
+		</div>
+
+		<div class="column">
+
+			<div class="portlet">
+				<div class="portlet-header">Gauge</div>
+				<div class="column-left">
+					<div id="gauge0" class="portlet-content"></div>
+				</div>
+				<div class="column-center">
+					<div id="gauge1" class="portlet-content"></div>
+				</div>
+				<div class="column-right">
+					<div id="gauge2" class="portlet-content"></div>
+				</div>
+			</div>
+		</div>
+	</div>
 
 
-                <!-- ui-dialog -->
-                <div id="dialog" title="Everyware Cloud Login">
-                <div id="form">
-                        <br />
-			    <table>
-			        <tr>
-			            <td>account name:</td>
-			            <td><input type="text" id="account" size="25" value=""/></td>
-				        <tr>
-			        <tr>
-			            <td>username:</td>
-			            <td><input type="text" id="username" size="25" value=""/></td>
-			        <tr>
-			        <tr>
-			            <td>password:</td>
-			            <td><input type="password" id="password" size="25" value=""/></td>
-			        <tr>
-			        <tr>
-			            <td>asset:</td>
-			            <td><input type="text" id="asset" size="25" value=""/></td>
-			        <tr>
-			    </table>
-                </div>
-                </div>
-</div>
+	<!-- ui-dialog -->
+	<div id="dialog" title="Everyware Cloud Login">
+		<div id="form">
+			<br />
+			<table>
+				<tr>
+					<td>account name:</td>
+					<td><input type="text" id="account" size="25" value="" /></td>
+				<tr>
+				<tr>
+					<td>username:</td>
+					<td><input type="text" id="username" size="25" value="" /></td>
+				<tr>
+				<tr>
+					<td>password:</td>
+					<td><input type="password" id="password" size="25" value="" /></td>
+				<tr>
+				<tr>
+					<td>asset:</td>
+					<td><input type="text" id="asset" size="25" value="" /></td>
+				<tr>
+			</table>
+		</div>
+	</div>
+	</div>
 
 </body>
 </html>
