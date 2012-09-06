@@ -17,6 +17,10 @@
 				<updatePolicy>always</updatePolicy>
 			</snapshots>
 		</repository>
+		<repository>
+			<id>edc-release</id>
+			<url>https://repository-eurotech.forge.cloudbees.com/release/</url>
+		</repository>
 	</repositories>
 
 	<groupId>com.eurotech.cloud.examples</groupId>
