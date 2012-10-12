@@ -155,6 +155,7 @@ private:
 			edcCloudClient->m_messageArrived(string(topicName), payload);
 		}
 
+		delete payload;
 		return 1;
 	}
 	/**
@@ -267,6 +268,7 @@ private:
 		rc = MQTTClient_waitForCompletion(m_MQTTClient, deliveryToken, timeout);	
 
 		delete[] data;
+		delete[] ctopic;
 
 		return rc;
 	}
@@ -288,6 +290,8 @@ private:
 #endif
 
 			MQTTClient_subscribe(m_MQTTClient, topic, it->getQos());
+
+			delete[] topic;
 		}
 
 		return MQTTCLIENT_SUCCESS;
@@ -404,8 +408,9 @@ private:
 	int publishBirthCertificate(){
 		
 		EdcPayload * payload = buildBirthCertificatePayload();
-
-		return _publish(buildBirthCertificateTopic(), payload, EDCCLIENT_QOS, EDCCLIENT_RETAIN, EDCCLIENT_PUBLISH_TIMEOUT);
+		int ret = _publish(buildBirthCertificateTopic(), payload, EDCCLIENT_QOS, EDCCLIENT_RETAIN, EDCCLIENT_PUBLISH_TIMEOUT);
+		delete payload;
+		return ret;
 	}
 	/**
 	 * Publishes the disconnect certificate to the MQtt broker
@@ -416,8 +421,9 @@ private:
 	int publishDisconnectCertificate(){
 
 		EdcPayload * payload = buildDisconnectCertificatePayload();
-
-		return _publish(buildDisconnectCertificateTopic(), payload, EDCCLIENT_QOS, EDCCLIENT_RETAIN, EDCCLIENT_PUBLISH_TIMEOUT);
+		int ret = _publish(buildDisconnectCertificateTopic(), payload, EDCCLIENT_QOS, EDCCLIENT_RETAIN, EDCCLIENT_PUBLISH_TIMEOUT);
+		delete payload;
+		return ret;
 	}
 
 
@@ -534,6 +540,8 @@ public:
 			MQTTCLIENT_PERSISTENCE_NONE, NULL);
 
 		if(rc != MQTTCLIENT_SUCCESS){
+			delete[] BrokerUrl;
+			delete[] ClientId;
 			return rc;
 		}
 
@@ -541,6 +549,8 @@ public:
 		rc = MQTTClient_setCallbacks(m_MQTTClient, this, connectionLost, messageArrived, messageDelivered);
 		
 		if(rc != MQTTCLIENT_SUCCESS){
+			delete[] BrokerUrl;
+			delete[] ClientId;
 			return rc;
 		}
 
@@ -570,6 +580,10 @@ public:
 		rc =  MQTTClient_connect(m_MQTTClient, &conn_opts);
 
 		if(rc != MQTTCLIENT_SUCCESS){
+			delete[] BrokerUrl;
+			delete[] ClientId;
+			delete[] conn_opts.username;
+			delete[] conn_opts.password;
 			return rc;
 		}
 
@@ -578,6 +592,10 @@ public:
 		//publish birth certificate
 		rc = publishBirthCertificate();
 
+		delete[] BrokerUrl;
+		delete[] ClientId;
+		delete[] conn_opts.username;
+		delete[] conn_opts.password;
 		return rc;
 	}
 	/**
@@ -616,8 +634,9 @@ public:
 #else
 		strcpy (fulltopic, buildTopic(topic).c_str());
 #endif
-
-		return _publish(fulltopic, payload, qos, retain, timeout);
+		int ret = _publish(fulltopic, payload, qos, retain, timeout);
+		delete[] fulltopic;
+		return ret;
 	}
 	/**
 	 * Subscribes to a semantic topic. The topic is inserted in the 
@@ -642,11 +661,12 @@ public:
 		rc = MQTTClient_subscribe(m_MQTTClient, stopic, qos);
 
 		if(rc != MQTTCLIENT_SUCCESS){
+			delete[] stopic;
 			return rc;
 		}
 		
 		m_subscriptions.push_front(EdcSubscription(stopic,qos));
-
+		delete[] stopic;
 		return MQTTCLIENT_SUCCESS;
 	}
 	/**
@@ -673,11 +693,12 @@ public:
 		rc = MQTTClient_subscribe(m_MQTTClient, ctopic, qos);
 
 		if(rc != MQTTCLIENT_SUCCESS){
+			delete[] ctopic;
 			return rc;
 		}
 		
 		m_subscriptions.push_front(EdcSubscription(ctopic,qos));
-
+		delete[] ctopic;
 		return MQTTCLIENT_SUCCESS;
 	}
 	/**
@@ -703,6 +724,7 @@ public:
 		rc = MQTTClient_unsubscribe(m_MQTTClient, utopic);
 
 		if(rc != MQTTCLIENT_SUCCESS){
+			delete[] utopic;
 			return rc;
 		}
 
@@ -717,6 +739,7 @@ public:
 			}
 		}
 
+		delete[] utopic;
 		return MQTTCLIENT_SUCCESS;
 	}
 	/**
@@ -742,6 +765,7 @@ public:
 		rc = MQTTClient_unsubscribe(m_MQTTClient, utopic);
 
 		if(rc != MQTTCLIENT_SUCCESS){
+			delete[] utopic;
 			return rc;
 		}
 
@@ -756,6 +780,7 @@ public:
 			}
 		}
 
+		delete[] utopic;
 		return MQTTCLIENT_SUCCESS;
 
 	}
@@ -784,6 +809,8 @@ public:
 			if(MQTTClient_unsubscribe(m_MQTTClient, utopic) == MQTTCLIENT_SUCCESS){
 				it = m_subscriptions.erase(it);
 			}
+
+			delete[] utopic;
 		}
 
 		return MQTTCLIENT_SUCCESS;
