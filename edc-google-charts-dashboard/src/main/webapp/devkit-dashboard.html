@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>EUROTECH Everyware Device Cloud Dashboard Example</title>
+
+<!--Load the CSS -->
+<link type="text/css" href="css/dashboard.css" rel="Stylesheet" />
+<link type="text/css" href="css/cupertino/jquery-ui-1.8.21.custom.css" rel="Stylesheet" />
+
+<!--Load the AJAX API-->
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.21.custom.min.js"></script>
+<script type="text/javascript" src="js/base64.js"></script>
+
+<script>
+
+//Load the Visualization API and the ready-made Google table visualization
+google.load('visualization', '1', {'packages':['table']});
+
+
+// Set a callback to run when the API is loaded.
+google.setOnLoadCallback(init);
+
+// Send the query to the data source.
+function init() {
+  
+	//
+	// use the jquery sortable plugin to give the page a dashboard look and feel
+    $( ".portlet" ).addClass( "ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" )
+        .find( ".portlet-header" )
+            .addClass( "ui-widget-header ui-corner-all" )
+            .prepend( "<span class='ui-icon ui-icon-minusthick'></span>")
+            .end()
+        .find( ".portlet-content" );
+
+    $( ".portlet-header .ui-icon" ).click(function() {
+        $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
+        $( this ).parents( ".portlet:first" ).find( ".portlet-content" ).toggle();
+    });
+
+    $( ".column" ).disableSelection();
+
+    //
+    // Issue the first login call into the platform
+    var dsUrl    = "https://api-sandbox.everyware-cloud.com/gvds";
+    var username = "my_username";
+    var password = "my_password";
+    
+    $.ajax({
+        type: "GET",
+        url:  dsUrl+"/login",
+        xhrFields: {
+            withCredentials: true
+        },          
+        beforeSend : function(req) {
+            req.setRequestHeader('Authorization', "Basic " +Base64.encode(username+":"+password))
+        }
+    }).done(function( msg ) {
+
+        //
+        // Upon successfull login, build all the charts contained in the page
+
+    	// Table
+        var wrapper = new google.visualization.ChartWrapper({
+            chartType: 'Table',
+            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+'/+/eurotech/demo'),
+            query: "SELECT receivedOn, account, asset, semanticTopic, qc, c3, t3, t4, t5, t6 format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+            refreshInterval: 10,
+            options: {
+                height: 200
+            },
+            containerId: 'chart_table'
+        });
+        wrapper.draw();
+        
+        // LineChart
+        var wrapper = new google.visualization.ChartWrapper({
+            chartType: 'LineChart',
+		//	cht="bvs",
+            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+'/+/eurotech/#'),
+            query: "SELECT receivedOn, qc format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+            refreshInterval: 5,
+            options: {
+                curveType: 'function',
+                legend: {position: 'top'},
+                hAxis: {title: 'Time', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+                pointSize: 3,
+                height: 200
+            },
+            containerId: 'chart_line'
+        });
+        wrapper.draw();
+
+        // Gauge
+        var wrapper = new google.visualization.ChartWrapper({
+            chartType: 'Gauge',
+            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+'/+/eurotech/demo')+'&limit=1',
+            query: "SELECT qc, c3 LABEL qc 'QC', c3 'Counter'",
+            refreshInterval: 2,
+            options: {
+            	min: 0, max: 100,
+                minorTicks: 2, 
+                greenFrom: 60, greenTo: 75,
+                yellowFrom: 75, yellowTo: 90,
+                redFrom: 90, redTo: 100,
+                height: 200
+            },
+            containerId: 'chart_gauge'
+        });
+        wrapper.draw();
+
+       // Table AVGs
+        var wrapper = new google.visualization.ChartWrapper({
+            chartType: 'Table',
+            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+'/+/eurotech/#')+'&limit=10',
+            query: "SELECT semanticTopic, avg(qc)  GROUP BY semanticTopic FORMAT avg(qc) '#.##'",
+            refreshInterval: 5,
+            options: {
+                height: 200
+            },
+            containerId: 'chart_table_avg'
+        });
+        wrapper.draw();
+
+/*        // PieChart
+        var wrapper = new google.visualization.ChartWrapper({
+            chartType: 'ScatterChart',
+            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+'/+/eurotech/#'),
+            query: "SELECT dbl, flt FORMAT dbl '#.##', flt '#.##'",
+            refreshInterval: 60,
+            options: {
+                hAxis: {title: 'dbl', minValue: 0, maxValue: 1},
+                vAxis: {title: 'flt', minValue: 0, maxValue: 1},
+                legend: 'none',
+                height: 200
+            },
+            containerId: 'chart_scatter'
+        });
+        wrapper.draw();
+*/        
+    })
+    .fail(function( msg ) {    	
+    	alert("Failed to login: "+msg.status+" - "+msg.statusText);
+    });
+}
+</script>
+</head>
+<body>
+
+
+<div class="row">
+    <div class="portlet">
+        <div class="portlet-header">QC</div>
+        <div id="chart_line" class="portlet-content"></div>
+    </div>
+</div>
+
+<div class="column">
+    <div class="portlet">
+        <div class="portlet-header">PLC Inputs</div>
+        <div id="chart_gauge" class="portlet-content"></div>
+    </div>
+
+    <div class="portlet">
+        <div class="portlet-header">QC AVG(us/#)</div>
+        <div id="chart_table_avg" class="portlet-content"></div>
+    </div>
+
+
+
+</div>
+
+<div class="column">
+
+
+    <div class="portlet">
+        <div class="portlet-header">Table of publishes for account on semantic topic </div>
+        <div id="chart_table" class="portlet-content"></div>
+    </div>
+
+
+</div>
+
+<!--
+<div class="column">
+
+    <div class="portlet">
+        <div class="portlet-header">sample/#</div>
+        <div id="chart_table" class="portlet-content"></div>
+    </div>
+    
+    <div class="portlet">
+        <div class="portlet-header">sample/data: double_metric, float_metric</div>
+        <div id="chart_gauge" class="portlet-content"></div>
+    </div>
+
+</div>
+
+<div class="column">
+
+    <div class="portlet">
+        <div class="portlet-header">AVG(sample/#)</div>
+        <div id="chart_table_avg" class="portlet-content"></div>
+    </div>
+
+    <div class="portlet">
+        <div class="portlet-header">dbl vs flt</div>
+        <div id="chart_scatter" class="portlet-content"></div>
+    </div>
+
+</div>
+-->
+</body>
+</html>
