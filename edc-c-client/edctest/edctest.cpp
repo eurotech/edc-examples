@@ -26,6 +26,7 @@
 #define	MAX_PUBLISH		10			// number of times to publish
 #define LATITUDE			46.369079			// default (simulated) GPS position
 #define LONGITUDE			13.076729
+#define ALTITUDE			320.0
 #define PUBLISH_TIMEOUT		50000L			
 
 #define DISPLAY_TX_MSG_PAYLOAD	
@@ -109,6 +110,7 @@ int main(){
 	//set GPS position in device profile - this is sent only once, with the birth certificate
 	prof.setLongitude(LONGITUDE);
 	prof.setLatitude(LATITUDE);
+	prof.setAltitude(ALTITUDE);
 
 	//Create cloud client instance
 	edcCloudClient = EdcCloudClient(&conf, &prof, 

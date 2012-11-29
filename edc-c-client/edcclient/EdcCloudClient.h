@@ -376,6 +376,12 @@ private:
 			metric->set_type(EdcPayload_EdcMetric_ValueType_STRING);
 			metric->set_string_value(EdcBirthPayloadValues[i]);	
 		}
+		
+		EdcPayload_EdcPosition * position = edcPayload->mutable_position();
+
+		position->set_longitude(m_edcDeviceProfile->getLatitude());
+		position->set_latitude(m_edcDeviceProfile->getLongitude());
+		position->set_latitude(m_edcDeviceProfile->getAltitude());
 
 		return edcPayload;
 	}
@@ -398,19 +404,6 @@ private:
 		}
 
 		return edcPayload;
-	}
-	/**
-	 * Publishes the birth certificate to the MQtt broker
-	 * 
-	 * @return MQTTCLIENT_SUCCESS or one of the MQtt cliene error codes
-	 * @see MQTTClient.h
-	 */
-	int publishBirthCertificate(){
-		
-		EdcPayload * payload = buildBirthCertificatePayload();
-		int ret = _publish(buildBirthCertificateTopic(), payload, EDCCLIENT_QOS, EDCCLIENT_RETAIN, EDCCLIENT_PUBLISH_TIMEOUT);
-		delete payload;
-		return ret;
 	}
 	/**
 	 * Publishes the disconnect certificate to the MQtt broker
@@ -614,6 +607,20 @@ public:
 
 		 return rc;
 	};
+
+	/**
+	 * Publishes the birth certificate to the MQtt broker
+	 * 
+	 * @return MQTTCLIENT_SUCCESS or one of the MQtt cliene error codes
+	 * @see MQTTClient.h
+	 */
+	int publishBirthCertificate(){
+		
+		EdcPayload * payload = buildBirthCertificatePayload();
+		int ret = _publish(buildBirthCertificateTopic(), payload, EDCCLIENT_QOS, EDCCLIENT_RETAIN, EDCCLIENT_PUBLISH_TIMEOUT);
+		delete payload;
+		return ret;
+	}
 	/**
 	 * Publishes to the MQtt broker
 	 *
