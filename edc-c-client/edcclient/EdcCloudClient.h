@@ -379,9 +379,9 @@ private:
 		
 		EdcPayload_EdcPosition * position = edcPayload->mutable_position();
 
-		position->set_longitude(m_edcDeviceProfile->getLatitude());
-		position->set_latitude(m_edcDeviceProfile->getLongitude());
-		position->set_latitude(m_edcDeviceProfile->getAltitude());
+		position->set_longitude(m_edcDeviceProfile->getLongitude());
+		position->set_latitude(m_edcDeviceProfile->getLatitude());
+		position->set_altitude(m_edcDeviceProfile->getAltitude());
 
 		return edcPayload;
 	}
