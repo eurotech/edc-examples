@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html>
+	<head>
+<!-- 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" /> -->
+<!-- 		<title>EDC Enviromental Monitoring</title> -->
+		
+				
+				
+		<meta charset="utf-8">
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+		<title>EDC Environmental Monitoring</title>
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+		
+		<!--Load the CSS -->
+		<link type="text/css" href="css/overcast/jquery-ui-1.8.22.custom.css" rel="stylesheet" />
+		<link type="text/css" href="css/dashboard.css" rel="Stylesheet" />
+		<link type="text/css" href="css/jquery-ui-1.8.22.custom.css" rel="stylesheet" />
+
+		<!--Load the AJAX API-->
+		<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+		<script type="text/javascript" src="googlecharts/js/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="googlecharts/js/jquery-ui-1.8.21.custom.min.js"></script>
+		
+
+		<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui-1.8.22.custom.min.js"></script>
+		<script type="text/javascript" src="js/base64.js"></script>
+		
+		<script type="text/javascript" src="jquery/jquery-1.6.4.js"></script>
+		<script type='text/javascript' src="jquery/jquery.maphilight.min.js"></script>
+		
+
+		<script type="text/javascript" src="jquery/jquery.atmosphere.js"></script>
+		<script type="text/javascript" src="jquery/getstreams.js"></script>
+
+		<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true"></script>
+		<script src="ui/jquery.ui.core.js"></script>
+		<script src="ui/jquery.ui.widget.js"></script>
+		<script src="ui/jquery.ui.mouse.js"></script>
+		<script src="ui/jquery.ui.draggable.js"></script>
+		<script src="ui/jquery.ui.position.js"></script>
+		<script src="ui/jquery.ui.resizable.js"></script>
+		<script src="ui/jquery.ui.dialog.js"></script>
+
+		<script>
+		   $(window).unload(function() {
+    	       onUnload();
+   			});
+		</script>
+
+		<script>
+			var subSocket;
+			var socket = $.atmosphere;
+			var defaultLatlng = new google.maps.LatLng(49.00,10.00);
+			var defaultZoom = 2;
+			var map;
+			var infowindow
+
+			function onUnload () {
+				socket.unsubscribe();
+			}
+		
+// <script type="text/javascript">
+//added to fix IE issue 
+// jQuery.support.cors = true;
+
+//Load the Visualization API and the ready-made Google table visualization
+// google.load('visualization', '1', {'packages':['table']});
+google.load('visualization', '1', {'packages':['table', 'map']});
+
+// google.load("visualization", "1", {packages:["corechart"]});
+
+// Set a callback to run when the API is loaded.
+google.setOnLoadCallback($.init);
+
+// Send the query to the data source.
+
+//$(function (){
+$(function init(){
+
+	//
+	// use the jquery sortable plugin to give the page a dashboard look and feel
+    $( ".portlet" ).addClass( "ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" )
+        .find( ".portlet-header" )
+            .addClass( "ui-widget-header ui-corner-all" )
+            .prepend( "<span class='ui-icon ui-icon-minusthick'></span>")
+            .end()
+        .find( ".portlet-content" );
+
+    $( ".portlet-header .ui-icon" ).click(function() {
+        $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
+        $( this ).parents( ".portlet:first" ).find( ".portlet-content" ).toggle();
+    });
+
+    $( ".column" ).disableSelection();
+
+				// Tabs
+				$('#tabs').tabs();
+
+				// Dialog
+				$('#dialog').dialog({
+// 					autoOpen: false,
+					modal: true,
+					width: 300,
+					buttons: {
+						"Login": function() {
+							$(this).dialog("close");
+						    var dsUrl    = "https://api-sandbox.everyware-cloud.com/gvds";
+					     	var username = $("input#username").attr("value");
+						    var password = $("input#password").attr("value");
+// 						    var clientID   = $("input#clientID").attr("value");
+						    var clientID   = "00600c80e2c0";
+// 							var getTopic   = $("input#getTopic").attr("value");
+							var getTopic   = "envmon/fvg/udine/1";
+
+						    $.ajax({
+						        type: "GET",
+						        url:  dsUrl+"/login",
+
+						      //Removed to fix IE issue    
+						        xhrFields: {
+						            withCredentials: true
+						        },          
+						        beforeSend : function(req) {
+						            req.setRequestHeader('Authorization', "Basic " +Base64.encode(username+":"+password))
+						        //added to fix IE issue    
+// 						            req.withCredentials = true;
+						        }
+						    }).done(function( msg ) {
+// 						    	alert("You successfully logged in");	
+						    	$("p").html("Welcome, "+username);
+
+						    	
+								// Upon successfull login, build all the charts contained in the page
+								var mapOptions = {
+								    zoom: defaultZoom,
+								    center: defaultLatlng,
+								    mapTypeId: google.maps.MapTypeId.HYBRID
+								};
+		
+								map = new google.maps.Map(document.getElementById("viz_map"), mapOptions);
+								infowindow = new google.maps.InfoWindow();
+
+
+// // Column Chart T5
+// 						        var wrapper = new google.visualization.ChartWrapper({
+// 						            chartType: 'ColumnChart',
+// 						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
+// // 						            query: "SELECT it4, it5, it6 LABEL it4 'Toggle 4', it5 'Toggle 5', it6 'Toggle 6'",
+// 						            query: "SELECT receivedOn, it5 LABEL it5 'Toggle 5'",
+// 						            refreshInterval: 1,
+// 						            options: {
+// 										backgroundColor : "none",
+// 						                colors:['#0033FF'],
+// 						                vAxis: {viewWindow : {min: 0 ,max: 1}, textStyle : {color: "black"}, baselineColor: "gray", textPosition: "none"},
+// 						                hAxis: {textStyle : {color: "gray"}, baselineColor: "gray", textPosition: "none"},
+// 						                legend: {position: 'bottom'}
+// 						            },
+// 						            containerId: 'geiger_histo'
+// 						        });
+// 						        wrapper.draw();
+						        
+
+
+						        
+						        // LineChart
+				        
+						        
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/GEIGER")+'&limit=20',
+						            query: "SELECT receivedOn, GEIGER format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+						                vAxis: {textStyle: {fontSize: 12}, title: 'Counts', titleTextStyle: {color: 'black', fontSize: 12}},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                height: 200,
+						                width: 600,
+						            },
+						            containerId: 'geiger_counts'
+						        });
+						        wrapper.draw();
+
+// LineChart: TPU temp
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/TPU")+'&limit=20',
+						            query: "SELECT receivedOn, TEMP format TEMP '#.##', receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+						                vAxis: {textStyle: {fontSize: 10}, title: 'Temperature (°C)', titleTextStyle: {color: 'black', fontSize: 10}},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                height: 200,
+						                width: 600,
+						            },
+						            containerId: 'tpu_temp'
+						        });
+						        wrapper.draw();
+						        
+// LineChart: TPU press
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/TPU")+'&limit=20',
+						            query: "SELECT receivedOn, PRESS format PRESS '#.#', receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+						                vAxis: {textStyle: {fontSize: 10}, title: 'Pressure (Pa)', titleTextStyle: {color: 'black', fontSize: 10}},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                height: 200,
+						                width: 600,
+						            },
+						            containerId: 'tpu_press'
+						        });
+						        wrapper.draw();	
+						        
+						        
+// LineChart: TPU hum
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/TPU")+'&limit=20',
+						            query: "SELECT receivedOn, HUMID format HUMID '#.#', receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+						                vAxis: {textStyle: {fontSize: 10},title: 'Humidity (%)', titleTextStyle: {color: 'black', fontSize: 10}},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                height: 200,
+						                width: 600,
+						            },
+						            containerId: 'tpu_hum'
+						        });
+						        wrapper.draw();
+						        
+// LineChart: PM10 counts
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/PM10")+'&limit=20',
+						            query: "SELECT receivedOn, PM10cnt format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+						                vAxis: {textStyle: {fontSize: 12}, title: 'Counts/(sampling interval)', titleTextStyle: {color: 'black', fontSize: 12}},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                height: 200,
+						                width: 600,
+						            },
+						            containerId: 'pm10_counts'
+						        });
+						        wrapper.draw();
+
+// LineChart: PM10 avg
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/PM10")+'&limit=20',
+						            query: "SELECT receivedOn, PM10min, PM10max, PM10avg LABEL PM10min 'min', PM10max 'max', PM10avg 'avg' format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+						                vAxis: {textStyle: {fontSize: 12}, title: 'Particle dimension(µm)', titleTextStyle: {color: 'black', fontSize: 12}},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                legend: {position: 'right'},
+						                width: 600,
+						                height: 200
+						            },
+						            containerId: 'pm10_avg'
+						        });
+						        wrapper.draw();
+						        
+// Table: PM!= machines status
+
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'Table',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/PM10")+'&limit=20',
+						            query: "SELECT asset, semanticTopic, receivedOn, PM10status LABEL PM10status 'Machine status' FORMAT receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+// 										backgroundColor : "none",
+						                height: 250,
+						                width: 600
+// 						                colors:['green','red','blue'],
+// 						                vAxis: {viewWindow : {min: 0 ,max: 1}, textStyle : {color: "black"}, baselineColor: "black"},
+// 						                hAxis: {viewWindow : {min: -10 ,max: 10},textStyle : {color: "black"}, baselineColor: "black"},
+// 						                legend: {position: 'none'}
+						            },
+						            containerId: 'pm10_status_table'
+						        });
+						        wrapper.draw();
+						        
+						        
+// LineChart: HF counts
+				        
+						        
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/HF")+'&limit=20',
+						            query: "SELECT receivedOn, HF_GHz_avg, HF_GHz_min, HF_GHz_max LABEL HF_GHz_avg 'E', HF_GHz_min 'Emin', HF_GHz_max 'Emax' format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+						                vAxis: {textStyle: {fontSize: 12}, title: 'Electric field (V/m)', titleTextStyle: {color: 'black', fontSize: 12}},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                legend: {position: 'right'},
+						                height: 200,
+						                width: 600,
+						            },
+						            containerId: 'hf_counts'
+						        });
+						        wrapper.draw();		
+						        
+						        
+// LineChart: ELF counts
+				        
+						        
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/HF")+'&limit=20',
+						            query: "SELECT receivedOn, ELF_50Hz, ELF_50Hz_PK LABEL ELF_50Hz 'M', ELF_50Hz_PK 'M Peak' format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+						                vAxis: {textStyle: {fontSize: 12}, title: 'Magnetic field (G)', titleTextStyle: {color: 'black', fontSize: 12}},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                legend: {position: 'right'},
+						                height: 200,
+						                width: 600,
+						            },
+						            containerId: 'elf_counts'
+						        });
+						        wrapper.draw();	
+						        
+						        
+// LineChart: NO2
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/NO2")+'&limit=20',
+						            query: "SELECT receivedOn, NO2 format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+						                vAxis: {textStyle: {fontSize: 10}, title: 'ppm', titleTextStyle: {color: 'black', fontSize: 10}},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                width: 600,
+						                height: 200
+// 						                width: 500,
+						            },
+						            containerId: 'no2_graph'
+						        });
+						        wrapper.draw();
+
+// LineChart: CO2
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/CO2")+'&limit=20',
+						            query: "SELECT receivedOn, CO2 format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+						                vAxis: {textStyle: {fontSize: 10}, title: 'ppm', titleTextStyle: {color: 'black', fontSize: 10}},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                width: 600,
+						                height: 200
+// 						                width: 500,
+						            },
+						            containerId: 'co2_graph'
+						        });
+						        wrapper.draw();			
+						        
+// LineChart: CO
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/CO")+'&limit=20',
+						            query: "SELECT receivedOn, CO format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+						                vAxis: {textStyle: {fontSize: 10}, title: 'ppm', titleTextStyle: {color: 'black', fontSize: 10}},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                width: 600,
+						                height: 200
+// 						                width: 500,
+						            },
+						            containerId: 'co_graph'
+						        });
+						        wrapper.draw();						        
+						        
+// LineChart: CO
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/VOC")+'&limit=20',
+						            query: "SELECT receivedOn, VOC format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+						                vAxis: {textStyle: {fontSize: 10}, title: 'ppb', titleTextStyle: {color: 'black', fontSize: 10}},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                width: 600,
+						                height: 200
+// 						                width: 500,
+						            },
+						            containerId: 'voc_graph'
+						        });
+						        wrapper.draw();	
+
+// LineChart: CO
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic+"/O3")+'&limit=20',
+						            query: "SELECT receivedOn, O3 format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+						                vAxis: {textStyle: {fontSize: 10}, title: 'ppm', titleTextStyle: {color: 'black', fontSize: 10}},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                width: 600,
+						                height: 200
+						            },
+						            containerId: 'o3_graph'
+						        });
+						        wrapper.draw();							        
+						        
+								doDemo(username,password,clientID,getTopic);	
+						    })
+						    .fail(function( msg ) {    	
+						    	alert("Failed to login: "+msg.status+" - "+msg.statusText);
+						    });
+
+						}
+					}
+				
+				
+				});
+
+$(function() {
+		$( "#check" ).button();
+		$( "#format" ).buttonset();
+});
+			
+
+}); //end of init function
+
+
+
+//NEW PART
+
+function doDemo (username,password,clientID,getTopic) {
+
+var sLatitude = "";
+var sLongitude = "";
+var positionMsg = "";
+var XMLData1="";
+var XMLData2="";
+var XMLData3="";
+var XMLData4="";
+var XMLrule1="";
+var XMLrule2="";
+var XMLReset="";
+var XML2Metric="";
+var XML1Metric="";
+var apiURL="https://api-sandbox.everyware-cloud.com/v2/messages/searchByTopic.xml?topic=";
+var publishURL="https://api-sandbox.everyware-cloud.com/v2/messages/publish.xml";
+var logoutURL= "https://api-sandbox.everyware-cloud.com/gvds/logout";
+
+$(document).ready(function(){
+
+
+	setInterval(function() {
+//	    var url = "https://api-sandbox.everyware-cloud.com/v2/messages/searchByTopic.xml?topic="+username+"/"+clientID+"/"+getTopic;
+    var url = apiURL+username+"/"+clientID+"/"+getTopic+"/gps";
+	function make_base_auth(user, password) {
+	var tok = user + ':' + password;
+	var hash = btoa(tok);
+	return "Basic " + hash;
+	}
+
+	$.ajax
+	({
+    type: "GET",
+    url: url, 
+    dataType: 'xml',
+    async : true,
+    data: '{}',
+    beforeSend: function (xhr){ 
+        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+    },
+    success: function(xml){
+    	$(xml).find('receivedOn').first().each(function(){
+    		var sTime = $(this).text();
+    		positionMsg = sTime + " " + username+"/"+clientID+"/"+getTopic+"/gps"+"\n";
+    	}); 
+        $(xml).find('position').first().each(function(){
+          sLatitude = $(this).find('latitude').text();
+          sLongitude = $(this).find('longitude').text();
+          altitude = $(this).find('altitude').text();
+          precision = $(this).find('precision').text();
+          heading = $(this).find('heading').text();
+          speed = $(this).find('speed').text();
+//           timestamp = $(this).find('timestamp').text();
+          satellites = $(this).find('satellites').text();
+          status = $(this).find('status').text();
+          
+          positionMsg = positionMsg+"  latitude "+sLatitude+"\n";
+          positionMsg = positionMsg+"  longitude "+sLongitude+"\n";
+          positionMsg = positionMsg+"  speed "+speed+"\n";
+          positionMsg = positionMsg+"  heading "+heading+"\n";
+          positionMsg = positionMsg+"  altitude "+altitude+"\n";
+          positionMsg = positionMsg+"  sats "+satellites+"\n";
+          positionMsg = positionMsg+"  stat "+status+"\n";
+          positionMsg = positionMsg+"  pre "+precision+"\n";
+   		  loadMarker(sLatitude, sLongitude, positionMsg);
+  		console.log("Message " +positionMsg);
+
+        });
+      },
+      error: function() {
+        alert("An error occurred while processing XML file.");
+      }
+});
+	}, 1000);
+
+
+});
+
+
+// "use strict";
+
+// var content = $('#content');
+// var submit  = $("input#subscribe").attr("value");
+// if (submit == 'Stop Tracking') {
+// 	socket.unsubscribe();
+// 	$("input#subscribe").attr("value", "Track");
+// 	return;
+// }
+
+// var input = $('#input');
+// var status = $('#status');
+// var myName = false;
+// var author = null;
+// var logged = false;
+// var url      = "https://api-sandbox.everyware-cloud.com/v2/streams/subscribe.json";
+// var auth     = make_base_auth(username, password);
+// var topics   = username+"/"+clientID+ "/" +getTopic+"/gps";
+// var topicQuery  = '';
+// var topicsArray = topics.split(',');
+// for (var t in topicsArray) {
+// 	topicQuery = topicQuery + 'topic='+topicsArray[t]+'&';
+// }
+
+
+
+// var request = { url: url+'?'+topicQuery,
+// 	headers: {'Authorization':auth},
+// 	logLevel : 'debug',
+// 		transport : 'long-polling' ,
+// 		fallbackTransport: 'streaming',
+// 	enableXDR: false,
+// 	withCredentials: true,    				
+// 	dropAtmosphereHeaders: false,
+// 	attachHeadersAsQueryString: false,
+// 	executeCallbackBeforeReconnect: false
+// };
+
+
+
+// request.onOpen = function(response) {
+// 	//alert('Atmosphere connected using ' + response.transport);
+// };
+
+// request.onMessage = function (response) {
+// 	//alert('Getting message...');
+	
+// 	var message = response.responseBody;
+	
+	
+	
+//     if (message.length != 0) {
+//     	console.log("Inside message");
+// 		try {        	
+// 			var jsonMessage = jQuery.parseJSON(message);
+// 		} catch (e) {
+// 	  		console.log('This doesn\'t look like a valid JSON: ', message.data);
+// 	 		return;
+// 		}
+		
+// 		var msg = jsonMessage.receivedOn+"-"+jsonMessage.topic+"\n";
+
+// 		if(jsonMessage.payload.metrics != null) {
+// 			for (var metricIdx in jsonMessage.payload.metrics.metric) {
+// 		    	var metric = jsonMessage.payload.metrics.metric[metricIdx];
+// 		   		msg = msg+"  "+metric.name+" "+metric.type+" "+metric.value+"\n"; 
+// //			   		console.log("Inside metric " +metric.name+" "+metric.type+" "+metric.value);
+// 		   		console.log("Inside metric " + metricIdx + " " + jsonMessage.payload.metrics.metric.value);
+// 			}
+// 	  	}
+
+// 		msg = msg+"  latitude "+jsonMessage.payload.position.latitude+"\n";
+// 		msg = msg+"  longitude "+jsonMessage.payload.position.longitude+"\n";
+// 		msg = msg+"  speed "+jsonMessage.payload.position.speed+"\n";
+// 		msg = msg+"  heading "+jsonMessage.payload.position.heading+"\n";
+// 		msg = msg+"  altitude "+jsonMessage.payload.position.altitude+"\n";
+// 		msg = msg+"  sats "+jsonMessage.payload.position.sats+"\n";
+// 		msg = msg+"  stat "+jsonMessage.payload.position.stat+"\n";
+// 		msg = msg+"  pacc "+jsonMessage.payload.position.pacc+"\n";
+		
+// 		console.log("Message " +msg);
+// // 		loadMarker(jsonMessage.payload.position.latitude, jsonMessage.payload.position.longitude, msg);
+// 	}
+// };
+
+// request.onError = function(response) {
+// 	alert('Sorry, but there\'s some problem with your socket or the server is down' + response);
+// };
+
+// var subSocket = socket.subscribe(request);
+// $("input#subscribe").attr("value", "Stop Tracking");    
+
+// function make_base_auth(user, password) {
+// 	var tok = user + ':' + password;
+// 	var hash = Base64.encode(tok);
+// 	return "Basic " + hash;
+// }
+
+
+function loadMarker(latitude, longitude, asset){
+	// create new marker location
+	var newLatlng = new google.maps.LatLng(latitude, longitude);
+
+	//alert("latitude: " + latitude + " longitude: " + longitude);
+ 
+	// create new marker
+	var marker = new google.maps.Marker({
+	    id: asset,
+	    map: map,
+	    title: asset,
+	    position: newLatlng
+	});
+
+	//map.setCenter(marker);
+	map.setCenter(newLatlng); 
+ 	map.setZoom(15);
+}
+
+//RESET COUNTER C3
+$(document).ready(function() {
+
+	  	   $("#reset_c3").click(function() {
+
+			 
+
+
+//             var url = "https://api-sandbox.everyware-cloud.com/v2/messages/publish.xml";
+            var url = publishURL;
+            
+			function make_base_auth(user, password) {
+			var tok = user + ':' + password;
+			var hash = btoa(tok);
+			return "Basic " + hash;
+			}
+			
+			var counterID="c3";
+			var resetMetric="value";
+			var resetValue = "true";
+			var resetTopic="eurotech/demo/resetcnt";
+			makeResetXML(username,clientID,resetTopic,resetMetric,resetValue,counterID);
+
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLReset,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});
+			 
+	   }); // end of click function
+	 });
+
+
+//Change GEIGER Parameters
+$(document).ready(function() {
+
+	  	   $("#g_change_sampling").click(function() {	 
+            var url = publishURL;
+			var timeMetric="GEIGER_interval";
+			var timeValue = $("input#g_sampling_interval").attr("value");
+			var voltageMetric="GEIGER_voltage";
+			var voltageValue = $("input#g_sampling_voltage").attr("value");			
+			var controltopic="envmon/controls/geiger";
+			
+			if(timeValue && voltageValue){ 
+			make2MetricXML(username,clientID,controltopic,timeMetric,timeValue,voltageMetric,voltageValue);
+
+			ajaxPOST(username,password,url,XML2Metric);
+	  	   } else {
+	  		   alert("Please, fill in the empty fiels");
+	  	   }
+	  		  
+	   }); // end of click function
+	 });
+	 
+
+//Change TPU Parameters
+$(document).ready(function() {
+
+	  	   $("#tpu_change_sampling").click(function() {	 
+            var url = publishURL;
+			var tpuMetric="TPU_interval";
+			var tpuValue = $("input#tpu_sampling_interval").attr("value");	
+			var controltopic="envmon/controls/tpu";
+			if(tpuValue){ 
+			makeSensorsXML(username,clientID,controltopic,tpuMetric,tpuValue);
+
+			ajaxPOST(username,password,url,XML1Metric);
+	  	   } else {
+	  		   alert("Please, fill in the empty fiels");
+	  	   }
+	  		  
+	   }); // end of click function
+	 });
+
+
+//Change PM10 Parameters
+$(document).ready(function() {
+
+	  	   $("#pm10_change_sampling").click(function() {	 
+            var url = publishURL;
+			var timeMetric="PM10_interval";
+			var timeValue = $("input#pm10_sampling_interval").attr("value");
+			var statusMetric="PM10_status";
+			var statusValue = $("#pm10_sampling_status").attr("value");	
+			statusValue = "0";
+			var controltopic="envmon/controls/pm10";
+			
+			if(timeValue && statusValue){ 
+			make2MetricXML(username,clientID,controltopic,timeMetric,timeValue,statusMetric,statusValue);
+
+			ajaxPOST(username,password,url,XML2Metric);
+	  	   } else {
+	  		   alert("Please, fill in the empty fiels");
+	  	   }
+	  		  
+	   }); // end of click function
+	 });
+	 
+	 
+//Change EM Parameters
+$(document).ready(function() {
+
+	  	   $("#em_change_sampling").click(function() {	 
+            var url = publishURL;
+			var emMetric="EM_interval";
+			var emValue = $("input#em_sampling_interval").attr("value");	
+			var controltopic="envmon/controls/em";
+			if(emValue){ 
+			makeSensorsXML(username,clientID,controltopic,emMetric,emValue);
+
+			ajaxPOST(username,password,url,XML1Metric);
+	  	   } else {
+	  		   alert("Please, fill in the empty fiels");
+	  	   }
+	  		  
+	   }); // end of click function
+	 });	
+
+
+//Change Chemicals Parameters
+$(document).ready(function() {
+
+	  	   $("#chem_change_sampling").click(function() {	 
+            var url = publishURL;
+            
+            
+            
+			var chemMetric=$("#chem_sensor").attr("value");
+			var chemValue = $("input#chem_sampling_interval").attr("value");	
+			var controltopic="envmon/controls/chem";
+			if(chemValue){ 
+			makeSensorsXML(username,clientID,controltopic,chemMetric,chemValue);
+
+			ajaxPOST(username,password,url,XML1Metric);
+	  	   } else {
+	  		   alert("Please, fill in the empty fiels");
+	  	   }
+	  		  
+	   }); // end of click function
+	 });
+
+$('#logout').click(
+        function(e){
+        e.preventDefault();
+        
+$('<div id="confirmLogout" title="Logout">Are you sure you want to log out?</div>').dialog(
+            {
+            modal: true,
+            height: 120, 
+            width:350,
+            show:"blind",
+            hide: "blind",
+            buttons:{
+                "Yes":function() {
+                    $.ajax({ 
+//                     	 url: "https://api-sandbox.everyware-cloud.com/gvds/logout",
+                    	 url: logoutURL,
+                        complete:
+                        	function() {
+                            $('#confirmLogout').html("Logged out!");
+                        	  $('.ui-dialog-buttonpane').css('display','none');
+                            var dlg = $("#confirmLogout").parents(".ui-dialog:first");
+                            dlg.animate({ width: 250},120);  
+                            setTimeout(function(){$("#confirmLogout").dialog("close")},1000);
+                            setTimeout(function(){location.reload();},1000);    
+                            } 
+                        });
+                    },
+                "No":function() {
+                    $("#confirmLogout").dialog("close");
+                    }
+            },
+            close:function(){
+                 $("#confirmLogout").remove();
+            }
+            });
+
+return false; 
+    }); 
+    
+
+
+
+function ajaxPOST(username,password,url,XMLajaxData){
+	
+	function make_base_auth(user, password) {
+		var tok = user + ':' + password;
+		var hash = btoa(tok);
+		return "Basic " + hash;
+		}
+	
+	$.ajax
+	({
+    type: "POST",
+    url: url,
+    contentType: 'application/xml',
+    async : true,
+    beforeSend: function (xhr){ 
+        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+    },
+    processData: true,
+    data: XMLajaxData,
+
+    error: function(XMLHttpRequest, textStatus, errorThrown){
+        alert(errorThrown);
+    }, success: function(data, textStatus, XMLHttpRequest){
+//        alert("Succeeded");
+    }
+});
+	
+}
+function makeXML(username,clientID,postTopic,name,lightValue,ledID){
+	
+	var XMLData0;
+	XMLData0 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+	"<message xmlns=\"http://eurotech.com/edc/2.0\">" +
+// 	  "<receivedOn>2012-07-19T14:22:00.774Z</receivedOn>" +
+// 	  "<topic>"+username + "/" + clientID + "/" +postTopic + "/" + ledID + "</topic>" +
+	  "<topic>"+"$EDC/" + username + "/" + clientID + "/" +postTopic + "/" + ledID + "</topic>" +
+	  "<payload>" +
+	    "<metrics>" +
+	      "<metric>" +
+	        "<name>" + name +"</name>" +
+	        "<type>String</type>" +
+	        "<value>" + lightValue + "</value>" +
+	      "</metric>" +
+	    "</metrics>" +
+// 	    "<sentOn>2012-07-19T14:22:10.774Z</sentOn>" +
+	  "</payload>" +
+	"</message>";
+    console.log('makeXML: ' + XMLData0);
+
+	 if(ledID=='1'){
+		 XMLData1=XMLData0;
+	 }	else if (ledID=='2') {
+		 XMLData2=XMLData0;
+	 }  else if (ledID=='3') {
+		 XMLData3=XMLData0;
+	 } else if (ledID=='4') {
+		 XMLData4=XMLData0;
+	 }
+}
+
+
+
+function make2MetricXML(username,clientID,controltopic,nameMetric1,valueMetric1,nameMetric2,valueMetric2){	
+	var XMLData0;
+	XMLData0 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+	"<message xmlns=\"http://eurotech.com/edc/2.0\">" +
+	  "<receivedOn>2012-07-19T14:22:00.774Z</receivedOn>" +
+// 	  "<topic>"+ "$EDC/" + username + "/" + clientID + "/" + controltopic + "</topic>" +
+	  "<topic>"+ username + "/" + clientID + "/" + controltopic + "</topic>" +
+	  "<payload>" +
+	    "<metrics>" +
+	      "<metric>" +
+	        "<name>" + nameMetric1 +"</name>" +
+	        "<type>String</type>" +
+	        "<value>" + valueMetric1 + "</value>" +
+	      "</metric>" +
+	      "<metric>" +
+	        "<name>" + nameMetric2 +"</name>" +
+	        "<type>String</type>" +
+	        "<value>" + valueMetric2 + "</value>" +
+	      "</metric>" +
+	    "</metrics>" +
+	    "<sentOn>2012-07-19T14:22:10.774Z</sentOn>" +
+	  "</payload>" +
+	"</message>";
+
+
+
+		 XML2Metric=XMLData0;
+
+}
+
+
+function makeSensorsXML(username,clientID,controltopic,Metric,Value){
+	var XMLData0;
+	XMLData0 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+	"<message xmlns=\"http://eurotech.com/edc/2.0\">" +
+	  "<receivedOn>2012-07-19T14:22:00.774Z</receivedOn>" +
+// 	  "<topic>"+ "$EDC/" + username + "/" + clientID + "/" + controltopic + "</topic>" +
+	  "<topic>"+ username + "/" + clientID + "/" + controltopic + "</topic>" +
+	  "<payload>" +
+	    "<metrics>" +
+	      "<metric>" +
+	        "<name>" + Metric +"</name>" +
+	        "<type>String</type>" +
+	        "<value>" + Value + "</value>" +
+	      "</metric>" +
+	    "</metrics>" +
+	    "<sentOn>2012-07-19T14:22:10.774Z</sentOn>" +
+	  "</payload>" +
+	"</message>";
+
+	XML1Metric=XMLData0;
+
+}
+
+function makeResetXML(username,clientID,resetTopic,resetMetric,resetValue,counterID){	
+	var XMLData0;
+	XMLData0 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+	"<message xmlns=\"http://eurotech.com/edc/2.0\">" +
+	  "<receivedOn>2012-07-19T14:22:00.774Z</receivedOn>" +
+// 	  "<topic>"+ username + "/" + clientID + "/" + resetTopic + "/" + counterID + "</topic>" +
+	  "<topic>"+ "$EDC/" + username + "/" + clientID + "/" + resetTopic + "/" + counterID + "</topic>" +
+	  "<payload>" +
+	    "<metrics>" +
+	      "<metric>" +
+	        "<name>" + resetMetric +"</name>" +
+	        "<type>String</type>" +
+	        "<value>" + resetValue + "</value>" +
+	      "</metric>" +
+	    "</metrics>" +
+	    "<sentOn>2012-07-19T14:22:10.774Z</sentOn>" +
+	  "</payload>" +
+	"</message>";
+
+
+
+		 XMLReset=XMLData0;
+
+}
+
+// RULES
+   
+
+ 
+  
+  
+ 
+ 
+}
+
+
+
+		</script>
+		<style type="text/css">
+			/*demo page css*/
+			body{ font: 62.5% "Trebuchet MS", sans-serif; margin: 50px;}
+			.demoHeaders { margin-top: 2em; }
+			.ui-tab-content, .ui-tabs-panel{overflow: auto;}
+			#format { margin-top: 2em; }
+		</style>
+	</head>
+	<body>
+	
+<div id="container"  style="position: relative; width : 100%; min-width : 1300px; height: 100%; margin:0px auto; border-radius: 1em; background-color: #EEEEEE;">
+		
+<!-- 		<h1>Everyware Cloud</h1> -->
+		<div style="position: absolute; height : 3em; padding: 0.45em">
+			<img alt="" src="imagemap/EC_logo.5.png" >
+		</div>
+		<div id="logout"  style="position: absolute; left :92%; top: 10px; font-size: 12px; color : blue; text-decoration:underline; cursor: hand; cursor: pointer; ">logout</div> 
+<!-- 		<center> -->
+
+	<div id="welcome_msg" 
+	style="position: absolute; left :80%; top: 0px; font-size: 12px; color : black;">
+		<p></p>
+	</div>
+
+	
+
+
+
+<!-- 		</center> -->
+
+<!-- 		<!-- Tabs -->
+<!-- 		<h2 class="demoHeaders">Tabs</h2> -->
+			<br />
+				<div id="tabs" style="top: 50px;">
+		
+			<ul>
+			    <li><a href="#tabs-0">Map</a></li>
+				<li><a href="#tabs-1">Radioactivity</a></li>
+				<li><a href="#tabs-2">Thermodynamics </a></li>
+				<li><a href="#tabs-3">Particle pollution </a></li>
+				<li><a href="#tabs-4">Electromagnetism </a></li>
+				<li><a href="#tabs-5">Chemicals </a></li>
+				<li><a href="#tabs-6">Data Streams</a></li>
+
+			</ul>
+
+
+<!-- *************************************************************************************************************************************-->
+			<div id="tabs-0">
+					<div class="row">
+				      <div class="portlet" style="height: 475px;">
+				    	<div class="portlet-header">Map</div>
+				    	<div id="viz_map" class="portlet-map-content" style="height: 465px;"></div>
+			    	</div>
+				  </div>
+
+			</div>	
+
+
+<!-- *************************************************************************************************************************************-->
+			
+			<div id="tabs-1">
+			<center>
+			
+
+			  <div class="portlet"style="width: 600px; height: 250px; display: inline-block;">
+				<div class="portlet-header">Counts</div>
+				
+					<div  class="row"> 
+						<div id="geiger_counts" class="portlet-content" style="height: 250px;"></div>
+					</div>
+				</div>	
+<!-- 				<div class="portlet"style="width: 600px; height: 250px;display: inline-block;"> -->
+<!-- 				    <div class="portlet-header">Histogram</div> -->
+<!--                     <div  class="row">  -->
+<!-- 						<div id="geiger_histo" class="portlet-content" style="height: 250px;"></div> -->
+<!-- 					</div> -->
+
+<!-- 			    </div> -->
+			</center>
+			
+			<br /> <br /> 
+			
+			<div id="geiger_controls" class="ui-widget-content ui-corner-all" style="width : 400px; margin:0px auto; border-radius: 1em;"> 
+			<center>
+			
+			<div id="form" ><h1>Sensors control</h1>
+			
+			<br />
+			<table>
+				<tr>
+				<tr>
+				<tr>
+					<td >Sampling interval (sec):</td>
+					<td><input type="text" id="g_sampling_interval" size="10" value="5" /></td>
+				<tr>
+				<tr>
+					<td>Sampling Voltage (max 500 Volt):</td>
+					<td><input type="text" id="g_sampling_voltage" size="10" value="500" /></td>
+				<tr>
+			</table>
+		</div>				
+		    <br/>
+				  <div> 
+ 					 <input type="button" id="g_change_sampling" value="Change sampling parameters"/>
+ 				  </div>
+ 				  <br/><br/>
+<!--  				  <div> -->
+<!--  					 <input type="button" id="g_stop_sampling" value="Deactivate automatic sampling"/> -->
+<!--  				  </div> -->
+<!--  			     <br/> -->
+ 			</center>	  
+ 				  
+ 			</div>	  
+ 				  
+			</div>			
+			
+
+<!-- *************************************************************************************************************************************-->
+		
+			<div id="tabs-2">
+			
+			<center>
+			<div class="column">
+			
+			  <div class="portlet"style="width: 600px; height: 250px; display: inline-block;">
+<!-- 				<div class="portlet-header">Temperature (�C)</div> -->
+				<div class="portlet-header">Temperature (°C)</div>
+				
+					<div  class="row"> 
+						<div id="tpu_temp" class="portlet-content" style="height: 250px;"></div>
+					</div>
+			  </div>				
+			    <div class="portlet"style="width: 600px; height: 250px;display: inline-block;">
+				   <div class="portlet-header">Humidity (%)</div>
+                        <div  class="row"> 
+						<div id="tpu_hum" class="portlet-content" style="height: 250px;"></div>
+				   </div>
+			    </div>
+			  
+			</div>
+			</center>
+			
+           <div class="column">
+			<center>
+
+				<div class="portlet"style="width: 600px; height: 250px;display: inline-block;">
+				    <div class="portlet-header">Pressure (Pa)</div>
+                        <div  class="row"> 
+						<div id="tpu_press" class="portlet-content" style="height: 250px;"></div>
+					</div>
+
+			    </div>
+			</center>
+			  </div>
+			  
+
+			
+		<div id="tpu_controls"> 
+			<center>
+			
+			<form id="tpu_form"><h1>Sensors control</h1>
+			
+			<br />
+			<table >
+				<tr>
+				<tr>
+				<tr>
+					<td >Sampling interval (sec):</td>
+					<td><input type="text" id="tpu_sampling_interval" size="10" value="5" /></td>
+				<tr>
+			</table>
+			<br/>
+			<div> 
+ 				<input type="button" id="tpu_change_sampling" value="Change sampling parameters"/>
+ 			</div>
+ 			     <br/>
+		    </form>				
+
+ 			</center>	  
+ 				  
+ 	    </div>	  
+			  
+			</div>		
+
+
+<!-- *************************************************************************************************************************************-->
+
+
+			<div id="tabs-3">
+			
+			
+			<div class="column">
+			<center>
+			  <div class="portlet"style="width: 600px; height: 250px; display: inline-block;">
+				<div class="portlet-header">PM10 counts</div>
+				
+					<div  class="row"> 
+						<div id="pm10_counts" class="portlet-content" style="height: 250px;"></div>
+					</div>
+			  </div>				
+			    <div class="portlet"style="width: 600px; height: 300px;display: inline-block;">
+				   <div class="portlet-header">Machines status</div>
+                        <div  class="row"> 
+						<div id="pm10_status_table" class="portlet-content" style="width: 600px; height: 250px;"></div>
+				   </div>
+			    </div>
+			  </center>
+			</div>
+			
+<!--            <div class="column"> -->
+<!-- 				<div class="portlet"> -->
+<!-- 				    <div class="portlet-header">PM10 max, min and average values</div> -->
+<!-- 						<div id="pm10_avg" class="portlet-content"></div> -->
+<!-- 			    </div> -->
+<!--            </div> -->
+			  <div class="portlet"style="width: 600px; height: 250px; display: inline-block;">
+				<div class="portlet-header">PM10 max, min and average values</div>
+				
+					<div  class="row"> 
+						<div id="pm10_avg" class="portlet-content" style="height: 250px;"></div>
+					</div>
+			  </div>
+			
+			<br /> <br /> <br/><br/>
+			<div id="pm10_controls"> 
+			<center>
+			
+			<div id="form" ><h1>Sensors control</h1>
+			
+			<br />
+			<table>
+				<tr>
+				<tr>
+				<tr>
+					<td >Sampling interval (sec):</td>
+					<td><input type="text" id="pm10_sampling_interval" size="10" value="5" /></td>
+				<tr>
+				<tr>
+<!-- 				    <td >Machine status</td> -->
+<!-- 				    <td ><select text="pm10_menu" id="pm10_sampling_status"> -->
+
+<!--  					 <option value="0">All Off</option> -->
+<!-- 					 <option value="1">Heater On</option> -->
+<!--  					 <option value="2">Power On</option> -->
+<!--  					 <option value="3">Heater and Power On</option> -->
+<!-- 		             </select> -->
+<!-- 		             </td>	 -->
+			</table>
+		</div>				
+		    <br/>
+				  <div> 
+ 					 <input type="button" id="pm10_change_sampling" value="Change sampling parameters"/>
+ 				  </div>
+ 				  <br/><br/>
+ 			</center>	  
+ 				  
+ 			</div>		
+			<br/>			 
+			</div>	
+			
+
+<!-- *************************************************************************************************************************************-->
+			
+			<div id="tabs-4">
+			<center>
+			
+
+			  <div class="portlet"style="width: 600px; height: 250px; display: inline-block;">
+				<div class="portlet-header">Electric Field(V/m)</div>
+				
+					<div  class="row"> 
+						<div id="hf_counts" class="portlet-content" style="height: 250px;"></div>
+					</div>
+				</div>	
+				<div class="portlet"style="width: 600px; height: 250px;display: inline-block;">
+				    <div class="portlet-header">Magnetic Field(G)</div>
+                        <div  class="row"> 
+						<div id="elf_counts" class="portlet-content" style="height: 250px;"></div>
+					</div>
+
+			    </div>
+			</center>
+			
+			<br /> <br /> 
+			
+			<div id="em_controls" class="ui-widget-content ui-corner-all" style="width : 400px; margin:0px auto; border-radius: 1em;"> 
+			<center>
+			
+			<div id="form" ><h1>Sensors control</h1>
+			
+			<br />
+			<table>
+				<tr>
+				<tr>
+				<tr>
+					<td >Sampling interval (sec):</td>
+					<td><input type="text" id="em_sampling_interval" size="10" value="5" /></td>
+				<tr>
+			</table>
+		</div>				
+		    <br/>
+				  <div> 
+ 					 <input type="button" id="em_change_sampling" value="Change sampling parameters"/>
+ 				  </div>
+ 				  <br/><br/>
+ 			</center>	  
+ 				  
+ 			</div>	  
+ 				  
+			</div>				
+
+<!-- *************************************************************************************************************************************-->
+		
+			<div id="tabs-5">
+			<center>
+			<div class="column">
+			
+			
+			  <div class="portlet" style="width: 600px; height: 250px;">
+				<div class="portlet-header">NO<sub>2</sub></div>
+				<div  class="row"> 
+						<div id="no2_graph" class="portlet-content" style="height: 250px;"></div>
+                </div>
+			  </div>				
+			    <div class="portlet"style="width: 600px; height: 250px;">
+				   <div class="portlet-header">CO<sub>2</sub></div>
+						<div id="co2_graph" class="portlet-content" style="height: 250px;"></div>
+			    </div>
+			    <div class="portlet"style="width: 600px; height: 250px;">
+				   <div class="portlet-header">CO</div>
+						<div id="co_graph" class="portlet-content"style="height: 250px;"></div>
+			    </div>
+			
+			</div>
+			</center>
+			
+			<center>			
+           <div class="column">
+			    <div class="portlet"style="width: 600px; height: 250px;">
+				   <div class="portlet-header">VOC</div>
+						<div id="voc_graph" class="portlet-content" style="height: 250px;"></div>
+			    </div>
+			    <div class="portlet"style="width: 600px; height: 250px;">
+				   <div class="portlet-header">O<sub>3</sub></div>
+						<div id="o3_graph" class="portlet-content" style="height: 250px;"></div>
+			    </div>			    
+			  </div>
+			  </center>
+
+			
+		<div id="chem_controls"> 
+			<center>
+			
+			<form id="chem_form"><h1>Sensors control</h1>
+			
+
+			<br />
+			<table >
+			        <td >Select sensor</td>
+					<td ><select text="chem_menu" id="chem_sensor">
+
+ 					 <option value="NO2">NO&#8322</option>
+					 <option value="CO2">CO&#8322</option>
+ 					 <option value="CO">CO</option>
+ 					 <option value="VOC">VOC</option>
+ 					 <option value="O3">O&#8323</option>
+		             </select>
+		             </td>	
+				<tr>
+				<tr>
+				<tr>
+					<td >Sampling interval (sec):</td>
+					<td><input type="text" id="chem_sampling_interval" size="10" value="5" /></td>
+				<tr>
+			</table>
+			<br/>
+			<div> 
+ 				<input type="button" id="chem_change_sampling" value="Change sampling parameters"/>
+ 			</div>
+ 			     <br/>
+		    </form>				
+
+ 			</center>	  
+ 				  
+ 	    </div>	  
+			  
+			</div>	
+
+<!-- *************************************************************************************************************************************-->
+
+					
+			
+
+			
+			<div id="tabs-6" style="overflow-y: scroll;height: 450px;">
+			<tr>
+				<td></td>
+					<td><input type="submit" id="getstreams" size="60" value="Get Streams" onclick="getStreams();" /></td>
+				<tr>
+
+
+				<div id="content_stream" style="font: Trebuchet MS ;font-size: 12px;"></div>
+				<div id="messages_stream" style="font: Trebuchet MS; font-size: 12px;"></div>
+					
+
+			
+			
+			</div>
+
+		</div>
+
+	
+		
+	
+		<div class="c3-text"></div>
+		<div class="qc-text"></div>
+
+
+		<!-- ui-dialog -->
+		<div id="dialog" title="Everyware Cloud Login">
+		<div id="form">
+			<br />
+			<table>
+				<tr>
+				<tr>
+				<tr>
+					<td >Username:</td>
+					<td><input type="text" id="username" size="30" value="" /></td>
+				<tr>
+				<tr>
+					<td ">Password:</td>
+					<td><input type="password" id="password" size="30" value="" /></td>
+				<tr>
+<!-- 				<tr> -->
+<!-- 					<td >Asset ID:</td> -->
+<!-- 					<td><input type="text" id="clientID" size="30" value="00600c80e2c0" /></td> -->
+<!-- 				<tr>				 -->
+<!-- 				<tr> -->
+<!-- 					<td >Subscribe topic:</td> -->
+<!-- 					<td><input type="text" id="getTopic" size="30" value="envmon/fvg/udine/1"/></td> -->
+<!-- 				<tr> -->
+			</table>
+
+
+
+		</div>
+		</div>
+		
+</div>
+		
+	</body>
+</html>
+
+
