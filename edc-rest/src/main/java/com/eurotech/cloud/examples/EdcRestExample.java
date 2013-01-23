@@ -43,19 +43,25 @@ import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.filter.GZIPContentEncodingFilter;
 
 
 /**
  * This example class demonstrates the use of REST calls to query the Everyware Cloud
- * 
+ * <p>
  * First, several REST APIs are called to read devices, messages, etc. (it assumes that the EdcJavaClient example has previously been run).
- * 
+ * <p>
  * Next, we create a Rule in the Everyware Cloud, and publish a message that triggers that rule. The Rule, in turn, republishes another message, and sends an e-mail notification. A REST call stores
  * another message directly into the database.
- * 
- * Then the REST API is used to read back all three messages: 1) original publish, 2) republish by the rule, and 3) direct data store.
+ * <p>
+ * Then the REST API is used to read back all three messages: 1) original publish, 2) republish by the rule, and 3) direct data store.<br>
  * 
  * Finally, the Rule is deleted.
+ * <p>
+ * Notice that we use the Jersey REST Client Library with the GZIPContentEncoding Filter. The request will be modified to set the Accept-Encoding header to "gzip"
+ * so the entity will be compressed using gzip.If the response has a Content-Encoding header of "gzip" then the response entity will be uncompressed using gzip.<br>
+ * This will give us a performance boost for large amount of data (large messages or large quantity of messages). 
+ * 
  */
 public class EdcRestExample
 {
@@ -64,7 +70,7 @@ public class EdcRestExample
 	public static final String ACCOUNT = "myEdcAccount";				// Cloud account name
 	public static final String USERNAME = "myEdcUserName";				// Username in account, requires Administrative permissions
 	public static final String PASSWORD = "myEdcPassword3#";			// Password associated with Username
-	public static final String ASSET_ID = "MyEclipseClient";			// Unique Client ID of this client device
+	public static final String ASSET_ID = "EdcTest-Device";			// Unique Client ID of this client device
 	public static final String TEST_EMAIL = "my.name@domain.com";		// E-mail address to use for this sample application
 	public static final String TEST_EMAIL2 = "rule.changed@domain.com";		// E-mail address to test rule update
     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -87,6 +93,8 @@ public class EdcRestExample
         config.getProperties().put(com.sun.jersey.client.urlconnection.HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new com.sun.jersey.client.urlconnection.HTTPSProperties(getHostnameVerifier(), ctx));
         client = Client.create(config);
         client.addFilter(new com.sun.jersey.api.client.filter.HTTPBasicAuthFilter(USERNAME, PASSWORD));
+        // Add GZIPContentEncodingFilter to compress the content returned by the server
+        client.addFilter(new GZIPContentEncodingFilter(true));
 
         //
         // Verify connection to Cloud
@@ -109,6 +117,7 @@ public class EdcRestExample
 
         System.out.println("##############\n Beginning test of listMessages()");
         listMessages("", 10, 0);
+        paginateMessages(ACCOUNT+"/"+ASSET_ID+"/#",10,5);
 
         // Create Rule using REST, to trigger on receipt of a publish
         createRule();
@@ -312,6 +321,62 @@ public class EdcRestExample
         else {
             System.out.println("metric: " + m.getName() + " " + m.getType() + " " + m.getValue());
         }
+    }
+
+
+    /**
+     * REST query for messages using pagination to demonstrate use of MessagesResult.limitExceeded flag.
+     * 
+     * @param topic
+     *            Enter a <code>String</code> to searchByTopic, or an empty String
+     * @param limit
+     *            Enter non-zero int to limit total number of messages to read
+     * @param pageSize
+     *            size of the page of messages to read
+     */
+    private static void paginateMessages(String topic, int limit, int pageSize) {
+        String apiPath = "";
+        WebResource apisWeb = null;
+
+        if (topic.isEmpty()) {
+            apiPath = "messages.xml";
+            apisWeb = client.resource(API_URL).path(apiPath);
+        }
+        else {
+            apiPath = "messages/searchByTopic.xml";
+            apisWeb = client.resource(API_URL).path(apiPath);
+            apisWeb = apisWeb.queryParam("topic", topic);
+        }
+
+        MessagesResult result;
+        int offset = 0;
+        boolean endOfData=false;
+        do {
+            apisWeb = client.resource(API_URL).path(apiPath);
+            if (!topic.isEmpty()) apisWeb = apisWeb.queryParam("topic", topic);
+            apisWeb = apisWeb.queryParam("limit", "" + pageSize);
+            if(offset>0)
+            	apisWeb = apisWeb.queryParam("offset", "" + offset);
+	        result = apisWeb.get(MessagesResult.class);
+	        List<EdcMessage> messages = result.getMessages();
+	        if (messages == null) {
+	            System.err.println("listMessages() - There are no messages to list.");
+	            break;
+	        }
+	        else {
+	            for (int i = 0; i < messages.size(); i++) {
+	                EdcMessage message = messages.get(i);
+	                System.out.println("Message topic(): " + message.getTopic()+"  Received on: " + message.getTimestamp());
+	            }
+	            if(result.getLimitExceeded()) System.out.println("limitExceeded set, more messages to read");
+	            else {
+	            	System.out.println("End of data");
+	            	endOfData=true;
+	            }
+	            offset+=pageSize;
+	        }
+        } while((!endOfData)&&(offset<limit));
+        sleep(1);
     }
 
 
