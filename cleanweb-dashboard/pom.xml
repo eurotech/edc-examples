@@ -4,7 +4,7 @@
   <groupId>com.eurotech.cloud</groupId>
   <artifactId>env-mon</artifactId>
   <packaging>war</packaging>
-  <version>2.1.0-SNAPSHOT</version>
+  <version>3.0.1</version>
   <name>Environmental Monitoring Webapp</name>
   <url>http://maven.apache.org</url>
   <build>
