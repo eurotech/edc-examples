@@ -46,6 +46,10 @@ Please follow maven instructions to download and install maven in your system (h
 The Edc REST Endpoint Example project comes with a pre-configured pom.xml file to build the project.
 As stated in the pom.xml, the only dependencies of the project are the Jersey Client Library and 
 the generated model binding classes.
+
+First configure the Eclipse workspace;
+>> mvn -Declipse.workspace=/your/eclipse/workspace eclipse:configure-workspace
+
 To build the project you can execute the following command from the project root directory;
 >> mvn clean install
 
@@ -53,6 +57,10 @@ To open the project in eclipse, you can run the following command from the proje
 >> mvn eclipse:eclipse
 
 and then import the directory as a new project in eclipse.
+
+Note: with some Maven packages you might need to specify the Java compliance level.
+This can be achieved by setting a couple of system properties on the command line, e.g.:
+>> mvn -Dmaven.compiler.source=1.6 -Dmaven.compiler.target=1.6 clean install
 
 
 For non-maven developers
@@ -62,7 +70,7 @@ The project has three dependencies:
  a. the Jersey Client Library downloadable from http://jersey.java.net/
  b. the generated model binding classes downloadable from https://api-sandbox.everyware-cloud.com/
  c. the Everyware Device Cloud Java Client Library and dependencies
- d. Simple Logging Façade for Java
+ d. Simple Logging FaÔøΩade for Java
  e. Google Protocol Buffers Runtime Library
  
 Please download the jar files for the libraries above and include them in the 
