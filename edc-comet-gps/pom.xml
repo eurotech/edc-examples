@@ -4,7 +4,7 @@
         <groupId>com.eurotech.cloud</groupId>
         <artifactId>edc-example-comet-gps</artifactId>
         <packaging>war</packaging>
-        <version>3.0.2</version>
+        <version>3.0.3</version>
         <name>Comet GPS Webapp</name>
         <url>http://maven.apache.org</url>
 
