@@ -5,7 +5,7 @@
         <parent>
                 <artifactId>edc-examples</artifactId>
                 <groupId>edc-examples</groupId>
-                <version>3.0.3</version>
+                <version>3.0.4</version>
         </parent>
 
 	<repositories>
@@ -25,7 +25,7 @@
 
 	<groupId>com.eurotech.cloud.examples</groupId>
 	<artifactId>edc-java-client</artifactId>
-	<version>3.0.3</version>
+	<version>3.0.4</version>
 	<packaging>jar</packaging>
 
 	<name>edc-java-client</name>
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>com.eurotech.cloud</groupId>
 			<artifactId>edc-client</artifactId>
-			<version>3.0.3</version>
+			<version>3.0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
