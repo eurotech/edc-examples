@@ -76,7 +76,7 @@ public class EdcRestExample
     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     static Client              client    = null;
-    static Rule                rule      = null;
+    static String              ruleName  = "APIs Test Rule Name";
 
 
     public static void main(String[] args) 
@@ -293,8 +293,13 @@ public class EdcRestExample
                 EdcMessage message = messages.get(i);
                 System.out.println("Message topic(): " + message.getTopic());
                 System.out.println("Received on: " + message.getTimestamp());
-                for (EdcMetric m : message.getEdcPayload().getMetrics().getMetrics()) {
-                    printMessageMetric(m);
+
+                try {
+                    for (EdcMetric m : message.getEdcPayload().getMetrics().getMetrics()) {
+                        printMessageMetric(m);
+                    }
+                } catch (NullPointerException npe) {
+                    System.out.println("(message does not contain any metrics)");
                 }
                 System.out.println();
             }
@@ -396,7 +401,7 @@ public class EdcRestExample
         // Create the rule
         RuleCreator ruleCreator = new RuleCreator();
         ruleCreator.setAccountId(accountID);
-        ruleCreator.setName("APIs Test Rule Name");
+        ruleCreator.setName(ruleName);
         ruleCreator.setEnabled(true);
         ruleCreator.setDescription("APis Test Rule Description");
         ruleCreator.setQuery("select *, doubleMetric('pub_double_metric') as dbl from EdcMessageEvent where semanticTopic = \"pub/test\"");
@@ -455,6 +460,7 @@ public class EdcRestExample
         ruleCreator.setRuleActionConfigurations(actionConfigs);
 
         WebResource rulesWeb = client.resource(API_URL).path("rules.xml");
+        Rule rule = null;
         try {
 
             rule = rulesWeb.accept(MediaType.APPLICATION_XML).type(MediaType.APPLICATION_XML).post(Rule.class, ruleCreator);
@@ -464,7 +470,7 @@ public class EdcRestExample
             boolean handled = false;
             ErrorBean errorBean = uie.getResponse().getEntity(ErrorBean.class);
             if (uie.getResponse().getClientResponseStatus().getStatusCode() == 400) {
-                if (errorBean.getMessage().contains("EdcDuplicateNameException")) {
+                if (errorBean.getMessage().contains("ruleName already exists")) {
                     System.err.println("createRule(): Unable to create rule -- EdcDuplicateNameException");
                     handled = true;
                     return;
@@ -501,9 +507,15 @@ public class EdcRestExample
         WebResource apisWeb = client.resource(API_URL);
         WebResource rulesWeb = apisWeb.path("rules.xml");
         RulesResult result = rulesWeb.get(RulesResult.class);
-        List<Rule> rules = result.getRules();
-        Rule localRule = rules.get(0);
-        
+
+        //find the rule that was created earlier
+        Rule localRule = null;
+        for (Rule rule : result.getRules()) {
+            if (ruleName.equals(rule.getName())) {
+                localRule = rule;
+            }
+        }
+
         // change email address
         RuleActionConfiguration config = localRule.getRuleActionConfigurations().get(0);
         for (Parameter param : config.getParameterValues().getParameters()) {
@@ -560,35 +572,31 @@ public class EdcRestExample
     private static void deleteRule() {
         System.out.println("\n##############\n Beginning test of deleteRule()");
 
+        WebResource apisWeb = client.resource(API_URL);
+        WebResource rulesWeb = apisWeb.path("rules.xml");
+        RulesResult result = rulesWeb.get(RulesResult.class);
+        
+        //find the rule that was created earlier
+        Rule localRule = null;
+        for (Rule rule : result.getRules()) {
+            if (ruleName.equals(rule.getName())) {
+                localRule = rule;
+            }
+        }
+
         long ruleID = 0;
         try {
-            ruleID = rule.getId();
+            ruleID = localRule.getId();
         }
         catch (NullPointerException e) {
-            System.err.println("deleteRule(): Couldn't get rule ID from previous createRule().");
-            // ruleID = 41; //use this to force a delete of specific rule
-        }
-        // if Couldn't get rule ID from previous createRule() get ID of the first rule if any
-        if(ruleID==0){
-            WebResource apisWeb = client.resource(API_URL);
-            WebResource rulesWeb = apisWeb.path("rules.xml");
-            RulesResult result = rulesWeb.get(RulesResult.class);
-            List<Rule> rules = result.getRules();
-            if(rules.size()>0){
-	            rule = rules.get(0);
-	            ruleID = rule.getId();
-            }
-            else
-            {
-                System.err.println("deleteRule(): no rule.");
-                return;
-            }
+            System.err.println("deleteRule(): Couldn't get rule ID for previously created rule (" + ruleName + ").");
+            return;
         }
 
-        WebResource rulesWeb = client.resource(API_URL).path("rules/" + ruleID + ".xml");
+        rulesWeb = client.resource(API_URL).path("rules/" + ruleID + ".xml");
         try {
 
-            rule = rulesWeb.accept(MediaType.APPLICATION_XML).type(MediaType.APPLICATION_XML).delete(Rule.class);
+            Rule deleteRule = rulesWeb.accept(MediaType.APPLICATION_XML).type(MediaType.APPLICATION_XML).delete(Rule.class);
         }
         catch (UniformInterfaceException uie) {
             if (uie.getResponse().getClientResponseStatus().getStatusCode() == 204) {
@@ -597,13 +605,8 @@ public class EdcRestExample
             }
 
             ErrorBean errorBean = uie.getResponse().getEntity(ErrorBean.class);
-            if (errorBean.getMessage().contains("Rule not found")) {
-                System.err.println("deleteRule(): Rule ID " + ruleID + " was not found and could not be deleted.");
-            }
-            else {
-                System.out.println(errorBean.getMessage());
-                throw uie;
-            }
+            System.out.println(errorBean.getMessage());
+            throw uie;
         }
     }
 
