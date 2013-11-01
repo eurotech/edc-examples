@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 #
-# Everyware Device Cloud (EDC): REST APIs Example v.2.0.0
+# Everyware Device Cloud (EDC): REST APIs Example v.2.1.0
 #
 --------------------------------------------------------------------------------
 
@@ -18,6 +18,7 @@ The example walks through several of the APIs offered by the platform including:
  - create a rule which sends email alters and stores messages in the data store
  - triggers the above rule through a message publishing
  - verifies the rules triggered
+ - update and delete rule through REST
  
 While any REST client can be used to invoke the Everyware Device Cloud APIs,
 the code presented in this example leverages the Jersey REST Client library. 
