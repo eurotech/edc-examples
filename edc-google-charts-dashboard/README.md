@@ -1,4 +1,4 @@
-# Everyware Device Cloud (EDC): Google Chart Tools Dashboard v2.0.0
+# Everyware Device Cloud (EDC): Google Chart Tools Dashboard v2.1.0
 
 
 ## Description
