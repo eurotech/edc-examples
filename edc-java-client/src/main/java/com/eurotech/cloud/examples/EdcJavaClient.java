@@ -6,7 +6,8 @@ import com.eurotech.cloud.client.EdcCallbackHandler;
 import com.eurotech.cloud.client.EdcClientFactory;
 import com.eurotech.cloud.client.EdcCloudClient;
 import com.eurotech.cloud.client.EdcConfiguration;
-import com.eurotech.cloud.client.EdcConfigurationFactory;import com.eurotech.cloud.client.EdcDeviceProfile;
+import com.eurotech.cloud.client.EdcConfigurationFactory;
+import com.eurotech.cloud.client.EdcDeviceProfile;
 import com.eurotech.cloud.client.EdcDeviceProfileFactory;
 import com.eurotech.cloud.message.EdcBirthPayload;
 import com.eurotech.cloud.message.EdcPayload;
@@ -101,7 +102,8 @@ public class EdcJavaClient implements EdcCallbackHandler
     
         //
         // Sleep to allow receipt of more publishes, then terminate connection
-        int listenSeconds = 60;             //keep connection alive for listenSeconds
+        System.out.println("Waiting 20 seconds to wait for any more published messages.");
+        int listenSeconds = 20;             //keep connection alive for listenSeconds
         Thread.sleep(listenSeconds * 1000); //sleep in milliseconds
 
         //
