@@ -445,7 +445,7 @@ public class EdcRestExample
         Parameter publishParam2 = new Parameter();
         publishParam2.setName("metrics");
         // value of 'metrics' parameter is a REST invocation in JSON format 
-        publishParam2.setValue("{\"metrics\":[{\"name\":\"new_string\", \"value\":\"$rule_string_metric\", \"type\":\"String\"},{\"name\":\"rule_double_metric\", \"value\":\"$dbl\", \"type\":\"Double\"}]}");
+        publishParam2.setValue("{\"metrics\":[{\"name\":\"rule_string_metric\", \"value\":\"new_string\", \"type\":\"String\"},{\"name\":\"rule_double_metric\", \"value\":\"$dbl\", \"type\":\"Double\"}]}");
         publishParams.add(publishParam2);
 
         ParametersMapType publishParamsMap = new ParametersMapType();
