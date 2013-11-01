@@ -65,7 +65,7 @@ function init() {
             chartType: 'Table',
             dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+'/+/sample/#'),
             query: "SELECT account, asset, semanticTopic, receivedOn, int, dbl, flt format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
-            refreshInterval: 60,
+            refreshInterval: 5,
             options: {
                 height: 200
             },
@@ -78,7 +78,7 @@ function init() {
             chartType: 'LineChart',
             dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+'/+/sample/#'),
             query: "SELECT receivedOn, dbl, flt format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
-            refreshInterval: 60,
+            refreshInterval: 5,
             options: {
                 curveType: 'function',
                 legend: {position: 'top'},
@@ -95,7 +95,7 @@ function init() {
             chartType: 'Gauge',
             dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+'/+/sample/data')+'&limit=1',
             query: "SELECT dbl, flt LABEL dbl 'DBL', flt 'FLT' FORMAT dbl '#.##', flt '#.##'",
-            refreshInterval: 60,
+            refreshInterval: 5,
             options: {
             	min: 0, max: 1,
                 minorTicks: 2, 
@@ -113,7 +113,7 @@ function init() {
             chartType: 'Table',
             dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+'/+/sample/#')+'&limit=10',
             query: "SELECT semanticTopic, avg(dbl), avg(flt), avg(int) GROUP BY semanticTopic FORMAT avg(dbl) '#.##', avg(flt) '#.##'",
-            refreshInterval: 60,
+            refreshInterval: 5,
             options: {
                 height: 200
             },
@@ -121,12 +121,12 @@ function init() {
         });
         wrapper.draw();
 
-        // PieChart
+        // Scatter Chart
         var wrapper = new google.visualization.ChartWrapper({
             chartType: 'ScatterChart',
             dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+'/+/sample/#'),
             query: "SELECT dbl, flt FORMAT dbl '#.##', flt '#.##'",
-            refreshInterval: 60,
+            refreshInterval: 5,
             options: {
                 hAxis: {title: 'dbl', minValue: 0, maxValue: 1},
                 vAxis: {title: 'flt', minValue: 0, maxValue: 1},
