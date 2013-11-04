@@ -143,7 +143,6 @@ public class EdcRestExample
 
     private static HostnameVerifier getHostnameVerifier() {
         return new HostnameVerifier() {
-            @Override
             public boolean verify(String hostname, javax.net.ssl.SSLSession sslSession) {
                 return true;
             }
