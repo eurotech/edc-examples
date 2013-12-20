@@ -320,9 +320,9 @@ EdcPayload * createPayload(){
 	time_t capturedOn;
 	time(&capturedOn);
 
-	position->set_timestamp(capturedOn);
+	position->set_timestamp(1000*capturedOn);
 
-	edcPayload->set_timestamp(capturedOn);
+	edcPayload->set_timestamp(1000*capturedOn);
 
 	return edcPayload;
 }
