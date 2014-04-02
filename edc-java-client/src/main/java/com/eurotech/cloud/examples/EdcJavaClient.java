@@ -83,9 +83,12 @@ public class EdcJavaClient implements EdcCallbackHandler
         //
         // Subscribe
         //
-        System.out.println("Subscribe to data topics of all assets in the account");
+        System.out.println("Subscribe to data topics of this asset in the account");
         edcCloudClient.subscribe("#", 1);
 
+        //System.out.println("Subscribe to data topics of all assets in the account");
+        //edcCloudClient.subscribe("+", "#", 1);
+        
         System.out.println("Subscribe to control topics of all assets in the account");
         edcCloudClient.controlSubscribe("+", "#", 1);
 
