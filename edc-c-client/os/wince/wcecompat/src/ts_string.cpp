@@ -24,7 +24,7 @@
 #include <windows.h>
 
 
-void ascii2unicode(const char* ascii, WCHAR* unicode)
+void ascii2unicode(const char* ascii, wchar_t* unicode)
 {
 	if (((unsigned int)unicode & 1) == 0)
 	{	// word-aligned
@@ -45,7 +45,7 @@ void ascii2unicode(const char* ascii, WCHAR* unicode)
 	}
 }
 
-void unicode2ascii(const WCHAR* unicode, char* ascii)
+void unicode2ascii(const wchar_t* unicode, char* ascii)
 {
 	if (((unsigned int)unicode & 1) == 0)
 	{	// word-aligned
@@ -61,17 +61,18 @@ void unicode2ascii(const WCHAR* unicode, char* ascii)
 	}
 }
 
-void ascii2unicode(const char* ascii, WCHAR* unicode, int maxChars)
+void ascii2unicode(const char* ascii, wchar_t* unicode, int maxChars)
 {
-	int i;
 	if (((unsigned int)unicode & 1) == 0)
 	{	// word-aligned
+		int i;
 		for (i=0; ascii[i] != 0 && i<maxChars; i++)
 			unicode[i] = ascii[i];
 		unicode[i] = 0;
 	}
 	else
 	{	// not word-aligned
+		int i;
 		for (i=0; ascii[i] != 0 && i<maxChars; i++)
 		{
 			*(char*)&unicode[i] = ascii[i];
@@ -83,17 +84,18 @@ void ascii2unicode(const char* ascii, WCHAR* unicode, int maxChars)
 	}
 }
 
-void unicode2ascii(const WCHAR* unicode, char* ascii, int maxChars)
+void unicode2ascii(const wchar_t* unicode, char* ascii, int maxChars)
 {
-	int i;
 	if (((unsigned int)unicode & 1) == 0)
 	{	// word-aligned
+		int i;
 		for (i=0; unicode[i] != 0 && i<maxChars; i++)
 			ascii[i] = (char)unicode[i];
 		ascii[i] = 0;
 	}
 	else
 	{	// not word-aligned
+		int i;
 		for (i=0; (*(char*)&unicode[i] != 0 || *(((char*)&unicode[i])+1) != 0) && i<maxChars; i++)
 			ascii[i] = *(char*)&unicode[i];
 		ascii[i] = 0;
@@ -105,7 +107,7 @@ void unicode2ascii(const WCHAR* unicode, char* ascii, int maxChars)
 // ascii/unicode typesafe versions of strcat
 //
 
-char* ts_strcat(char* dest, const WCHAR* src)
+char* ts_strcat(char* dest, const wchar_t* src)
 {
 	char* p = dest;
 	while (*p != '\0')
@@ -114,9 +116,9 @@ char* ts_strcat(char* dest, const WCHAR* src)
 	return dest;
 }
 
-WCHAR* ts_strcat(WCHAR* dest, const char* src)
+wchar_t* ts_strcat(wchar_t* dest, const char* src)
 {
-	WCHAR* p = dest;
+	wchar_t* p = dest;
 	while (*p != '\0')
 		p++;
 	ascii2unicode(src, p);
@@ -128,7 +130,7 @@ WCHAR* ts_strcat(WCHAR* dest, const char* src)
 // ascii/unicode typesafe versions of strdup
 //
 
-char* ts_strdup_unicode_to_ascii(const WCHAR* str)
+char* ts_strdup_unicode_to_ascii(const wchar_t* str)
 {
 	char* result = (char*)malloc(wcslen(str)+1);
 	if (result == NULL)
@@ -137,9 +139,9 @@ char* ts_strdup_unicode_to_ascii(const WCHAR* str)
 	return result;
 }
 
-WCHAR* ts_strdup_ascii_to_unicode(const char* str)
+wchar_t* ts_strdup_ascii_to_unicode(const char* str)
 {
-	WCHAR* result = (WCHAR*)malloc((strlen(str)+1)*2);
+	wchar_t* result = (wchar_t*)malloc((strlen(str)+1)*2);
 	if (result == NULL)
 		return NULL;
 	ascii2unicode(str, result);

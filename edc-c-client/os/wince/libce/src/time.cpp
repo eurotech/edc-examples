@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include <errno.h>
-#include "internal.h"
+//#include "internal.h"
 
 long timezone;
 

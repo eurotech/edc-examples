@@ -1,13 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 IBM Corp.
+ * Copyright (c) 2009, 201 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
  *    Ian Craggs - initial API and implementation and/or initial documentation
+ *    Ian Craggs, Allan Stockdill-Mander - SSL updates
  *******************************************************************************/
 
 /**
@@ -80,25 +85,46 @@ char* MQTTProtocol_addressPort(char* ip_address, int* port)
  * @param password MQTT 3.1 password, or NULL
  * @return the new client structure
  */
+#if defined(OPENSSL)
+int MQTTProtocol_connect(char* ip_address, Clients* aClient, int ssl)
+#else
 int MQTTProtocol_connect(char* ip_address, Clients* aClient)
+#endif
 {
 	int rc, port;
 	char* addr;
 
 	FUNC_ENTRY;
 	aClient->good = 1;
-	time(&(aClient->lastContact));
 
 	addr = MQTTProtocol_addressPort(ip_address, &port);
-	rc = Socket_new(addr, port, &(aClient->socket));
+	rc = Socket_new(addr, port, &(aClient->net.socket));
 	if (rc == EINPROGRESS || rc == EWOULDBLOCK)
-		aClient->connect_state = 1; /* TCP connect called */
+		aClient->connect_state = 1; /* TCP connect called - wait for connect completion */
 	else if (rc == 0)
-	{
-		if ((rc = MQTTPacket_send_connect(aClient)) == 0)
-			aClient->connect_state = 2; /* TCP connect completed, in which case send the MQTT connect packet */
-		else
-			aClient->connect_state = 0;
+	{	/* TCP connect completed. If SSL, send SSL connect */
+#if defined(OPENSSL)
+		if (ssl)
+		{
+			if (SSLSocket_setSocketForSSL(&aClient->net, aClient->sslopts) != 1)
+			{
+				rc = SSLSocket_connect(aClient->net.ssl, aClient->net.socket);
+				if (rc == -1)
+					aClient->connect_state = 2; /* SSL connect called - wait for completion */
+			}
+			else
+				rc = SOCKET_ERROR;
+		}
+#endif
+		
+		if (rc == 0)
+		{
+			/* Now send the MQTT connect packet */
+			if ((rc = MQTTPacket_send_connect(aClient)) == 0)
+				aClient->connect_state = 3; /* MQTT Connect sent - wait for CONNACK */ 
+			else
+				aClient->connect_state = 0;
+		}
 	}
 
 	FUNC_EXIT_RC(rc);
@@ -139,7 +165,7 @@ int MQTTProtocol_subscribe(Clients* client, List* topics, List* qoss)
 
 	FUNC_ENTRY;
 	/* we should stack this up for retry processing too */
-	rc = MQTTPacket_send_subscribe(topics, qoss, MQTTProtocol_assignMsgId(client), 0, client->socket, client->clientID);
+	rc = MQTTPacket_send_subscribe(topics, qoss, MQTTProtocol_assignMsgId(client), 0, &client->net, client->clientID);
 	FUNC_EXIT_RC(rc);
 	return rc;
 }
@@ -178,7 +204,7 @@ int MQTTProtocol_unsubscribe(Clients* client, List* topics)
 
 	FUNC_ENTRY;
 	/* we should stack this up for retry processing too? */
-	rc = MQTTPacket_send_unsubscribe(topics, MQTTProtocol_assignMsgId(client), 0, client->socket, client->clientID);
+	rc = MQTTPacket_send_unsubscribe(topics, MQTTProtocol_assignMsgId(client), 0, &client->net, client->clientID);
 	FUNC_EXIT_RC(rc);
 	return rc;
 }

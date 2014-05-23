@@ -25,6 +25,7 @@
 #include "stddef.h"
 #include "malloc.h"
 #include "memory.h"
+#include "io.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -109,7 +110,7 @@ int __cdecl atexit(void (__cdecl *)(void));
 #define EXIT_FAILURE    1
 typedef int (__cdecl * _onexit_t)(void);
 #define onexit_t _onexit_t
-
+/*
 // Data structure & function definitions for div and ldiv runtimes
 typedef struct _div_t {
     int quot;
@@ -123,7 +124,7 @@ typedef struct _ldiv_t {
 
 div_t  __cdecl div(int, int);
 ldiv_t __cdecl ldiv(long, long);
-
+*/
 #ifdef __cplusplus
 }
 #endif

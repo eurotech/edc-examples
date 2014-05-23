@@ -1,14 +1,26 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 IBM Corp.
+ * Copyright (c) 2009, 2013 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
  *    Ian Craggs - initial API and implementation and/or initial documentation
+ *    Ian Craggs - updates for the async client
  *******************************************************************************/
+
+/**
+ * @file
+ * \brief Logging and tracing module
+ *
+ * 
+ */
 
 #include "Log.h"
 #include "MQTTPacket.h"
@@ -17,6 +29,7 @@
 #include "Messages.h"
 #include "LinkedList.h"
 #include "StackTrace.h"
+#include "Thread.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,12 +37,9 @@
 #include <time.h>
 #include <string.h>
 
-#if defined(_WIN32_WCE)
-#include "wincehelper.h"
-#endif
-
 #if !defined(WIN32)
 #include <syslog.h>
+#include <sys/stat.h>
 #define GETTIMEOFDAY 1
 #else
 #define snprintf _snprintf
@@ -38,9 +48,14 @@
 #if defined(GETTIMEOFDAY)
 	#include <sys/time.h>
 #else
-#if !defined(_WIN32_WCE)
 	#include <sys/timeb.h>
 #endif
+
+#if !defined(WIN32)
+/**
+ * _unlink mapping for linux
+ */
+#define _unlink unlink
 #endif
 
 
@@ -62,11 +77,7 @@ typedef struct
 #if defined(GETTIMEOFDAY)
 	struct timeval ts;
 #else
-#if defined(_WIN32_WCE)
-	SYSTEMTIME ts;
-#else
 	struct timeb ts;
-#endif
 #endif
 	int sametime_count;
 	int number;
@@ -85,22 +96,31 @@ static traceEntry* trace_queue = NULL;
 static int trace_queue_size = 0;
 
 static FILE* trace_destination = NULL;	/**< flag to indicate if trace is to be sent to a stream */
+static char* trace_destination_name = NULL; /**< the name of the trace file */
+static char* trace_destination_backup_name = NULL; /**< the name of the backup trace file */
+static int lines_written = 0; /**< number of lines written to the current output file */
+static int max_lines_per_file = 1000; /**< maximum number of lines to write to one trace file */
 static int trace_output_level = -1;
+static Log_traceCallback* trace_callback = NULL;
+static void Log_output(int log_level, char* msg);
 
 static int sametime_count = 0;
 #if defined(GETTIMEOFDAY)
 struct timeval ts, last_ts;
 #else
-#if defined(_WIN32_WCE)
-SYSTEMTIME ts, last_ts;
-#else
 struct timeb ts, last_ts;
-#endif
 #endif
 static char msg_buf[512];
 
+#if defined(WIN32)
+mutex_type log_mutex;
+#else
+static pthread_mutex_t log_mutex_store = PTHREAD_MUTEX_INITIALIZER;
+static mutex_type log_mutex = &log_mutex_store;
+#endif
 
-int Log_initialize()
+
+int Log_initialize(Log_nameValue* info)
 {
 	int rc = -1;
 	char* envval = NULL;
@@ -111,8 +131,21 @@ int Log_initialize()
 
 	if ((envval = getenv("MQTT_C_CLIENT_TRACE")) != NULL && strlen(envval) > 0)
 	{
-		if (strcmp(envval, "ON") == 0 || (trace_destination = fopen(envval, "wt")) == NULL)
+		if (strcmp(envval, "ON") == 0 || (trace_destination = fopen(envval, "w")) == NULL)
 			trace_destination = stdout;
+		else
+		{
+			trace_destination_name = malloc(strlen(envval) + 1);
+			strcpy(trace_destination_name, envval);
+			trace_destination_backup_name = malloc(strlen(envval) + 3);
+			sprintf(trace_destination_backup_name, "%s.0", trace_destination_name);
+		}
+	}
+	if ((envval = getenv("MQTT_C_CLIENT_TRACE_MAX_LINES")) != NULL && strlen(envval) > 0)
+	{
+		max_lines_per_file = atoi(envval);
+		if (max_lines_per_file <= 0)
+			max_lines_per_file = 1000;
 	}
 	if ((envval = getenv("MQTT_C_CLIENT_TRACE_LEVEL")) != NULL && strlen(envval) > 0)
 	{
@@ -124,8 +157,55 @@ int Log_initialize()
 			trace_settings.trace_level = TRACE_MINIMUM;
 		else if (strcmp(envval, "PROTOCOL") == 0  || strcmp(envval, "TRACE_PROTOCOL") == 0)
 			trace_output_level = TRACE_PROTOCOL;
+		else if (strcmp(envval, "ERROR") == 0  || strcmp(envval, "TRACE_ERROR") == 0)
+			trace_output_level = LOG_ERROR;
 	}
+	Log_output(TRACE_MINIMUM, "=========================================================");
+	Log_output(TRACE_MINIMUM, "                   Trace Output");
+	if (info)
+	{
+		while (info->name)
+		{
+			sprintf(msg_buf, "%s: %s", info->name, info->value);
+			Log_output(TRACE_MINIMUM, msg_buf);
+			info++;
+		}
+	}
+#if !defined(WIN32)
+	struct stat buf;
+	if (stat("/proc/version", &buf) != -1)
+	{
+		FILE* vfile;
+		
+		if ((vfile = fopen("/proc/version", "r")) != NULL)
+		{
+			int len;
+			
+			strcpy(msg_buf, "/proc/version: ");
+			len = strlen(msg_buf);
+			if (fgets(&msg_buf[len], sizeof(msg_buf) - len, vfile))
+				Log_output(TRACE_MINIMUM, msg_buf);
+			fclose(vfile);
+		}
+	}
+#endif
+	Log_output(TRACE_MINIMUM, "=========================================================");
+		
 	return rc;
+}
+
+
+void Log_setTraceCallback(Log_traceCallback* callback)
+{
+	trace_callback = callback;
+}
+
+
+void Log_setTraceLevel(enum LOG_LEVELS level)
+{
+	if (level < TRACE_MINIMUM) /* the lowest we can go is TRACE_MINIMUM*/
+		trace_settings.trace_level = level;
+	trace_output_level = level;
 }
 
 
@@ -140,6 +220,10 @@ void Log_terminate()
 			fclose(trace_destination);
 		trace_destination = NULL;
 	}
+	if (trace_destination_name)
+		free(trace_destination_name);
+	if (trace_destination_backup_name)
+		free(trace_destination_backup_name);
 	start_index = -1;
 	next_index = 0;
 	trace_output_level = -1;
@@ -158,15 +242,8 @@ static traceEntry* Log_pretrace()
 		gettimeofday(&ts, NULL);
 		if (ts.tv_sec != last_ts.tv_sec || ts.tv_usec != last_ts.tv_usec)
 #else
-#if defined(_WIN32_WCE)
-		GetLocalTime(&ts);
-		if (ts.wDay!=last_ts.wDay || ts.wHour!=last_ts.wHour || ts.wMilliseconds!=last_ts.wMilliseconds 
-			|| ts.wMinute!=last_ts.wMinute || ts.wMonth!=last_ts.wMonth || ts.wSecond!=last_ts.wSecond 
-			|| ts.wYear!=last_ts.wYear) 
-#else
 		ftime(&ts);
 		if (ts.time != last_ts.time || ts.millitm != last_ts.millitm)
-#endif
 #endif
 		{
 			sametime_count = 0;
@@ -214,35 +291,13 @@ static char* Log_formatTraceEntry(traceEntry* cur_entry)
 #if defined(GETTIMEOFDAY)
 	timeinfo = localtime(&cur_entry->ts.tv_sec);
 #else
-#if defined(_WIN32_WCE)
-	timeinfo = malloc (sizeof(struct tm));
-	timeinfo->tm_sec = cur_entry->ts.wSecond;
-	timeinfo->tm_min = cur_entry->ts.wMinute;
-	timeinfo->tm_hour = cur_entry->ts.wHour;
-	timeinfo->tm_mday = cur_entry->ts.wDay;
-	timeinfo->tm_mon = (cur_entry->ts.wMonth)-1;
-	timeinfo->tm_year = (cur_entry->ts.wYear)-1900;
-	timeinfo->tm_wday = cur_entry->ts.wDayOfWeek;
-	timeinfo->tm_yday = 0;
-	timeinfo->tm_isdst = 0;
-#else
 	timeinfo = localtime(&cur_entry->ts.time);
 #endif
-#endif
-#if defined(_WIN32_WCE)
-	sprintf(&msg_buf[7], "%04d%02d%02d %2d%2d%2d ", timeinfo->tm_year, timeinfo->tm_mon, timeinfo->tm_mday
-		, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
-#else
 	strftime(&msg_buf[7], 80, "%Y%m%d %H%M%S ", timeinfo);
-#endif
 #if defined(GETTIMEOFDAY)
 	sprintf(&msg_buf[22], ".%.3lu ", cur_entry->ts.tv_usec / 1000L);
 #else
-#if defined(_WIN32_WCE)
-	sprintf(&msg_buf[22], ".%.3hu ", cur_entry->ts.wMilliseconds);
-#else
 	sprintf(&msg_buf[22], ".%.3hu ", cur_entry->ts.millitm);
-#endif
 #endif
 	buf_pos = 27;
 
@@ -265,13 +320,42 @@ static char* Log_formatTraceEntry(traceEntry* cur_entry)
 }
 
 
+static void Log_output(int log_level, char* msg)
+{
+	if (trace_destination)
+	{
+		fprintf(trace_destination, "%s\n", msg);
+
+		if (trace_destination != stdout && ++lines_written >= max_lines_per_file)
+		{	
+
+			fclose(trace_destination);		
+			_unlink(trace_destination_backup_name); /* remove any old backup trace file */
+			rename(trace_destination_name, trace_destination_backup_name); /* rename recently closed to backup */
+			trace_destination = fopen(trace_destination_name, "w"); /* open new trace file */
+			if (trace_destination == NULL)
+				trace_destination = stdout;
+			lines_written = 0;
+		}
+		else
+			fflush(trace_destination);
+	}
+		
+	if (trace_callback)
+		(*trace_callback)(log_level, msg);
+}
+
+
 static void Log_posttrace(int log_level, traceEntry* cur_entry)
 {
-	if (trace_destination &&
-		((trace_output_level == -1) ? log_level >= trace_settings.trace_level : log_level >= trace_output_level))
+	if (((trace_output_level == -1) ? log_level >= trace_settings.trace_level : log_level >= trace_output_level))
 	{
-		fprintf(trace_destination, "%s\n", &Log_formatTraceEntry(cur_entry)[7]);
-		fflush(trace_destination);
+		char* msg = NULL;
+		
+		if (trace_destination || trace_callback)
+			msg = &Log_formatTraceEntry(cur_entry)[7];
+		
+		Log_output(log_level, msg);
 	}
 }
 
@@ -307,13 +391,14 @@ static void Log_trace(int log_level, char* buf)
  */
 void Log(int log_level, int msgno, char* format, ...)
 {
-	char* temp = NULL;
-	static char msg_buf[512];
-
 	if (log_level >= trace_settings.trace_level)
 	{
+		char* temp = NULL;
+		static char msg_buf[512];
 		va_list args;
 
+		/* we're using a static character buffer, so we need to make sure only one thread uses it at a time */
+		Thread_lock_mutex(log_mutex); 
 		if (format == NULL && (temp = Messages_get(msgno, log_level)) != NULL)
 			format = temp;
 
@@ -322,6 +407,7 @@ void Log(int log_level, int msgno, char* format, ...)
 
 		Log_trace(log_level, msg_buf);
 		va_end(args);
+		Thread_unlock_mutex(log_mutex); 
 	}
 
 	/*if (log_level >= LOG_ERROR)
@@ -329,9 +415,7 @@ void Log(int log_level, int msgno, char* format, ...)
 		char* filename = NULL;
 		Log_recordFFDC(&msg_buf[7]);
 	}
-
-	if (log_level == LOG_FATAL)
-		exit(-1);*/
+	*/
 }
 
 

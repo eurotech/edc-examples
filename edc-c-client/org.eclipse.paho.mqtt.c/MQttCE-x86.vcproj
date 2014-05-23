@@ -40,8 +40,8 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="_DEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;DEBUG;_WINDOWS;_USRDLL;MQTTCEX86_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="..\os\wince\libce\include"
+				PreprocessorDefinitions="_DEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;DEBUG;_WINDOWS;_USRDLL;MQTTCEX86_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="true"
 				RuntimeLibrary="1"
 				BufferSecurityCheck="false"
@@ -126,8 +126,8 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="2"
-				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;_WINDOWS;_USRDLL;MQTTCEX86_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="..\os\wince\libce\include"
+				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;_WINDOWS;_USRDLL;MQTTCEX86_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;_CRT_SECURE_NO_DEPRECATE;WIN32"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
 				UsePrecompiledHeader="0"
@@ -201,6 +201,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\os\wince\libce\src\errno.c"
+				>
+			</File>
+			<File
+				RelativePath="..\os\wince\libce\src\FindFile.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\os\wince\libce\src\getenv.c"
+				>
+			</File>
+			<File
+				RelativePath="..\os\wince\libce\src\gettimeofday.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Heap.c"
 				>
 			</File>
@@ -214,6 +230,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Messages.c"
+				>
+			</File>
+			<File
+				RelativePath="..\os\wince\libce\src\mkdir.c"
 				>
 			</File>
 			<File
@@ -245,6 +265,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\os\wince\libce\src\rename.c"
+				>
+			</File>
+			<File
+				RelativePath="..\os\wince\libce\src\rmdir.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Socket.c"
 				>
 			</File>
@@ -253,7 +281,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SSLSocket.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\StackTrace.c"
+				>
+			</File>
+			<File
+				RelativePath="..\os\wince\libce\src\string_extras.cpp"
 				>
 			</File>
 			<File
@@ -261,11 +297,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\utf-8.c"
+				RelativePath="..\os\wince\libce\src\time.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\WinCEHelper.c"
+				RelativePath=".\src\Tree.c"
+				>
+			</File>
+			<File
+				RelativePath="..\os\wince\libce\src\unlink.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\utf-8.c"
 				>
 			</File>
 		</Filter>

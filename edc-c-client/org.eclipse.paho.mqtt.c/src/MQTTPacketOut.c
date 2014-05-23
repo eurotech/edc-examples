@@ -1,13 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 IBM Corp.
+ * Copyright (c) 2009, 2013 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
  *    Ian Craggs - initial API and implementation and/or initial documentation
+ *    Ian Craggs, Allan Stockdill-Mander - SSL updates
  *******************************************************************************/
 
 /**
@@ -83,8 +88,8 @@ int MQTTPacket_send_connect(Clients* client)
 	if (client->password)
 		writeUTF(&ptr, client->password);
 
-	rc = MQTTPacket_send(client->socket, packet.header, buf, len);
-	Log(LOG_PROTOCOL, 0, NULL, client->socket, client->clientID, client->cleansession, rc);
+	rc = MQTTPacket_send(&client->net, packet.header, buf, len);
+	Log(LOG_PROTOCOL, 0, NULL, client->net.socket, client->clientID, client->cleansession, rc);
 	free(buf);
 	FUNC_EXIT_RC(rc);
 	return rc;
@@ -118,7 +123,7 @@ void* MQTTPacket_connack(unsigned char aHeader, char* data, int datalen)
  * @param clientID the string client identifier, only used for tracing
  * @return the completion code (e.g. TCPSOCKET_COMPLETE)
  */
-int MQTTPacket_send_pingreq(int socket, char* clientID)
+int MQTTPacket_send_pingreq(networkHandles* net, char* clientID)
 {
 	Header header;
 	int rc = 0;
@@ -126,8 +131,8 @@ int MQTTPacket_send_pingreq(int socket, char* clientID)
 	FUNC_ENTRY;
 	header.byte = 0;
 	header.bits.type = PINGREQ;
-	rc = MQTTPacket_send(socket, header, NULL, 0);
-	Log(LOG_PROTOCOL, 20, NULL, socket, clientID, rc);
+	rc = MQTTPacket_send(net, header, NULL, 0);
+	Log(LOG_PROTOCOL, 20, NULL, net->socket, clientID, rc);
 	FUNC_EXIT_RC(rc);
 	return rc;
 }
@@ -143,7 +148,7 @@ int MQTTPacket_send_pingreq(int socket, char* clientID)
  * @param clientID the string client identifier, only used for tracing
  * @return the completion code (e.g. TCPSOCKET_COMPLETE)
  */
-int MQTTPacket_send_subscribe(List* topics, List* qoss, int msgid, int dup, int socket, char* clientID)
+int MQTTPacket_send_subscribe(List* topics, List* qoss, int msgid, int dup, networkHandles* net, char* clientID)
 {
 	Header header;
 	char *data, *ptr;
@@ -170,8 +175,8 @@ int MQTTPacket_send_subscribe(List* topics, List* qoss, int msgid, int dup, int 
 		writeUTF(&ptr, (char*)(elem->content));
 		writeChar(&ptr, *(int*)(qosElem->content));
 	}
-	rc = MQTTPacket_send(socket, header, data, datalen);
-	Log(LOG_PROTOCOL, 22, NULL, socket, clientID, msgid, rc);
+	rc = MQTTPacket_send(net, header, data, datalen);
+	Log(LOG_PROTOCOL, 22, NULL, net->socket, clientID, msgid, rc);
 	free(data);
 	FUNC_EXIT_RC(rc);
 	return rc;
@@ -215,7 +220,7 @@ void* MQTTPacket_suback(unsigned char aHeader, char* data, int datalen)
  * @param clientID the string client identifier, only used for tracing
  * @return the completion code (e.g. TCPSOCKET_COMPLETE)
  */
-int MQTTPacket_send_unsubscribe(List* topics, int msgid, int dup, int socket, char* clientID)
+int MQTTPacket_send_unsubscribe(List* topics, int msgid, int dup, networkHandles* net, char* clientID)
 {
 	Header header;
 	char *data, *ptr;
@@ -238,8 +243,8 @@ int MQTTPacket_send_unsubscribe(List* topics, int msgid, int dup, int socket, ch
 	elem = NULL;
 	while (ListNextElement(topics, &elem))
 		writeUTF(&ptr, (char*)(elem->content));
-	rc = MQTTPacket_send(socket, header, data, datalen);
-	Log(LOG_PROTOCOL, 25, NULL, socket, clientID, msgid, rc);
+	rc = MQTTPacket_send(net, header, data, datalen);
+	Log(LOG_PROTOCOL, 25, NULL, net->socket, clientID, msgid, rc);
 	free(data);
 	FUNC_EXIT_RC(rc);
 	return rc;

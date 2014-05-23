@@ -19,11 +19,8 @@
  */
 
 
-#include <sys/timeb.h>
+#ifndef __wcecompat__SIGNAL_H__
+#define __wcecompat__SIGNAL_H__
 
 
-int ftime(struct timeb* tp)
-{
-	// TODO: implement
-	return -1;
-}
+#endif // __wcecompat__SIGNAL_H__

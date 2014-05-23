@@ -31,7 +31,7 @@ extern "C" {
 #include <time.h>
 
 
-struct timeb
+struct _timeb
 {
 	time_t			time;
 	unsigned short	millitm;
@@ -40,7 +40,7 @@ struct timeb
 };
 
 
-int __cdecl _ftime(struct timeb *tp);
+int __cdecl _ftime(struct _timeb *tp);
 #define ftime _ftime
 
 

@@ -36,7 +36,7 @@ extern int errno;
 
 #define ENOENT	(2)
 #define EBADF	(9)
-#define EAGAIN	(11)
+//#define EAGAIN	(11)
 #define ENOMEM	(12)
 #define	EACCES  (13)    /* Permission denied */
 #define EINVAL	(22)
@@ -48,5 +48,8 @@ extern int errno;
 }
 #endif
 
+#define EEXIST		ERROR_ALREADY_EXISTS
+//#define ENOENT		ERROR_FILE_NOT_FOUND
+#define ENOTEMPTY	ERROR_DIR_NOT_EMPTY
 
 #endif // __wcecompat__ERRNO_H__

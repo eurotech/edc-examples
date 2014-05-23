@@ -388,7 +388,7 @@ bool removeRedirArgs(LPTSTR lpCmdLine)
 			if (*lpCmdLine == 0)
 				*p = 0;
 			else
-				memmove(p, lpCmdLine, ts_strsizez(lpCmdLine));
+				memmove(p, lpCmdLine, ts_strsizez((const char*)lpCmdLine));
 			lpCmdLine = p;
 		}
 		p = lpCmdLine;

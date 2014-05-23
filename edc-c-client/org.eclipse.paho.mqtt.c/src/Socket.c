@@ -1,13 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 IBM Corp.
+ * Copyright (c) 2009, 2013 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
- *    Ian Craggs - initial API and implementation and/or initial documentation
+ *    Ian Craggs - initial implementation and documentation
+ *    Ian Craggs - async client updates
  *******************************************************************************/
 
 /**
@@ -23,12 +28,13 @@
 #include "SocketBuffer.h"
 #include "Messages.h"
 #include "StackTrace.h"
+#if defined(OPENSSL)
+#include "SSLSocket.h"
+#endif
 
 #include <stdlib.h>
 #include <string.h>
-#if !defined(_WIN32_WCE)
 #include <signal.h>
-#endif
 #include <ctype.h>
 
 #include "Heap.h"
@@ -39,14 +45,12 @@ int Socket_continueWrites(fd_set* pwset);
 #if defined(WIN32)
 #define iov_len len
 #define iov_base buf
-#else
-#include <sys/uio.h>
 #endif
 
 /**
  * Structure to hold all socket data for the module
  */
-static Sockets s;
+Sockets s;
 static fd_set wset;
 
 /**
@@ -94,7 +98,7 @@ int Socket_error(char* aString, int sock)
 	if (errno != EINTR && errno != EAGAIN && errno != EINPROGRESS && errno != EWOULDBLOCK)
 	{
 		if (strcmp(aString, "shutdown") != 0 || (errno != ENOTCONN && errno != ECONNRESET))
-			Log(TRACE_MIN, -1, "Socket error %d in %s for socket %d", errno, aString, sock);
+			Log(TRACE_MIN, -1, "Socket error %s in %s for socket %d", strerror(errno), aString, sock);
 	}
 	FUNC_EXIT_RC(errno);
 	return errno;
@@ -463,7 +467,11 @@ int Socket_putdatas(int socket, char* buf0, int buf0len, int count, char** buffe
 			int* sockmem = (int*)malloc(sizeof(int));
 			Log(TRACE_MIN, -1, "Partial write: %ld bytes of %d actually written on socket %d",
 					bytes, total, socket);
+#if defined(OPENSSL)
+			SocketBuffer_pendingWrite(socket, NULL, count+1, iovecs, total, bytes);
+#else
 			SocketBuffer_pendingWrite(socket, count+1, iovecs, total, bytes);
+#endif
 			*sockmem = socket;
 			ListAppend(s.write_pending, sockmem, sizeof(int));
 			FD_SET(socket, &(s.pending_wset));
@@ -473,6 +481,29 @@ int Socket_putdatas(int socket, char* buf0, int buf0len, int count, char** buffe
 exit:
 	FUNC_EXIT_RC(rc);
 	return rc;
+}
+
+
+/**
+ *  Add a socket to the pending write list, so that it is checked for writing in select.  This is used
+ *  in connect processing when the TCP connect is incomplete, as we need to check the socket for both
+ *  ready to read and write states. 
+ *  @param socket the socket to add
+ */
+void Socket_addPendingWrite(int socket)
+{
+	FD_SET(socket, &(s.pending_wset));
+}
+
+
+/**
+ *  Clear a socket from the pending write list - if one was added with Socket_addPendingWrite
+ *  @param socket the socket to remove
+ */
+void Socket_clearPendingWrite(int socket)
+{
+	if (FD_ISSET(socket, &(s.pending_wset)))
+		FD_CLR(socket, &(s.pending_wset));
 }
 
 
@@ -492,7 +523,9 @@ int Socket_close_only(int socket)
 	if ((rc = closesocket(socket)) == SOCKET_ERROR)
 		Socket_error("close", socket);
 #else
-	if (shutdown(socket, SHUT_RDWR) == SOCKET_ERROR)
+	if (shutdown(socket, SHUT_WR) == SOCKET_ERROR)
+		Socket_error("shutdown", socket);
+	if ((rc = recv(socket, NULL, (size_t)0, 0)) == SOCKET_ERROR)
 		Socket_error("shutdown", socket);
 	if ((rc = close(socket)) == SOCKET_ERROR)
 		Socket_error("close", socket);
@@ -615,6 +648,13 @@ int Socket_new(char* addr, int port, int* sock)
 			rc = Socket_error("socket", *sock);
 		else
 		{
+#if defined(NOSIGPIPE)
+			int opt = 1;
+
+			if (setsockopt(*sock, SOL_SOCKET, SO_NOSIGPIPE, (void*)&opt, sizeof(opt)) != 0)
+				Log(TRACE_MIN, -1, "Could not set SO_NOSIGPIPE for socket %d", *sock);
+#endif
+
 			Log(TRACE_MIN, -1, "New socket %d for %s, port %d",	*sock, addr, port);
 			if (Socket_addSocket(*sock) == SOCKET_ERROR)
 				rc = Socket_error("setnonblocking", *sock);
@@ -644,6 +684,13 @@ int Socket_new(char* addr, int port, int* sock)
 }
 
 
+static Socket_writeComplete* writecomplete = NULL;
+
+void Socket_setWriteCompleteCallback(Socket_writeComplete* mywritecomplete)
+{
+	writecomplete = mywritecomplete;
+}
+
 /**
  *  Continue an outstanding write for a particular socket
  *  @param socket that socket
@@ -660,6 +707,14 @@ int Socket_continueWrite(int socket)
 
 	FUNC_ENTRY;
 	pw = SocketBuffer_getWrite(socket);
+	
+#if defined(OPENSSL)
+	if (pw->ssl)
+	{
+		rc = SSLSocket_continueWrite(pw);
+		goto exit;
+	} 	
+#endif
 
 	for (i = 0; i < pw->count; ++i)
 	{
@@ -689,11 +744,14 @@ int Socket_continueWrite(int socket)
 			free(pw->iovecs[1].iov_base);
 			if (pw->count == 5)
 				free(pw->iovecs[3].iov_base);
-			Log(TRACE_MIN, -1, "ContinueWrite: partial write now complete for socket %d", socket);
+			Log(TRACE_MIN, -1, "ContinueWrite: partial write now complete for socket %d", socket);		
 		}
 		else
 			Log(TRACE_MIN, -1, "ContinueWrite wrote +%lu bytes on socket %d", bytes, socket);
 	}
+#if defined(OPENSSL)
+exit:
+#endif
 	FUNC_EXIT_RC(rc);
 	return rc;
 }
@@ -724,6 +782,9 @@ int Socket_continueWrites(fd_set* pwset)
 				ListNextElement(s.write_pending, &curpending);
 			}
 			curpending = s.write_pending->current;
+						
+			if (writecomplete)
+				(*writecomplete)(socket);
 		}
 		else
 			ListNextElement(s.write_pending, &curpending);

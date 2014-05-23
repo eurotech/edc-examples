@@ -1,31 +1,72 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 IBM Corp.
+ * Copyright (c) 2009, 2013 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
  *    Ian Craggs - initial API and implementation and/or initial documentation
+ *    Ian Craggs, Allan Stockdill-Mander - SSL updates
+ *    Ian Craggs - multiple server connection support
  *******************************************************************************/
 
 /**
+ * @cond MQTTClient_internal
+ * @mainpage MQTT Client Library Internals
+ * In the beginning there was one MQTT C client library, MQTTClient, as implemented in MQTTClient.c
+ * This library was designed to be easy to use for applications which didn't mind if some of the calls 
+ * blocked for a while.  For instance, the MQTTClient_connect call will block until a successful
+ * connection has completed, or a connection has failed, which could be as long as the "connection 
+ * timeout" interval, whose default is 30 seconds.
+ * 
+ * However in mobile devices and other windowing environments, blocking on the GUI thread is a bad
+ * thing as it causes the user interface to freeze.  Hence a new API, MQTTAsync, implemented 
+ * in MQTTAsync.c, was devised.  There are no blocking calls in this library, so it is well suited 
+ * to GUI and mobile environments, at the expense of some extra complexity.
+ * 
+ * Both libraries are designed to be sparing in the use of threads.  So multiple client objects are
+ * handled by one or two threads, with a select call in Socket_getReadySocket(), used to determine 
+ * when a socket has incoming data.
+ *
+ * @endcond
+ * @cond MQTTClient_main
  * @mainpage MQTT Client library for C
- * &copy; Copyright IBM Corp. 2009, 2011
+ * &copy; Copyright IBM Corp. 2009, 2013
  * 
  * @brief An MQTT client library in C.
  *
- * An MQTT client application connects to MQTT-capable servers. 
+ * These pages describe the original more synchronous API which might be 
+ * considered easier to use.  Some of the calls will block.  For the new
+ * totally asynchronous API where no calls block, which is especially suitable
+ * for use in windowed environments, see the
+ * <a href="../Casync/index.html">MQTT C Client Asynchronous API Documentation</a>.
+ *
+ * An MQTT client application connects to MQTT-capable servers.
  * A typical client is responsible for collecting information from a telemetry 
  * device and publishing the information to the server. It can also subscribe 
  * to topics, receive messages, and use this information to control the 
- * telemetry device. MQTT clients implement the published MQTT v3 protocol. 
+ * telemetry device.
+ * 
+ * MQTT clients implement the published MQTT v3 protocol. You can write your own
+ * API to the MQTT protocol using the programming language and platform of your 
+ * choice. This can be time-consuming and error-prone.
+ * 
+ * To simplify writing MQTT client applications, this library encapsulates
+ * the MQTT v3 protocol for you. Using this library enables a fully functional 
+ * MQTT client application to be written in a few lines of code.
+ * The information presented here documents the API provided
+ * by the MQTT Client library for C.
  * 
  * <b>Using the client</b><br>
  * Applications that use the client library typically use a similar structure:
  * <ul>
- * <li>Create a clent</li>
+ * <li>Create a client object</li>
  * <li>Set the options to connect to an MQTT server</li>
  * <li>Set up callback functions if multi-threaded (asynchronous mode) 
  * operation is being used (see @ref async).</li>
@@ -49,19 +90,21 @@
  * <li>@ref async</li>
  * <li>@ref wildcard</li>
  * <li>@ref qos</li>
+ * <li>@ref tracing</li>
  * </ul>
+ * @endcond
  */
 
 /// @cond EXCLUDE
 #if !defined(MQTTCLIENT_H)
 #define MQTTCLIENT_H
 
-#if defined(WIN32) || defined(_WIN32_WCE)
+#if defined(WIN32)
   #define DLLImport __declspec(dllimport)
   #define DLLExport __declspec(dllexport)
 #else
   #define DLLImport extern
-  #define DLLExport
+  #define DLLExport __attribute__ ((visibility ("default")))
 #endif
 
 #include <stdio.h>
@@ -112,6 +155,10 @@
  * and version number.
  */
 #define MQTTCLIENT_BAD_STRUCTURE -8
+/**
+ * Return code: A QoS value that falls outside of the acceptable range (0,1,2)
+ */
+#define MQTTCLIENT_BAD_QOS -9
 
 /**
  * A handle representing an MQTT client. A valid client handle is available
@@ -129,6 +176,7 @@ typedef void* MQTTClient;
  * MQTTClient_getPendingDeliveryTokens()).
  */
 typedef int MQTTClient_deliveryToken;
+typedef int MQTTClient_token;
 
 /**
  * A structure representing the payload and attributes of an MQTT message. The
@@ -192,7 +240,7 @@ typedef struct
 	int msgid;
 } MQTTClient_message;
 
-#define MQTTClient_message_initializer { "MQTM", 0, 0, NULL, 0, 0, 0, 0 }
+#define MQTTClient_message_initializer { {'M', 'Q', 'T', 'M'}, 0, 0, NULL, 0, 0, 0, 0 }
 
 /**
  * This is a callback function. The client application
@@ -261,7 +309,6 @@ typedef void MQTTClient_deliveryComplete(void* context, MQTTClient_deliveryToken
  */
 typedef void MQTTClient_connectionLost(void* context, char* cause);
 
-
 /**
  * This function sets the callback functions for a specific client.
  * If your client application doesn't use a particular callback, set the 
@@ -290,7 +337,8 @@ typedef void MQTTClient_connectionLost(void* context, char* cause);
  * ::MQTTCLIENT_FAILURE if an error occurred.
  */
 DLLExport int MQTTClient_setCallbacks(MQTTClient handle, void* context, MQTTClient_connectionLost* cl,
-																			MQTTClient_messageArrived* ma, MQTTClient_deliveryComplete* dc);
+									MQTTClient_messageArrived* ma, MQTTClient_deliveryComplete* dc);
+		
 
 /**
  * This function creates an MQTT client ready for connection to the 
@@ -371,7 +419,58 @@ typedef struct
 	int qos;
 } MQTTClient_willOptions;
 
-#define MQTTClient_willOptions_initializer { "MQTW", 0, NULL, NULL, 0, 0 }
+#define MQTTClient_willOptions_initializer { {'M', 'Q', 'T', 'W'}, 0, NULL, NULL, 0, 0 }
+
+/**
+* MQTTClient_sslProperties defines the settings to establish an SSL/TLS connection using the 
+* OpenSSL library. It covers the following scenarios:
+* - Server authentication: The client needs the digital certificate of the server. It is included
+*   in a store containting trusted material (also known as "trust store").
+* - Mutual authentication: Both client and server are authenticated during the SSL handshake. In 
+*   addition to the digital certificate of the server in a trust store, the client will need its own 
+*   digital certificate and the private key used to sign its digital certificate stored in a "key store".
+* - Anonymous connection: Both client and server do not get authenticated and no credentials are needed 
+*   to establish an SSL connection. Note that this scenario is not fully secure since it is subject to
+*   man-in-the-middle attacks.
+*/
+typedef struct 
+{
+	/** The eyecatcher for this structure.  Must be MQTS */
+	char struct_id[4];
+	/** The version number of this structure.  Must be 0 */
+	int struct_version;	
+	
+	/** The file in PEM format containing the public digital certificates trusted by the client. */
+	char* trustStore;
+
+	/** The file in PEM format containing the public certificate chain of the client. It may also include
+	* the client's private key. 
+	*/
+	char* keyStore;
+	
+	/** If not included in the sslKeyStore, this setting points to the file in PEM format containing
+	* the client's private key.
+	*/
+	char* privateKey;
+	/** The password to load the client's privateKey if encrypted. */
+	char* privateKeyPassword;
+ 
+	/**
+	* The list of cipher suites that the client will present to the server during the SSL handshake. For a 
+	* full explanation of the cipher list format, please see the OpenSSL on-line documentation:
+	* http://www.openssl.org/docs/apps/ciphers.html#CIPHER_LIST_FORMAT
+	* If this setting is ommitted, its default value will be "ALL", that is, all the cipher suites -excluding
+	* those offering no encryption- will be considered.
+	* This setting can be used to set an SSL anonymous connection ("aNULL" string value, for instance).
+	*/
+	char* enabledCipherSuites;    
+
+    /** True/False option to enable verification of the server certificate **/
+    int enableServerCertAuth;
+  
+} MQTTClient_SSLOptions;
+
+#define MQTTClient_SSLOptions_initializer { {'M', 'Q', 'T', 'S'}, 0, NULL, NULL, NULL, NULL, NULL, 1 }
 
 /**
  * MQTTClient_connectOptions defines several settings that control the way the
@@ -391,79 +490,122 @@ typedef struct
 {
 	/** The eyecatcher for this structure.  must be MQTC. */
 	char struct_id[4];
-	/** The version number of this structure.  Must be 0 */
+	/** The version number of this structure.  Must be 0, 1 or 2.  
+	  * 0 signifies no SSL options and no serverURIs
+	  * 1 signifies no serverURIs 
+	  */
 	int struct_version;
 	/** The "keep alive" interval, measured in seconds, defines the maximum time
-      * that should pass without communication between the client and the server
-      * The client will ensure that at least one message travels across the
-      * network within each keep alive period.  In the absence of a data-related 
-	  * message during the time period, the client sends a very small MQTT 
-      * "ping" message, which the server will acknowledge. The keep alive 
-      * interval enables the client to detect when the server is no longer 
-	  * available without having to wait for the long TCP/IP timeout.
-	  */
+   * that should pass without communication between the client and the server
+   * The client will ensure that at least one message travels across the
+   * network within each keep alive period.  In the absence of a data-related 
+	 * message during the time period, the client sends a very small MQTT 
+   * "ping" message, which the server will acknowledge. The keep alive 
+   * interval enables the client to detect when the server is no longer 
+	 * available without having to wait for the long TCP/IP timeout.
+	 */
 	int keepAliveInterval;
 	/** 
-      * This is a boolean value. The cleansession setting controls the behaviour
-      * of both the client and the server at connection and disconnection time.
-      * The client and server both maintain session state information. This
-      * information is used to ensure "at least once" and "exactly once"
-      * delivery, and "exactly once" receipt of messages. Session state also
-      * includes subscriptions created by an MQTT client. You can choose to
-      * maintain or discard state information between sessions. 
-      *
-      * When cleansession is true, the state information is discarded at 
-      * connect and disconnect. Setting cleansession to false keeps the state 
-      * information. When you connect an MQTT client application with 
-      * MQTTClient_connect(), the client identifies the connection using the 
-      * client identifier and the address of the server. The server checks 
-      * whether session information for this client
-      * has been saved from a previous connection to the server. If a previous 
-      * session still exists, and cleansession=true, then the previous session 
-      * information at the client and server is cleared. If cleansession=false,
-      * the previous session is resumed. If no previous session exists, a new
-      * session is started.
-	  */
+   * This is a boolean value. The cleansession setting controls the behaviour
+   * of both the client and the server at connection and disconnection time.
+   * The client and server both maintain session state information. This
+   * information is used to ensure "at least once" and "exactly once"
+   * delivery, and "exactly once" receipt of messages. Session state also
+   * includes subscriptions created by an MQTT client. You can choose to
+   * maintain or discard state information between sessions. 
+   *
+   * When cleansession is true, the state information is discarded at 
+   * connect and disconnect. Setting cleansession to false keeps the state 
+   * information. When you connect an MQTT client application with 
+   * MQTTClient_connect(), the client identifies the connection using the 
+   * client identifier and the address of the server. The server checks 
+   * whether session information for this client
+   * has been saved from a previous connection to the server. If a previous 
+   * session still exists, and cleansession=true, then the previous session 
+   * information at the client and server is cleared. If cleansession=false,
+   * the previous session is resumed. If no previous session exists, a new
+   * session is started.
+	 */
 	int cleansession;
 	/** 
-      * This is a boolean value that controls how many messages can be in-flight
-      * simultaneously. Setting <i>reliable</i> to true means that a published 
-      * message must be completed (acknowledgements received) before another
-      * can be sent. Attempts to publish additional messages receive an
-      * ::MQTTCLIENT_MAX_MESSAGES_INFLIGHT return code. Setting this flag to
-	  * false allows up to 10 messages to be in-flight. This can increase 
-      * overall throughput in some circumstances.
-	  */
+   * This is a boolean value that controls how many messages can be in-flight
+   * simultaneously. Setting <i>reliable</i> to true means that a published 
+   * message must be completed (acknowledgements received) before another
+   * can be sent. Attempts to publish additional messages receive an
+   * ::MQTTCLIENT_MAX_MESSAGES_INFLIGHT return code. Setting this flag to
+	 * false allows up to 10 messages to be in-flight. This can increase 
+   * overall throughput in some circumstances.
+	 */
 	int reliable;		
 	/** 
-      * This is a pointer to an MQTTClient_willOptions structure. If your 
-      * application does not make use of the Last Will and Testament feature, 
-      * set this pointer to NULL.
-      */
+   * This is a pointer to an MQTTClient_willOptions structure. If your 
+   * application does not make use of the Last Will and Testament feature, 
+   * set this pointer to NULL.
+   */
 	MQTTClient_willOptions* will;
 	/** 
-      * MQTT servers that support the MQTT v3.1 protocol provide authentication
-      * and authorisation by user name and password. This is the user name 
-      * parameter. 
-      */
+   * MQTT servers that support the MQTT v3.1 protocol provide authentication
+   * and authorisation by user name and password. This is the user name 
+   * parameter. 
+   */
 	char* username;	
 	/** 
-      * MQTT servers that support the MQTT v3.1 protocol provide authentication
-      * and authorisation by user name and password. This is the password 
-      * parameter.
-      */
+   * MQTT servers that support the MQTT v3.1 protocol provide authentication
+   * and authorisation by user name and password. This is the password 
+   * parameter.
+   */
 	char* password;
 	/**
-      * The time interval in seconds to allow a connect to complete.
-      */
+   * The time interval in seconds to allow a connect to complete.
+   */
 	int connectTimeout;
 	/**
 	 * The time interval in seconds
 	 */
 	int retryInterval;
+	/** 
+   * This is a pointer to an MQTTClient_SSLOptions structure. If your 
+   * application does not make use of SSL, set this pointer to NULL.
+   */
+	MQTTClient_SSLOptions* ssl;
+	/**
+	 * The number of entries in the optional serverURIs array. Defaults to 0.
+	 */
+	int serverURIcount;
+	/**
+   * An optional array of null-terminated strings specifying the servers to
+   * which the client will connect. Each string takes the form <i>protocol://host:port</i>.
+   * <i>protocol</i> must be <i>tcp</i> or <i>ssl</i>. For <i>host</i>, you can 
+   * specify either an IP address or a host name. For instance, to connect to
+   * a server running on the local machines with the default MQTT port, specify
+   * <i>tcp://localhost:1883</i>.
+   * If this list is empty (the default), the server URI specified on MQTTClient_create()
+   * is used.
+   */    
+	char** serverURIs;
 } MQTTClient_connectOptions;
 
-#define MQTTClient_connectOptions_initializer { "MQTC", 0, 60, 1, 1, NULL, NULL, NULL, 30, 20 }
+#define MQTTClient_connectOptions_initializer { {'M', 'Q', 'T', 'C'}, 2, 60, 1, 1, NULL, NULL, NULL, 30, 20, NULL, 0, NULL }
+
+/**
+  * MQTTClient_libraryInfo is used to store details relating to the currently used
+  * library such as the version in use, the time it was built and relevant openSSL
+  * options. 
+  * There is one static instance of this struct in MQTTClient.c
+  */
+
+typedef struct
+{
+	const char* name;
+	const char* value;
+} MQTTClient_nameValue;
+
+/**
+  * This function returns version information about the library.
+  * no trace information will be returned.
+  * @return an array of strings describing the library.  The last entry is a NULL pointer.
+  */
+DLLExport MQTTClient_nameValue* MQTTClient_getVersionInfo(void);
 
 /**
   * This function attempts to connect a previously-created client (see
@@ -602,7 +744,6 @@ DLLExport int MQTTClient_unsubscribeMany(MQTTClient handle, int count, char** to
   */
 DLLExport int MQTTClient_publish(MQTTClient handle, char* topicName, int payloadlen, void* payload, int qos, int retained,
 																 MQTTClient_deliveryToken* dt);
-
 /** 
   * This function attempts to publish a message to a given topic (see also
   * MQTTClient_publish()). An ::MQTTClient_deliveryToken is issued when 
@@ -739,6 +880,7 @@ DLLExport void MQTTClient_destroy(MQTTClient* handle);
 #endif
 
 /**
+  * @cond MQTTClient_main
   * @page async Asynchronous vs synchronous client applications
   * The client library supports two modes of operation. These are referred to
   * as <b>synchronous</b> and <b>asynchronous</b> modes. If your application
@@ -844,7 +986,7 @@ DLLExport void MQTTClient_destroy(MQTTClient* handle);
   * and acknowledgement sequence is used than for QoS1 to ensure no duplication
   * of messages occurs.
   * @page pubsync Synchronous publication example
-  * @code
+@code
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -893,7 +1035,7 @@ int main(int argc, char* argv[])
   * @endcode
   *
   * @page pubasync Asynchronous publication example
-  * @code
+@code{.c}
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -977,7 +1119,7 @@ int main(int argc, char* argv[])
   
   * @endcode
   * @page subasync Asynchronous subscription example
-  * @code
+@code
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -1058,4 +1200,94 @@ int main(int argc, char* argv[])
 }
               
   * @endcode
+  * @page tracing Tracing
+  * 
+  * Runtime tracing is controlled by environment variables.
+  *
+  * Tracing is switched on by setting MQTT_C_CLIENT_TRACE.  A value of ON, or stdout, prints to
+  * stdout, any other value is interpreted as a file name to use.
+  *
+  * The amount of trace detail is controlled with the MQTT_C_CLIENT_TRACE_LEVEL environment
+  * variable - valid values are ERROR, PROTOCOL, MINIMUM, MEDIUM and MAXIMUM
+  * (from least to most verbose).
+  *
+  * The variable MQTT_C_CLIENT_TRACE_MAX_LINES limits the number of lines of trace that are output
+  * to a file.  Two files are used at most, when they are full, the last one is overwritten with the
+  * new trace entries.  The default size is 1000 lines.
+  *
+  * ### MQTT Packet Tracing
+  * 
+  * A feature that can be very useful is printing the MQTT packets that are sent and received.  To 
+  * achieve this, use the following environment variable settings:
+  * @code
+    MQTT_C_CLIENT_TRACE=ON
+    MQTT_C_CLIENT_TRACE_LEVEL=PROTOCOL
+  * @endcode
+  * The output you should see looks like this:
+  * @code
+    20130528 155936.813 3 stdout-subscriber -> CONNECT cleansession: 1 (0)
+    20130528 155936.813 3 stdout-subscriber <- CONNACK rc: 0
+    20130528 155936.813 3 stdout-subscriber -> SUBSCRIBE msgid: 1 (0)
+    20130528 155936.813 3 stdout-subscriber <- SUBACK msgid: 1
+    20130528 155941.818 3 stdout-subscriber -> DISCONNECT (0)
+  * @endcode
+  * where the fields are:
+  * 1. date
+  * 2. time
+  * 3. socket number
+  * 4. client id
+  * 5. direction (-> from client to server, <- from server to client)
+  * 6. packet details
+  *
+  * ### Default Level Tracing
+  * 
+  * This is an extract of a default level trace of a call to connect:
+  * @code
+    19700101 010000.000 (1152206656) (0)> MQTTClient_connect:893
+    19700101 010000.000 (1152206656)  (1)> MQTTClient_connectURI:716
+    20130528 160447.479 Connecting to serverURI localhost:1883
+    20130528 160447.479 (1152206656)   (2)> MQTTProtocol_connect:98
+    20130528 160447.479 (1152206656)    (3)> MQTTProtocol_addressPort:48
+    20130528 160447.479 (1152206656)    (3)< MQTTProtocol_addressPort:73
+    20130528 160447.479 (1152206656)    (3)> Socket_new:599
+    20130528 160447.479 New socket 4 for localhost, port 1883
+    20130528 160447.479 (1152206656)     (4)> Socket_addSocket:163
+    20130528 160447.479 (1152206656)      (5)> Socket_setnonblocking:73
+    20130528 160447.479 (1152206656)      (5)< Socket_setnonblocking:78 (0)
+    20130528 160447.479 (1152206656)     (4)< Socket_addSocket:176 (0)
+    20130528 160447.479 (1152206656)     (4)> Socket_error:95
+    20130528 160447.479 (1152206656)     (4)< Socket_error:104 (115)
+    20130528 160447.479 Connect pending
+    20130528 160447.479 (1152206656)    (3)< Socket_new:683 (115)
+    20130528 160447.479 (1152206656)   (2)< MQTTProtocol_connect:131 (115)
+  * @endcode
+  * where the fields are:
+  * 1. date
+  * 2. time
+  * 3. thread id
+  * 4. function nesting level
+  * 5. function entry (>) or exit (<)
+  * 6. function name : line of source code file
+  * 7. return value (if there is one)
+  *
+  * ### Memory Allocation Tracing
+  * 
+  * Setting the trace level to maximum causes memory allocations and frees to be traced along with 
+  * the default trace entries, with messages like the following:
+  * @code
+    20130528 161819.657 Allocating 16 bytes in heap at file /home/icraggs/workspaces/mqrtc/mqttv3c/src/MQTTPacket.c line 177 ptr 0x179f930
+
+    20130528 161819.657 Freeing 16 bytes in heap at file /home/icraggs/workspaces/mqrtc/mqttv3c/src/MQTTPacket.c line 201, heap use now 896 bytes
+  * @endcode
+  * When the last MQTT client object is destroyed, if the trace is being recorded 
+  * and all memory allocated by the client library has not been freed, an error message will be
+  * written to the trace.  This can help with fixing memory leaks.  The message will look like this:
+  * @code
+    20130528 163909.208 Some memory not freed at shutdown, possible memory leak
+    20130528 163909.208 Heap scan start, total 880 bytes
+    20130528 163909.208 Heap element size 32, line 354, file /home/icraggs/workspaces/mqrtc/mqttv3c/src/MQTTPacket.c, ptr 0x260cb00
+    20130528 163909.208   Content           
+    20130528 163909.209 Heap scan end
+  * @endcode
+  * @endcond
   */

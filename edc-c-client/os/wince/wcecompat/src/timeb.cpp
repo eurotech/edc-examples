@@ -2,7 +2,6 @@
  *
  *  Copyright (C) 2001-2002 Essemer Pty Ltd.  All rights reserved.
  *  http://www.essemer.com.au/
- *  Copyright (C) 2010 Company 100 Inc.
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -20,49 +19,11 @@
  */
 
 
-#ifndef __wcecompat__TIME_H__
-#define __wcecompat__TIME_H__
+#include <sys/timeb.h>
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-#include <stdlib.h>		// time_t defined there
-//typedef int time_t;
-
-typedef unsigned long clock_t;
-#define CLOCKS_PER_SEC (1000)
-
-time_t time(time_t* t);
-clock_t __cdecl clock(void);
-
-#ifndef _TM_DEFINED
-struct tm
+int _ftime(struct _timeb* tp)
 {
-	int tm_sec;
-	int tm_min;
-	int tm_hour;
-	int tm_mday;
-	int tm_mon;
-	int tm_year;
-	int tm_wday;
-	int tm_yday;
-	int tm_isdst;
-};
-#define _TM_DEFINED
-#endif
-
-struct tm* localtime(const time_t* clock);
-struct tm * __cdecl gmtime(const time_t *clock);
-
-time_t mktime(struct tm *t);
-size_t strftime(char * const s, const size_t maxsize, const char *format, const struct tm * const t);
-
-#ifdef __cplusplus
+	// TODO: implement
+	return -1;
 }
-#endif
-
-
-#endif // __wcecompat__TIME_H__

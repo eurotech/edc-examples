@@ -1,32 +1,37 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 IBM Corp.
+ * Copyright (c) 2009, 2013 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
- *    Ian Craggs - initial API and implementation and/or initial documentation
+ *    Ian Craggs - initial implementation and documentation
+ *    Ian Craggs - async client updates
  *******************************************************************************/
 
 #if !defined(SOCKET_H)
 #define SOCKET_H
 
-#if !defined(_WIN32_WCE)
 #include <sys/types.h>
-#endif
 
-#if defined(WIN32) || defined(_WIN32_WCE)
+#if defined(WIN32)
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #define MAXHOSTNAMELEN 256
+#if !defined(SSLSOCKET_H)
 #define EAGAIN WSAEWOULDBLOCK
 #define EINTR WSAEINTR
 #define EINPROGRESS WSAEINPROGRESS
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #define ENOTCONN WSAENOTCONN
 #define ECONNRESET WSAECONNRESET
+#endif
 #define ioctl ioctlsocket
 #define socklen_t int
 #else
@@ -52,7 +57,8 @@
 	#define SOCKET_ERROR -1
 #endif
 /** must be the same as SOCKETBUFFER_INTERRUPTED */
-#define TCPSOCKET_INTERRUPTED -2
+#define TCPSOCKET_INTERRUPTED -22
+#define SSL_FATAL -3
 
 #if !defined(INET6_ADDRSTRLEN)
 #define INET6_ADDRSTRLEN 46 /** only needed for gcc/cygwin on windows */
@@ -112,5 +118,11 @@ int Socket_new(char* addr, int port, int* socket);
 
 int Socket_noPendingWrites(int socket);
 char* Socket_getpeer(int sock);
+
+void Socket_addPendingWrite(int socket);
+void Socket_clearPendingWrite(int socket);
+
+typedef void Socket_writeComplete(int socket);
+void Socket_setWriteCompleteCallback(Socket_writeComplete*);
 
 #endif /* SOCKET_H */

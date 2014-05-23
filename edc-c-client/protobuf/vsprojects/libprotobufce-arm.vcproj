@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="libprotobuf"
 	ProjectGUID="{BCE732E2-B15F-4750-A1E3-6AA591753699}"
+	RootNamespace="libprotobuf"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -41,7 +42,7 @@
 				ExecutionBucket="7"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\src;."
-				PreprocessorDefinitions="_DEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;DEBUG;_LIB;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;LIBPROTOBUF_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_WINDOWS;_USRDLL;NDEBUG"
+				PreprocessorDefinitions="_DEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;DEBUG;_LIB;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;LIBPROTOBUF_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_WINDOWS;_USRDLL;NDEBUG;WIN32"
 				MinimalRebuild="true"
 				RuntimeLibrary="1"
 				BufferSecurityCheck="false"
@@ -119,7 +120,7 @@
 				ExecutionBucket="7"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\src;."
-				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;_LIB;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;LIBPROTOBUF_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_WINDOWS;_USRDLL;"
+				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;_LIB;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;LIBPROTOBUF_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_WINDOWS;_USRDLL;WIN32"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
 				UsePrecompiledHeader="0"

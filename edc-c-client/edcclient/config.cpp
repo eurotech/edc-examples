@@ -29,16 +29,6 @@ Config::Config(string configFile, char** envp) {
 	debugInfo = configFile;
 	groupStack.push_front(this);
 
-#if defined (WIN32)
-	FILE* in;
-	errno_t err = fopen_s (&in, configFile.c_str(), "r");
-
-	if (err) {
-		//cerr << "Cannot open input file '" << configFile << "'" << endl;
-		//exit(2);
-		return;
-	}
-#else
 	FILE* in = fopen(configFile.c_str(), "r");
 
 	if (!in) {
@@ -46,7 +36,6 @@ Config::Config(string configFile, char** envp) {
 		//exit(2);
 		return;
 	}
-#endif
 
 	char buff[1024];
 	while (fgets(buff, 1024, in)) {

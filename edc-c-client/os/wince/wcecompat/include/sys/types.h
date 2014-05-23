@@ -19,45 +19,14 @@
  */
 
 
-#include <string.h>
-#include <stdlib.h>
+#ifndef __wcecompat__SYS__TYPES_H__
+#define __wcecompat__SYS__TYPES_H__
 
 
-_CRTIMP int __cdecl _stricmp(const char* s1, const char* s2)
-{
-	int	c1, c2;
-	do
-	{
-		c1 = (unsigned char)*s1++;
-		if (c1 >= 'A' && c1 <= 'Z')
-			c1 -= 'A' - 'a';
-		c2 = (unsigned char)*s2++;
-		if (c2 >= 'A' && c2 <= 'Z')
-			c2 -= 'A' - 'a';
-	} while (c1 && (c1 == c2));
-	return c1 - c2;
-}
+#ifndef _SIZE_T_DEFINED
+typedef unsigned int size_t;
+#define _SIZE_T_DEFINED
+#endif
 
-_CRTIMP int __cdecl _strnicmp(const char* s1, const char* s2, size_t n)
-{
-	int	c1, c2;
-	do
-	{
-		c1 = (unsigned char)*s1++;
-		if (c1 >= 'A' && c1 <= 'Z')
-			c1 -= 'A' - 'a';
-		c2 = (unsigned char)*s2++;
-		if (c2 >= 'A' && c2 <= 'Z')
-			c2 -= 'A' - 'a';
-	} while ((--n > 0) && c1 && (c1 == c2));
-	return c1 - c2;
-}
 
-_CRTIMP char* __cdecl _strdup(const char* s)
-{
-	char* new_s = (char*)malloc(strlen(s)+1);
-	if (new_s == NULL)
-		return NULL;
-	strcpy(new_s, s);
-	return new_s;
-}
+#endif // __wcecompat__SYS__TYPES_H__

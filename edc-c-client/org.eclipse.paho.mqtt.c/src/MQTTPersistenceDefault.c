@@ -1,13 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 IBM Corp.
+ * Copyright (c) 2009, 2013 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
  *    Ian Craggs - initial API and implementation and/or initial documentation
+ *    Ian Craggs - async client updates
  *******************************************************************************/
 
 /**
@@ -25,19 +30,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#if !defined(_WIN32_WCE)
 #include <errno.h>
-#endif
 
-#if defined(_WIN32_WCE)
-#include "wincehelper.h"
-#endif
-
-#if defined(WIN32) || defined(_WIN32_WCE)
+#if defined(WIN32)
 	#include <windows.h>
-#if !defined(_WIN32_WCE)
 	#include <direct.h>
-#endif
 	/* Windows doesn't have strtok_r, so remap it to strtok */
 	#define strtok_r( A, B, C ) strtok( A, B )
 	int keysWin32(char *, char ***, int *);
@@ -350,49 +347,6 @@ int containskeyWin32(char *dirname, char *key)
 {
 	int notFound = MQTTCLIENT_PERSISTENCE_ERROR;
 	int fFinished = 0;
-
-#if defined (_WIN32_WCE)
-	TCHAR *filekey, *ptraux;
-	char dir[MAX_PATH+1];
-	WIN32_FIND_DATA FileData;
-	HANDLE hDir;
-	TCHAR tmpPathname[MAX_PATH];
-
-	FUNC_ENTRY;
-	sprintf(dir, "%s/*", dirname);
-
-	MultiByteToWideChar (CP_ACP, 0, dir, -1,  tmpPathname, MAX_PATH);
-	hDir = FindFirstFile(tmpPathname, &FileData);
-
-	if (hDir != INVALID_HANDLE_VALUE)
-	{
-		while (!fFinished)
-		{
-			if (FileData.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE)
-			{
-				filekey = malloc(wcslen(FileData.cFileName)*sizeof(TCHAR) + 1*sizeof(TCHAR));
-				wcscpy(filekey, FileData.cFileName);
-				MultiByteToWideChar (CP_ACP, 0, MESSAGE_FILENAME_EXTENSION, -1,  tmpPathname, MAX_PATH);
-				ptraux = wcsstr(filekey, tmpPathname);
-				if ( ptraux != NULL )
-					*ptraux = '\0' ;
-				MultiByteToWideChar (CP_ACP, 0, key, -1,  tmpPathname, MAX_PATH);
-				if(wcscmp(filekey, tmpPathname) == 0)
-				{
-					notFound = 0;
-					fFinished = 1;
-				}
-				free(filekey);
-			}
-			if (!FindNextFile(hDir, &FileData))
-			{
-				if (GetLastError() == ERROR_NO_MORE_FILES)
-					fFinished = 1;
-			}
-		}
-		FindClose(hDir);
-	}
-#else
 	char *filekey, *ptraux;
 	char dir[MAX_PATH+1];
 	WIN32_FIND_DATAA FileData;
@@ -428,7 +382,6 @@ int containskeyWin32(char *dirname, char *key)
 		}
 		FindClose(hDir);
 	}
-#endif
 
 	FUNC_EXIT_RC(notFound);
 	return notFound;
@@ -447,7 +400,10 @@ int containskeyUnix(char *dirname, char *key)
 	{
 		while((dir_entry = readdir(dp)) != NULL && notFound)
 		{
-			lstat(dir_entry->d_name, &stat_info);
+			char* filename = malloc(strlen(dirname) + strlen(dir_entry->d_name) + 2);
+			sprintf(filename, "%s/%s", dirname, dir_entry->d_name);
+			lstat(filename, &stat_info);
+			free(filename);
 			if(S_ISREG(stat_info.st_mode))
 			{
 				filekey = malloc(strlen(dir_entry->d_name) + 1);
@@ -501,53 +457,6 @@ int clearWin32(char *dirname)
 {
 	int rc = 0;
 	int fFinished = 0;
-
-#if defined(_WIN32_WCE)
-	TCHAR *file;
-	char dir[MAX_PATH+1];
-	WIN32_FIND_DATA FileData;
-	HANDLE hDir;
-	TCHAR tmpPathname[MAX_PATH];
-
-	FUNC_ENTRY;
-	sprintf(dir, "%s/*", dirname);
-
-	MultiByteToWideChar (CP_ACP, 0, dir, -1,  tmpPathname, MAX_PATH);
-	hDir = FindFirstFile(tmpPathname, &FileData);
-
-	if (hDir != INVALID_HANDLE_VALUE)
-	{
-		while (!fFinished)
-		{
-			if (FileData.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE)
-			{
-				MultiByteToWideChar (CP_ACP, 0, dirname, -1,  tmpPathname, MAX_PATH);
-				file = malloc((wcslen(tmpPathname) + wcslen(FileData.cFileName) + 2)*sizeof(TCHAR));
-				wsprintf(file, L"%s/%s", tmpPathname, FileData.cFileName);
-				rc = DeleteFile(file);
-				if (rc != 0) rc = 0; else rc = 1;
-				free(file);
-				if ( rc != 0 )
-				{
-					rc = MQTTCLIENT_PERSISTENCE_ERROR;
-					break;
-				}
-			}
-			if (!FindNextFile(hDir, &FileData))
-			{
-				if (GetLastError() == ERROR_NO_MORE_FILES)
-					fFinished = 1;
-			}
-		}
-		FindClose(hDir);
-	} else
-	{
-		if (GetLastError() != ERROR_NO_MORE_FILES)
-		{
-			rc = MQTTCLIENT_PERSISTENCE_ERROR;
-		}
-	}
-#else
 	char *file;
 	char dir[MAX_PATH+1];
 	WIN32_FIND_DATAA FileData;
@@ -582,7 +491,6 @@ int clearWin32(char *dirname)
 		FindClose(hDir);
 	} else
 		rc = MQTTCLIENT_PERSISTENCE_ERROR;
-#endif
 
 	FUNC_EXIT_RC(rc);
 	return rc;
@@ -651,82 +559,6 @@ int keysWin32(char *dirname, char ***keys, int *nkeys)
 	char **fkeys = NULL;
 	int nfkeys = 0;
 	char dir[MAX_PATH+1];
-
-#if defined(_WIN32_WCE)
-	WIN32_FIND_DATA FileData;
-	HANDLE hDir;
-	int fFinished = 0;
-	char *ptraux;
-	int i;
-	TCHAR tmpPathname[MAX_PATH];
-	char tmpPathnamec[MAX_PATH];
-
-	FUNC_ENTRY;
-	sprintf(dir, "%s/*", dirname);
-
-	/* get number of keys */
-	MultiByteToWideChar (CP_ACP, 0, dir, -1,  tmpPathname, MAX_PATH);
-	hDir = FindFirstFile(tmpPathname, &FileData);
-	if (hDir != INVALID_HANDLE_VALUE)
-	{
-		while (!fFinished)
-		{
-			if (FileData.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE)
-				nfkeys++;
-			if (!FindNextFile(hDir, &FileData))
-			{
-				if (GetLastError() == ERROR_NO_MORE_FILES)
-					fFinished = 1;
-			}
-		}
-		FindClose(hDir);
-	} else
-	{
-		if (GetLastError() != ERROR_NO_MORE_FILES)
-		{
-			rc = MQTTCLIENT_PERSISTENCE_ERROR;
-			goto exit;
-		}
-	}
-
-	if (nfkeys != 0 )
-		fkeys = (char **)malloc(nfkeys * sizeof(char *));
-
-	/* copy the keys */
-	MultiByteToWideChar (CP_ACP, 0, dir, -1,  tmpPathname, MAX_PATH);
-	hDir = FindFirstFile(tmpPathname, &FileData);
-	if (hDir != INVALID_HANDLE_VALUE)
-	{
-		fFinished = 0;
-		i = 0;
-		while (!fFinished)
-		{
-			if (FileData.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE)
-			{
-				WideCharToMultiByte (CP_ACP, 0, FileData.cFileName, wcslen(FileData.cFileName), tmpPathnamec, MAX_PATH, NULL, NULL);
-				fkeys[i] = malloc(strlen(tmpPathnamec) + 1);
-				strcpy(fkeys[i], tmpPathnamec);
-				ptraux = strstr(fkeys[i], MESSAGE_FILENAME_EXTENSION);
-				if ( ptraux != NULL )
-					*ptraux = '\0' ;
-				i++;
-			}
-			if (!FindNextFile(hDir, &FileData))
-			{
-				if (GetLastError() == ERROR_NO_MORE_FILES)
-					fFinished = 1;
-			}
-		}
-		FindClose(hDir);
-	} else
-	{
-		if (GetLastError() != ERROR_NO_MORE_FILES)
-		{
-			rc = MQTTCLIENT_PERSISTENCE_ERROR;
-			goto exit;
-		}
-	}
-#else
 	WIN32_FIND_DATAA FileData;
 	HANDLE hDir;
 	int fFinished = 0;
@@ -789,7 +621,6 @@ int keysWin32(char *dirname, char ***keys, int *nkeys)
 		rc = MQTTCLIENT_PERSISTENCE_ERROR;
 		goto exit;
 	}
-#endif
 
 	*nkeys = nfkeys;
 	*keys = fkeys;

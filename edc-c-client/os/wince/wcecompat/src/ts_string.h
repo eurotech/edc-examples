@@ -27,10 +27,10 @@
 #include <windows.h>
 
 
-void ascii2unicode(const char* ascii, WCHAR* unicode);
-void unicode2ascii(const WCHAR* unicode, char* ascii);
-void ascii2unicode(const char* ascii, WCHAR* unicode, int maxChars);
-void unicode2ascii(const WCHAR* unicode, char* ascii, int maxChars);
+void ascii2unicode(const char* ascii, wchar_t* unicode);
+void unicode2ascii(const wchar_t* unicode, char* ascii);
+void ascii2unicode(const char* ascii, wchar_t* unicode, int maxChars);
+void unicode2ascii(const wchar_t* unicode, char* ascii, int maxChars);
 
 
 //
@@ -42,7 +42,7 @@ inline size_t ts_strlen(const char* str)
 	return strlen(str);
 }
 
-inline size_t ts_strlen(const WCHAR* str)
+inline size_t ts_strlen(const wchar_t* str)
 {
 	return wcslen(str);
 }
@@ -58,7 +58,7 @@ inline size_t ts_strsize(const char* str)
 	return strlen(str);
 }
 
-inline size_t ts_strsize(const WCHAR* str)
+inline size_t ts_strsize(const wchar_t* str)
 {
 	return wcslen(str)*2;
 }
@@ -74,7 +74,7 @@ inline size_t ts_strsizez(const char* str)
 	return strlen(str)+1;
 }
 
-inline size_t ts_strsizez(const WCHAR* str)
+inline size_t ts_strsizez(const wchar_t* str)
 {
 	return (wcslen(str)+1)*2;
 }
@@ -89,21 +89,21 @@ inline char* ts_strcpy(char* dest, const char* src)
 	return strcpy(dest, src);
 }
 
-inline char* ts_strcpy(char* dest, const WCHAR* src)
+inline char* ts_strcpy(char* dest, const wchar_t* src)
 {
 	unicode2ascii(src, dest);
 	return dest;
 }
 
-inline WCHAR* ts_strcpy(WCHAR* dest, const char* src)
+inline wchar_t* ts_strcpy(wchar_t* dest, const char* src)
 {
 	ascii2unicode(src, dest);
 	return dest;
 }
 
-inline WCHAR* ts_strcpy(WCHAR* dest, WCHAR* src)
+inline wchar_t* ts_strcpy(wchar_t* dest, const wchar_t* src)
 {
-	return wcscpy(dest, src);
+	return (wchar_t*)wcscpy((wchar_t *)dest, (wchar_t *)src);
 }
 
 
@@ -116,21 +116,21 @@ inline char* ts_strncpy(char* dest, const char* src, int n)
 	return strncpy(dest, src, n);
 }
 
-inline char* ts_strncpy(char* dest, const WCHAR* src, int n)
+inline char* ts_strncpy(char* dest, const wchar_t* src, int n)
 {
 	unicode2ascii(src, dest, n);
 	return dest;
 }
 
-inline WCHAR* ts_strncpy(WCHAR* dest, const char* src, int n)
+inline wchar_t* ts_strncpy(wchar_t* dest, const char* src, int n)
 {
 	ascii2unicode(src, dest, n);
 	return dest;
 }
 
-inline WCHAR* ts_strncpy(WCHAR* dest, const WCHAR* src, int n)
+inline wchar_t* ts_strncpy(wchar_t* dest, const wchar_t* src, int n)
 {
-	return wcsncpy(dest, src, n);
+	return (wchar_t*)wcsncpy((wchar_t *)dest, (wchar_t *)src, n);
 }
 
 
@@ -143,12 +143,12 @@ inline char* ts_strcat(char* dest, const char* src)
 	return strcat(dest, src);
 }
 
-char* ts_strcat(char* dest, const WCHAR* src);
-WCHAR* ts_strcat(WCHAR* dest, const char* src);
+char* ts_strcat(char* dest, const wchar_t* src);
+wchar_t* ts_strcat(wchar_t* dest, const char* src);
 
-inline WCHAR* ts_strcat(WCHAR* dest, const WCHAR* src)
+inline wchar_t* ts_strcat(wchar_t* dest, const wchar_t* src)
 {
-	return wcscat(dest, src);
+	return (wchar_t*)wcscat((wchar_t *)dest, (wchar_t *)src);
 }
 
 
@@ -161,14 +161,14 @@ inline char* ts_strdup(const char* str)
 	return _strdup(str);
 }
 
-char* ts_strdup_unicode_to_ascii(const WCHAR* str);
+char* ts_strdup_unicode_to_ascii(const wchar_t* str);
 
-inline WCHAR* ts_strdup(const WCHAR* str)
+inline wchar_t* ts_strdup(const wchar_t* str)
 {
-	return wcsdup(str);
+	return (wchar_t*)wcsdup(str);
 }
 
-WCHAR* ts_strdup_ascii_to_unicode(const char* str);
+wchar_t* ts_strdup_ascii_to_unicode(const char* str);
 
 
 #endif /* __wcecompat__ts_string_h__ */

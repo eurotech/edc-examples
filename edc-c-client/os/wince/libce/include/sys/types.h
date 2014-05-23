@@ -28,5 +28,16 @@ typedef unsigned int size_t;
 #define _SIZE_T_DEFINED
 #endif
 
+#ifndef _OFF_T_DEFINED
+
+typedef long _off_t;                    /* file offset value */
+
+#if !__STDC__
+/* Non-ANSI name for compatibility */
+typedef long off_t;
+#endif  /* !__STDC__ */
+
+#define _OFF_T_DEFINED
+#endif  /* _OFF_T_DEFINED */
 
 #endif // __wcecompat__SYS__TYPES_H__

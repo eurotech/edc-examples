@@ -77,9 +77,7 @@ typedef unsigned long  time_t;
 #endif
 #endif
 
-#ifndef offsetof
 #define offsetof(s,m) ((size_t)&(((s*)0)->m))
-#endif
 
 #ifdef __cplusplus
 }

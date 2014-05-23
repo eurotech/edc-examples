@@ -235,11 +235,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SSLSocket.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\StackTrace.c"
 				>
 			</File>
 			<File
 				RelativePath=".\src\Thread.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Tree.c"
 				>
 			</File>
 			<File
@@ -317,11 +325,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SSLSocket.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\StackTrace.h"
 				>
 			</File>
 			<File
 				RelativePath=".\src\Thread.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Tree.h"
 				>
 			</File>
 			<File

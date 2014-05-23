@@ -3,8 +3,12 @@
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
  *    Ian Craggs - initial API and implementation and/or initial documentation
@@ -41,14 +45,14 @@ BE*/
 
 typedef struct
 {
-	unsigned long threadid;
+	thread_id_type threadid;
 	char name[MAX_FUNCTION_NAME_LENGTH];
 	int line;
 } stackEntry;
 
 typedef struct
 {
-	unsigned long id;
+	thread_id_type id;
 	int maxdepth;
 	int current_depth;
 	stackEntry callstack[MAX_STACK_DEPTH];
@@ -133,11 +137,13 @@ exit:
 }
 
 
-void StackTrace_printStack(char* dest)
+void StackTrace_printStack(FILE* dest)
 {
 	FILE* file = stdout;
 	int t = 0;
 
+	if (dest)
+		file = dest;
 	for (t = 0; t < thread_count; ++t)
 	{
 		threadEntry *cur_thread = &threads[t];

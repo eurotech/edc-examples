@@ -1,0 +1,82 @@
+/*  wcecompat: Windows CE C Runtime Library "compatibility" library.
+ *
+ *  Copyright (C) 2001-2002 Essemer Pty Ltd.  All rights reserved.
+ *  http://www.essemer.com.au/
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+
+#ifndef __wcecompat__WINSOCK_EXTRAS_H__
+#define __wcecompat__WINSOCK_EXTRAS_H__
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+#include <winsock.h>
+
+struct servent* PASCAL getservbyname(const char* name, const char* proto);
+
+// Added here
+
+/* IPv6 definitions */
+
+#ifndef s6_addr
+
+struct in6_addr {
+    union {
+        u_char Byte[16];
+        u_short Word[8];
+    } u;
+};
+
+#define in_addr6 in6_addr
+
+/*
+** Defines to match RFC 2553.
+*/
+#define _S6_un     u
+#define _S6_u8     Byte
+#define s6_addr    _S6_un._S6_u8
+
+/*
+** Defines for our implementation.
+*/
+#define s6_bytes   u.Byte
+#define s6_words   u.Word
+
+#endif
+
+
+/* IPv6 socket address structure, RFC 2553 */
+
+struct sockaddr_in6 {
+		short	sin6_family;   	/* AF_INET6 */
+		u_short sin6_port;	/* Transport level port number */
+		u_long	sin6_flowinfo;	/* IPv6 flow information */
+		struct in6_addr sin6_addr; /* IPv6 address */
+        u_long sin6_scope_id;  /* set of interfaces for a scope */
+};
+
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif // __wcecompat__WINSOCK_EXTRAS_H__

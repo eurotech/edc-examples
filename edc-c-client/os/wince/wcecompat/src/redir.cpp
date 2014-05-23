@@ -103,9 +103,9 @@ typedef struct _FD_BLOCK {
 _FD_BLOCK	_fd_block0 = {
 	0x00000007,	// first three in use (reserved)
 	{
-		{ NULL, 0xff, INVALID_HANDLE_VALUE, FALSE, FALSE },
-		{ NULL, 0xff, INVALID_HANDLE_VALUE, FALSE, FALSE },
-		{ NULL, 0xff, INVALID_HANDLE_VALUE, FALSE, FALSE }
+		{ NULL, -1, INVALID_HANDLE_VALUE, FALSE, FALSE },
+		{ NULL, -1, INVALID_HANDLE_VALUE, FALSE, FALSE },
+		{ NULL, -1, INVALID_HANDLE_VALUE, FALSE, FALSE }
 	}
 };
 _FD_BLOCK*	_fd_blocks[FD_MAX_BLOCKS] = { &_fd_block0 };
@@ -113,13 +113,14 @@ _FD_BLOCK*	_fd_blocks[FD_MAX_BLOCKS] = { &_fd_block0 };
 // file stream
 
 typedef struct _FILE_BLOCK _FILE_BLOCK;
+/*
 typedef struct _FILE {
 	int					file_index;
 	int					fd;
 	int					bufferedChar;
 	BOOL				error;
 } _FILE;
-
+*/
 #define FILE_MAX		(512)
 #define FILE_BLOCK_SIZE	(32)	/* changing this will screw up "in_use" code below */
 #define FILE_MAX_BLOCKS	(FILE_MAX/FILE_BLOCK_SIZE)
@@ -917,7 +918,7 @@ static bool _wopen_fds(const WCHAR* filename, int flags, int mode, _FD_STRUCT* f
 	}
 
 	fds->pipe = NULL;
-	fds->pipeChannel = 0xff;
+	fds->pipeChannel = -1;
 	fds->hFile = hFile;
 	fds->binary = (flags & O_BINARY);
 	fds->eof = FALSE;
@@ -931,6 +932,134 @@ cleanup:
 		CloseHandle(hFile);
 
 	return result;
+}
+
+FILE* fopen(const char* filename, const char* mode)
+{
+	bool	result = false;
+	bool	mode_r = false;
+	bool	mode_w = false;
+	bool	mode_a = false;
+	bool	mode_r_plus = false;
+	bool	mode_w_plus = false;
+	bool	mode_a_plus = false;
+	bool	mode_t = false;
+	bool	mode_b = false;
+	int		num_rwa;
+	int		flags = 0;
+	int		pmode = 0;
+	int		fd = -1;
+	_FILE*	file = NULL;
+
+	if (filename == NULL || mode == NULL)
+		return NULL;
+
+	file = file_allocate();
+	if (file == NULL)
+		return NULL;
+
+	while (*mode != 0)
+	{
+		switch (*mode)
+		{
+			case 'r':
+				if (*(mode+1) == '+')
+				{
+					mode_r_plus = true;
+					mode++;
+				}
+				else
+					mode_r = true;
+				break;
+			case 'w':
+				if (*(mode+1) == '+')
+				{
+					mode_w_plus = true;
+					mode++;
+				}
+				else
+					mode_w = true;
+				break;
+			case 'a':
+				if (*(mode+1) == '+')
+				{
+					mode_a_plus = true;
+					mode++;
+				}
+				else
+					mode_a = true;
+				break;
+			case 't':
+				mode_t = true;
+				break;
+			case 'b':
+				mode_b = true;
+				break;
+		}
+		mode++;
+	}
+	num_rwa = 0;
+	if (mode_r)         num_rwa++;
+	if (mode_w)         num_rwa++;
+	if (mode_a)         num_rwa++;
+	if (mode_r_plus)    num_rwa++;
+	if (mode_w_plus)    num_rwa++;
+	if (mode_a_plus)    num_rwa++;
+	if (num_rwa != 1)
+		goto cleanup;
+	if (mode_t && mode_b)
+		goto cleanup;
+
+	// r  =                   O_RDONLY
+	// w  = O_CREAT|O_TRUNC | O_WRONLY
+	// a  = O_CREAT         | O_WRONLY | O_APPEND
+	// r+ =                   O_RDWR
+	// w+ = O_CREAT|O_TRUNC | O_RDWR
+	// a+ = O_CREAT         | O_RDWR   | O_APPEND
+	if (mode_w || mode_a || mode_w_plus || mode_a_plus)
+	{
+		flags |= O_CREAT;
+		pmode = S_IREAD | S_IWRITE;
+	}
+	if (mode_w || mode_w_plus)
+		flags |= O_TRUNC;
+	if (mode_r)
+		flags |= O_RDONLY;
+	else if (mode_w || mode_a)
+		flags |= O_WRONLY;
+	else
+		flags |= O_RDWR;
+	if (mode_a || mode_a_plus)
+		flags |= O_APPEND;
+	if (mode_t)
+		flags |= O_TEXT;
+	if (mode_b)
+		flags |= O_BINARY;
+
+	fd = open(filename, flags, pmode);
+	if (fd == -1)
+		goto cleanup;
+
+	file->fd = fd;
+	file->bufferedChar = -1;
+	file->error = FALSE;
+
+	result = true;
+
+cleanup:
+
+	if (result == false)
+	{
+		if (file != NULL)
+		{
+			file_release(file);
+			file = NULL;	// returned below
+		}
+		if (fd != -1)
+			close(fd);
+	}
+
+	return (FILE*)file;
 }
 
 int close(int fd)
@@ -955,6 +1084,26 @@ cleanup:
 		errno = -1;
 
 	return result ? 0 : -1;
+}
+
+int fclose(FILE* stream)
+{
+	_FILE*	file = (_FILE*)stream;
+	bool	result = false;
+
+	if (file == NULL)
+		return EOF;
+
+	if (close(file->fd) != 0)
+		goto cleanup;
+
+	file_release(file);
+
+	result = true;
+
+cleanup:
+
+	return result;
 }
 
 int read(int fd, void* buffer, unsigned int count)
@@ -991,6 +1140,23 @@ int read(int fd, void* buffer, unsigned int count)
 		return 0;
 
 	return (int)numRead;
+}
+
+size_t fread(void* buffer, size_t size, size_t count, FILE* stream)
+{
+	_FILE*	file = (_FILE*)stream;
+	int		read_result;
+	DWORD	numRead;
+
+	if (file == NULL)
+		return 0;
+
+	read_result = read(file->fd, buffer, size*count);
+	numRead = (read_result == -1) ? 0 : read_result;
+	if (read_result == -1)
+		file->error = TRUE;
+
+	return numRead/size;
 }
 
 int write(int fd, const void* buffer, unsigned int count)
@@ -1033,6 +1199,45 @@ int write(int fd, const void* buffer, unsigned int count)
 		return 0;
 
 	return (int)numWritten;
+}
+
+size_t fwrite(const void* buffer, size_t size, size_t count, FILE* stream)
+{
+	_FILE*	file = (_FILE*)stream;
+	int		write_result;
+	DWORD	numWritten;
+
+	if (file == NULL)
+		return 0;
+
+	write_result = write(file->fd, buffer, size*count);
+	numWritten = (write_result == -1) ? 0 : write_result;
+	if (write_result == -1)
+		file->error = TRUE;
+
+	return numWritten/size;
+}
+
+FILE* _getstdfilex(int n)
+{
+	switch (n)
+	{
+		case STDIN:
+			return (FILE*)stdin;
+		case STDOUT:
+			return (FILE*)stdout;
+		case STDERR:
+			return (FILE*)stderr;
+		default:
+			return NULL;
+	}
+}
+
+  FILE *_iob[3] = { (FILE*)stdin, (FILE*)stdout, (FILE*)stderr };
+
+FILE *__iob_func()
+{
+  return *_iob;
 }
 
 int _fileno(FILE* stream)
@@ -1093,6 +1298,28 @@ cleanup:
 	return result;
 }
 
+int feof(FILE* stream)
+{
+	_FILE*	file = (_FILE*)stream;
+
+	if (file == NULL)
+		return EOF;
+
+	// since we don't have buffering, just return low-level eof
+	// TODO: when buffering is implemented, this will need more work
+	return _eof(file->fd) == 1 ? 1 : 0;
+}
+
+int ferror(FILE* stream)
+{
+	_FILE*	file = (_FILE*)stream;
+
+	if (file == NULL)
+		return 0;
+
+	return file->error;
+}
+
 void clearerr(FILE* stream)
 {
 	_FILE*	file = (_FILE*)stream;
@@ -1136,7 +1363,7 @@ long _lseek(int fd, long offset, int whence)
 	int			_errno = EBADF;
 	_FD_STRUCT*	fds;
 	DWORD		dwMoveMethod;
-	DWORD		newPos = 0xffffffff;
+	DWORD		newPos;
 
 	fds = fds_from_index(fd);
 	if (fds == NULL || fds->hFile == INVALID_HANDLE_VALUE)
@@ -1168,6 +1395,53 @@ cleanup:
 	return (long)newPos;
 }
 
+int fsetpos(FILE* stream, const fpos_t* pos)
+{
+	long	longPos = (long)*pos;
+	return fseek(stream, longPos, SEEK_SET);
+}
+
+int fseek(FILE* stream, long offset, int origin)
+{
+	_FILE*	file = (_FILE*)stream;
+	long	newPos = -1L;
+
+	if (file == NULL)
+		return EOF;
+
+	newPos = _lseek(file->fd, offset, origin);
+
+	return (newPos == -1) ? EOF : 0;
+}
+
+int fgetpos(FILE* stream, fpos_t* pos)
+{
+	_FILE*	file = (_FILE*)stream;
+	long	_pos;
+
+	if (file == NULL || pos == NULL)
+		return -1;
+
+	_pos = _tell(file->fd);
+	if (_pos == -1L)
+		return -1;
+
+	*pos = (fpos_t)_pos;
+	return 0;
+}
+
+long ftell(FILE* stream)
+{
+	_FILE*	file = (_FILE*)stream;
+	long	pos;
+
+	if (file == NULL)
+		return -1L;
+
+	pos = _tell(file->fd);
+	return pos;
+}
+
 int _setmode(int fd, int mode)
 {
 	_FD_STRUCT*	fds;
@@ -1192,3 +1466,212 @@ int _setmode(int fd, int mode)
 	return prevMode;
 }
 
+int fgetc(FILE* stream)
+{
+	_FILE*	file = (_FILE*)stream;
+	int		result = EOF;
+
+	if (file == NULL)
+		return EOF;
+
+	if (file->bufferedChar != -1)
+	{
+		result = file->bufferedChar;
+		file->bufferedChar = -1;
+	}
+	else
+	{
+		char	ch;
+		if (fread(&ch, 1, 1, stream) == 1)
+			result = ch;
+	}
+
+	return result;
+}
+
+char* fgets(char* string, int n, FILE* stream)
+{
+//	_FILE*	file = (_FILE*)stream;
+	char*	result = string;
+	char	ch;
+
+//	if (file == NULL)
+//		return NULL;
+
+	while (!ferror(stream) && !feof(stream) && n > 0)
+	{
+		ch = fgetc(stream);
+		// handle error/EOF
+		if (ch == EOF)
+		{
+			if (result == string)	// no characters were read
+				result = NULL;
+			break;
+		}
+		// ignore CR
+		if (ch == '\r')
+			continue;
+		// add character to string
+		*string++ = ch;
+		*string = 0;
+		n--;
+		// check for end of line
+		if (ch == '\n')
+			break;
+	}
+
+	return result;
+}
+
+int fputc(int ch, FILE* stream)
+{
+	char	buffer[1] = { ch };
+	if (fwrite(buffer, 1, 1, stream) == 1)
+		return ch;
+	return EOF;
+}
+
+int fputs(const char* string, FILE* stream)
+{
+	if (fwrite(string, strlen(string), 1, stream) == 1)
+		return 0;
+	return EOF;
+}
+
+int ungetc(int c, FILE* stream)
+{
+	_FILE*	file = (_FILE*)stream;
+	int		result = EOF;
+
+	if (file == NULL)
+		return EOF;
+
+	if (file->bufferedChar == -1)
+	{
+		file->bufferedChar = c;
+		result = c;
+	}
+
+	return result;
+}
+
+int fscanf(FILE* stream, const char* format, ...)
+{
+//	if (fprintf(stderr, "NOT IMPLEMENTED: fscanf(stream=%p, format=\"%s\")\n", stream, format) <= 0)
+//		printf("NOT IMPLEMENTED: fscanf(stream=%p, format=\"%s\")\n", stream, format);
+	return EOF;
+}
+
+int vfprintf(FILE* stream, const char* format, va_list argptr)
+{
+	// TODO: use smaller buffer for short output, enable longer output
+	char	buffer[4096];
+
+	if (_vsnprintf(buffer, sizeof(buffer), format, argptr) == -1)
+		buffer[sizeof(buffer)-1] = '\0';
+
+	return fwrite(buffer, 1, strlen(buffer), stream);
+}
+
+int fprintf(FILE* stream, const char* format, ...)
+{
+	int		result;
+	va_list	args;
+
+	va_start(args, format);
+	result = vfprintf(stream, format, args);
+	va_end(args);
+
+	return result;
+}
+
+FILE* _wfdopen(void* handle, const wchar_t* mode)
+{
+//	if (fprintf(stderr, "NOT IMPLEMENTED: _wfdopen(handle=%p, mode=\"%s\")\n", handle, mode) <= 0)
+//		printf("NOT IMPLEMENTED: _wfdopen(handle=%p, mode=\"%s\")\n", handle, mode);
+	return NULL;
+}
+
+FILE* _wfreopen(const wchar_t* path, const wchar_t* mode, FILE* stream)
+{
+//	if (fprintf(stderr, "NOT IMPLEMENTED: _wfreopen(path=\"%s\", mode=\"%s\", stream=%p)\n", path, mode, stream) <= 0)
+//		printf("NOT IMPLEMENTED: _wfreopen(path=\"%s\", mode=\"%s\", stream=%p)\n", path, mode, stream);
+	return NULL;
+}
+
+wint_t fgetwc(FILE* stream)
+{
+//	if (fprintf(stderr, "NOT IMPLEMENTED: fgetwc(stream=%p)\n", stream) <= 0)
+//		printf("NOT IMPLEMENTED: fgetwc(stream=%p)\n", stream);
+	return WEOF;
+}
+
+wint_t fputwc(wint_t ch, FILE* stream)
+{
+//	if (fprintf(stderr, "NOT IMPLEMENTED: fputwc(ch='%c', stream=%p)\n", ch, stream) <= 0)
+//		printf("NOT IMPLEMENTED: fputwc(ch='%c', stream=%p)\n", ch, stream);
+	return WEOF;
+}
+
+wint_t ungetwc(wint_t ch, FILE* stream)
+{
+//	if (fprintf(stderr, "NOT IMPLEMENTED: ungetwc(ch='%c', stream=%p)\n", ch, stream) <= 0)
+//		printf("NOT IMPLEMENTED: ungetwc(ch='%c', stream=%p)\n", ch, stream);
+	return WEOF;
+}
+
+wchar_t* fgetws(wchar_t* string, int n, FILE* stream)
+{
+//	if (fprintf(stderr, "NOT IMPLEMENTED: fgetws(string=\"%s\", n=%d, stream=%p)\n", string, n, stream) <= 0)
+//		printf("NOT IMPLEMENTED: fgetws(string=\"%s\", n=%d, stream=%p)\n", string, n, stream);
+	return NULL;
+}
+
+int fputws(const wchar_t* string, FILE* stream)
+{
+//	if (fprintf(stderr, "NOT IMPLEMENTED: fputws(string=\"%s\", stream=%p)\n", string, stream) <= 0)
+//		printf("NOT IMPLEMENTED: fputws(string=\"%s\", stream=%p)\n", string, stream);
+	return WEOF;
+}
+
+FILE* _wfopen(const wchar_t* filename, const wchar_t* mode)
+{
+	char	filenameA[1024];
+	char	modeA[10];
+	unicode2ascii(filename, filenameA, 1024);
+	unicode2ascii(mode, modeA, 10);
+	return fopen(filenameA, modeA);
+}
+
+int fwscanf(FILE* stream, const wchar_t* format, ...)
+{
+//	if (fprintf(stderr, "NOT IMPLEMENTED: fwscanf(stream=%p, format=\"%s\")\n", stream, format) <= 0)
+//		printf("NOT IMPLEMENTED: fwscanf(stream=%p, format=\"%s\")\n", stream, format);
+	return WEOF;
+}
+
+int fwprintf(FILE* stream, const wchar_t* format, ...)
+{
+//	if (fprintf(stderr, "NOT IMPLEMENTED: fwprintf(stream=%p, format=\"%s\")\n", stream, format) <= 0)
+//		printf("NOT IMPLEMENTED: fwprintf(stream=%p, format=\"%s\")\n", stream, format);
+	return -1;
+}
+
+int vfwprintf(FILE* stream, const wchar_t* format, va_list argptr)
+{
+//	if (fprintf(stderr, "NOT IMPLEMENTED: vfwprintf(stream=%p, format=\"%s\")\n", stream, format) <= 0)
+//		printf("NOT IMPLEMENTED: vfwprintf(stream=%p, format=\"%s\")\n", stream, format);
+	return -1;
+}
+
+int printf(const char *format, ...)
+{
+	int		result;
+	va_list	args;
+
+	va_start(args, format);
+	result = vfprintf(stdout, format, args);
+	va_end(args);
+
+	return result;
+}
