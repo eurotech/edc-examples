@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Everyware Device Cloud Demo</string>
+    <string name="menu_item_settings">Settings</string>
+    <string name="menu_item_logfile_open">Open internal logfile</string>
+    <string name="menu_item_logfile_close">Close internal logfile</string>
+    <string name="menu_item_logfile_email">E.mail internal logfile</string>
+    <string name="menu_item_about">About</string>
+    <string name="menu_item_exit">Exit</string>
+    <string name="pref_connectivity_title">Connectivity</string>
+    <string name="pref_gateway_title">Android Gateway</string>
+    <string name="Desc">Android Demo</string>
+    <string name="title">Title</string>
+
+    <!-- Clound connect screen -->
+    <string name="pref_connectivity_connection">Cloud connection</string>
+    <string name="pref_connectivity_connection_title">Connection</string>
+    <string name="pref_connectivity_connection_broker_title">Broker</string>
+    <string name="pref_connectivity_connection_broker_default">mqtt://broker-sandbox.everyware-cloud.com:1883/</string>
+    <string name="pref_connectivity_connection_broker_desc">EDC Broker URL</string>
+    <string name="pref_connectivity_connection_username_title">Username</string>
+    <string name="pref_connectivity_connection_username_desc">Insert your EDC username.</string>
+    <string name="pref_connectivity_connection_password_title">Password</string>
+    <string name="pref_connectivity_connection_password_desc">Insert your EDC password.</string>
+    <string name="pref_connectivity_connection_device_title">Device</string>
+    <string name="pref_connectivity_connection_account_title">Account name</string>
+    <string name="pref_connectivity_connection_account_desc">Insert your account name.</string>
+    <string name="pref_connectivity_connection_assetID_title">Device Display Name</string>
+    <string name="pref_connectivity_connection_assetID_desc">Insert device display name.</string>
+
+    <!-- Automatic publishing screen -->
+    <string name="pref_connectivity_autopublish">Automatic publishing</string>
+    <string name="pref_connectivity_autopublish_freq_title">Frequency</string>
+    <string name="pref_connectivity_autopublish_freq_time_title">Publish Every</string>
+    <string name="pref_connectivity_autopublish_content_title">Content</string>
+
+    <!-- Automatic publishing screen -->
+
+    <string name="pref_gateway_commands">Commands</string>
+    <string name="pref_gateway_commands_list_title">Commands</string>
+    <string name="subscribe">Subscribe</string>
+    <string name="unsubscribe">Unsubscribe</string>
+
+</resources>

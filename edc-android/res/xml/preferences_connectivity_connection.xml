@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <PreferenceCategory 
+        android:key="pref_cloud_connectivity_title"
+        android:title="@string/pref_connectivity_connection_title">
+        
+        <EditTextPreference 
+            android:key="pref_connectivity_connection_username"
+            android:title="@string/pref_connectivity_connection_username_title"
+            android:summary="@string/pref_connectivity_connection_username_desc"/>
+        
+        <EditTextPreference 
+            android:key="pref_connectivity_connection_password"
+            android:title="@string/pref_connectivity_connection_password_title"
+            android:summary="@string/pref_connectivity_connection_password_desc"/>
+        
+    </PreferenceCategory>
+
+    <PreferenceCategory 
+        android:key="pref_cloud_connectivity_device_title"
+        android:title="@string/pref_connectivity_connection_device_title">
+        
+        <EditTextPreference 
+            android:key="pref_connectivity_connection_broker"
+            android:title="@string/pref_connectivity_connection_broker_title"
+            android:summary="@string/pref_connectivity_connection_broker_desc"
+            android:defaultValue="@string/pref_connectivity_connection_broker_default"/>
+        
+        <EditTextPreference 
+            android:key="pref_connectivity_connection_account"
+            android:title="@string/pref_connectivity_connection_account_title"
+            android:summary="@string/pref_connectivity_connection_account_desc"/>
+        
+        <EditTextPreference 
+            android:key="pref_connectivity_connection_assetID"
+            android:title="@string/pref_connectivity_connection_assetID_title"
+            android:summary="@string/pref_connectivity_connection_assetID_desc"/>
+        
+    </PreferenceCategory>
+       
+</PreferenceScreen>

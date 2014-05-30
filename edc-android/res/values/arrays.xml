@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="connectivity_autopublish_freq_time">
+        <item>1 sec.</item>
+        <item>5 sec.</item>
+        <item>20 sec.</item>
+        <item>60 sec.</item>
+    </string-array>
+    <string-array name="connectivity_autopublish_freq_time_val">
+        <item>1</item>
+        <item>5</item>
+        <item>20</item>
+        <item>60</item>
+    </string-array>
+
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <PreferenceCategory 
+        android:key="pref_connectivity_autopublish_freq"
+        android:title="@string/pref_connectivity_autopublish_freq_title">
+        
+        <ListPreference 
+            android:key="pref_connectivity_autopublish_freq_time"
+            android:title="@string/pref_connectivity_autopublish_freq_time_title"
+            android:entries="@array/connectivity_autopublish_freq_time"
+            android:entryValues="@array/connectivity_autopublish_freq_time_val"/>
+        
+    </PreferenceCategory>
+
+    <PreferenceCategory 
+        android:key="pref_connectivity_autopublish_content"
+        android:title="@string/pref_connectivity_autopublish_content_title"
+        android:id="@+id/pref_connectivity_autopublish_content_title">
+        
+    </PreferenceCategory>
+
+       
+</PreferenceScreen>

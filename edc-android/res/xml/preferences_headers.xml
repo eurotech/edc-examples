@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <header android:title="@string/pref_connectivity_title" />
+    <header
+        android:id="@+id/pref_connectivity_connection_header"
+        android:fragment="com.eurotech.edcdroid.settings.CloudConnectionFragment"
+        android:title="@string/pref_connectivity_connection" />
+    <header
+        android:id="@+id/pref_connectivity_autopublish_header"
+        android:fragment="com.eurotech.edcdroid.settings.AutomaticPublishingFragment"
+        android:title="@string/pref_connectivity_autopublish" />
+    
+        
+    <header android:title="@string/pref_gateway_title" />
+    <header
+        android:id="@+id/pref_gateway_commands_header"
+        android:fragment="com.eurotech.edcdroid.settings.CommandsFragment"
+        android:title="@string/pref_gateway_commands" />
+
+</preference-headers>

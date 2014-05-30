@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="Wakelock">
+        <ignore path="src/com/eurotech/edcdroid/Demo.java" />
+        <ignore path="src/com/eurotech/edcdroid/gateway/EdcConnectionService.java" />
+    </issue>
+</lint>

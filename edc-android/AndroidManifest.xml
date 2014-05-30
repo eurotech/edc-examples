@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.eurotech.edcdroid"
+    android:versionCode="1"
+    android:versionName="0.1" >
+
+    <uses-sdk android:minSdkVersion="14" />
+
+    <instrumentation
+        android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="com.eurotech.edcdroid" />
+
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/cloud"
+        android:label="@string/app_name"
+        android:theme="@style/EdcTheme" >
+        <activity
+            android:name=".Demo"
+            android:screenOrientation="portrait"
+            android:label="@string/app_name"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".commands.BrightnessActivity"
+            android:configChanges="orientation"
+            android:excludeFromRecents="true"
+            android:taskAffinity="com.eurotech.edcdroid.commands.Dummy"
+            android:theme="@android:style/Theme.Translucent" >
+        </activity>
+        <activity
+            android:name=".commands.SpeakActivity"
+            android:configChanges="orientation"
+            android:excludeFromRecents="true"
+            android:taskAffinity="com.eurotech.edcdroid.commands.Dummy"
+            android:theme="@android:style/Theme.Translucent" >
+        </activity>
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:configChanges="orientation" >
+        </activity>
+        <activity
+            android:name=".gateway.EdcReceiveActivity"
+            android:configChanges="orientation" >
+        </activity>
+        <activity
+            android:name=".gateway.EdcSubscribeActivity"
+            android:configChanges="orientation" >
+        </activity>
+
+        <service
+            android:name=".gateway.EdcConnectionService"
+            android:exported="true"
+            android:permission="android.permission.INTERNET" >
+            <intent-filter>
+                <action android:name=".gateway.EdcConnectionService" >
+                </action>
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>
