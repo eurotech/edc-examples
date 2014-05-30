@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.SyncFailedException;
+import java.lang.reflect.Field;
 import java.nio.channels.FileChannel;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -52,6 +53,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -85,7 +87,7 @@ public class Demo extends Activity {
 	public static RandomAccessFile logFileWriter;
 	public static FileChannel logFileChannel;
 	public static int i = 0;
-	
+
 	//
 	// Enable DEBUG output here!!
 	//
@@ -108,10 +110,21 @@ public class Demo extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		localLog("BEGIN", ENABLE);
 
 		startingActivityContext = getApplicationContext();
+
+		try {
+			ViewConfiguration config = ViewConfiguration.get(this);
+			Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
+			if (menuKeyField != null) {
+				menuKeyField.setAccessible(true);
+				menuKeyField.setBoolean(config, false);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(startingActivityContext);
 		usernameDone = !prefs.getString("pref_connectivity_connection_username", "").isEmpty();
@@ -257,14 +270,14 @@ public class Demo extends Activity {
 			// get the last build date of the App & report in a simple dialog
 			String builddate = null;
 			try{
-				     ApplicationInfo ai = getPackageManager().getApplicationInfo(getPackageName(), 0);
-				     ZipFile zf = new ZipFile(ai.sourceDir);
-				     ZipEntry ze = zf.getEntry("classes.dex");
-				     long dextime = ze.getTime();
-				     DateFormat df = new SimpleDateFormat("dd/MMM/yyyy - hh:mm:ss", Locale.getDefault());
-				     builddate = df.format(new java.util.Date(dextime));
-				     zf.close();
-				  }catch(Exception e){
+				ApplicationInfo ai = getPackageManager().getApplicationInfo(getPackageName(), 0);
+				ZipFile zf = new ZipFile(ai.sourceDir);
+				ZipEntry ze = zf.getEntry("classes.dex");
+				long dextime = ze.getTime();
+				DateFormat df = new SimpleDateFormat("dd/MMM/yyyy - hh:mm:ss", Locale.getDefault());
+				builddate = df.format(new java.util.Date(dextime));
+				zf.close();
+			}catch(Exception e){
 			}
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("EDC Android");
@@ -274,7 +287,7 @@ public class Demo extends Activity {
 
 			TextView messageView = (TextView)dialog.findViewById(android.R.id.message);
 			messageView.setGravity(Gravity.CENTER);
-			
+
 			return true;
 		case R.id.menu_exit:
 			localLog("END FINISH", ENABLE);
@@ -304,7 +317,7 @@ public class Demo extends Activity {
 	}
 
 	private void registerConnectionPreferenceListener() {
-		
+
 		localLog("BEGIN", ENABLE);
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -312,7 +325,7 @@ public class Demo extends Activity {
 		connectionPreferenceListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
 
 			public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-				
+
 				localLog("BEGIN", ENABLE);
 
 				if (keyList.contains(key)) {
@@ -365,7 +378,7 @@ public class Demo extends Activity {
 	}
 
 	private void publishMessage() {
-		
+
 		localLog("BEGIN", ENABLE);
 
 		final AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -401,7 +414,7 @@ public class Demo extends Activity {
 	}
 
 	private void controlPublishMessage() {
-		
+
 		localLog("BEGIN", ENABLE);
 
 		final AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -437,7 +450,7 @@ public class Demo extends Activity {
 	}
 
 	private void broadcastPublishMessage(String assetList, String topicList, Map<String,Object> metrics) {
-		
+
 		localLog("BEGIN", ENABLE);
 
 		Intent edcIntent = new Intent();
@@ -473,7 +486,7 @@ public class Demo extends Activity {
 		edcIntent.putExtra(EdcConnectionIntents.PUBLISHED_ASSET, assetList);
 		edcIntent.putExtra(EdcConnectionIntents.PUBLISHED_TOPIC, topicList);
 		LocalSendBroadcast.sendBroadcast(startingActivityContext, edcIntent);
-		
+
 		localLog("END", ENABLE);
 	}
 
