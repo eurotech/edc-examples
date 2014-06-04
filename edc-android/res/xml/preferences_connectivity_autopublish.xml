@@ -8,6 +8,7 @@
         <ListPreference 
             android:key="pref_connectivity_autopublish_freq_time"
             android:title="@string/pref_connectivity_autopublish_freq_time_title"
+            android:summary="@string/pref_connectivity_autopublish_freq_time"
             android:entries="@array/connectivity_autopublish_freq_time"
             android:entryValues="@array/connectivity_autopublish_freq_time_val"/>
         

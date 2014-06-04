@@ -13,6 +13,7 @@
         <EditTextPreference 
             android:key="pref_connectivity_connection_password"
             android:title="@string/pref_connectivity_connection_password_title"
+            android:password="true"
             android:summary="@string/pref_connectivity_connection_password_desc"/>
         
     </PreferenceCategory>

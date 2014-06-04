@@ -4,18 +4,18 @@
     <header android:title="@string/pref_connectivity_title" />
     <header
         android:id="@+id/pref_connectivity_connection_header"
-        android:fragment="com.eurotech.edcdroid.settings.CloudConnectionFragment"
+        android:fragment="com.eurotech.edcandroid.settings.CloudConnectionFragment"
         android:title="@string/pref_connectivity_connection" />
     <header
         android:id="@+id/pref_connectivity_autopublish_header"
-        android:fragment="com.eurotech.edcdroid.settings.AutomaticPublishingFragment"
+        android:fragment="com.eurotech.edcandroid.settings.AutomaticPublishingFragment"
         android:title="@string/pref_connectivity_autopublish" />
     
         
     <header android:title="@string/pref_gateway_title" />
     <header
         android:id="@+id/pref_gateway_commands_header"
-        android:fragment="com.eurotech.edcdroid.settings.CommandsFragment"
+        android:fragment="com.eurotech.edcandroid.settings.CommandsFragment"
         android:title="@string/pref_gateway_commands" />
 
 </preference-headers>
