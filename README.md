@@ -3,6 +3,9 @@ edc-examples
 
 ##EDC Example Projects##
 
+###edc-android###
+This is a demo application demonstrating the use of the EDC Platform on a Android smartphone. Within the application the user can publish, contro-publish, auto-publish, and receive messages from user-defined topics and assets. See the edc-android README for a more detailed explanation.
+
 ###cleanweb-dashboard###
 This is an example 'dashboard' that shows how to use the REST APIs of Everyware Cloud to retrive information and display it in a meaningful and specific way.  It shows how to include simple maps, widgets, and other features and can be used as a starting point for a custom portal view.
 

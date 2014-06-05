@@ -289,6 +289,15 @@ public class EDCAndroid extends Activity {
 		case R.id.menu_settings:
 			startActivity(new Intent(this, SettingsActivity.class));
 			return true;
+		case R.id.menu_dock:
+			localLog("END FINISH", ENABLE);
+			finish();
+			return true;
+		case R.id.menu_exit:
+			localLog("END FINISH", ENABLE);
+			EdcStop();
+			finish();
+			return true;
 		case R.id.menu_about:
 			String builddate = null;
 			try{
@@ -316,15 +325,6 @@ public class EDCAndroid extends Activity {
 			TextView messageView = (TextView)dialog.findViewById(android.R.id.message);
 			messageView.setGravity(Gravity.CENTER);
 
-			return true;
-		case R.id.menu_dock:
-			localLog("END FINISH", ENABLE);
-			finish();
-			return true;
-		case R.id.menu_exit:
-			localLog("END FINISH", ENABLE);
-			EdcStop();
-			finish();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
