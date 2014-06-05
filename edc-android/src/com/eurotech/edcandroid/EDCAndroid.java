@@ -47,7 +47,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Display;
@@ -74,7 +73,6 @@ public class EDCAndroid extends Activity {
 	public static GridView gridView;
 	private final boolean active = true;
 	private ControlMessageReceiver controlMessageReceiver;
-	private static boolean firstStart = true;
 	private static OnSharedPreferenceChangeListener connectionPreferenceListener;
 	public static boolean usernameDone     = false;
 	public static boolean passwordDone     = false;
@@ -89,7 +87,7 @@ public class EDCAndroid extends Activity {
 	public static FileOutputStream logFileOutputStream;
 	public static RandomAccessFile logFileWriter;
 	public static FileChannel logFileChannel;
-	public static int i = 0;
+	public static int CANCEL_ALL = -1;
 
 	public static final Boolean ENABLE = false;
 
@@ -127,14 +125,14 @@ public class EDCAndroid extends Activity {
 		}
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(startingActivityContext);
-		
+
 		usernameDone = !prefs.getString("pref_connectivity_connection_username", "").isEmpty();
 		passwordDone = !prefs.getString("pref_connectivity_connection_password", "").isEmpty();
 		brokerDone   = !prefs.getString("pref_connectivity_connection_broker", "").isEmpty();
 		accountDone  = !prefs.getString("pref_connectivity_connection_account", "").isEmpty();
 		assetDone    = !prefs.getString("pref_connectivity_connection_assetID", "").isEmpty();
 		allSetsDone  = usernameDone && passwordDone && brokerDone && accountDone && assetDone;
-		
+
 		semanticTopicList = new ArrayList<String>();
 		EdcConnectionService.deviceData = new DeviceData(this);
 		ASSET_ID = EdcConnectionService.deviceData.assetId;
@@ -209,55 +207,33 @@ public class EDCAndroid extends Activity {
 			}
 		});
 
-		if (firstStart) {
-			firstStart = false;
-			int logo;
-			String message = "";
-			if (!EdcConnectionService.networkIsConnected(startingActivityContext)) {
-				logo = R.drawable.redlogo;
-				message = "Network is not connected.";
-				new EdcNotification(startingActivityContext, logo, EdcConnectionService.messageTitle, message, Notification.FLAG_NO_CLEAR, EDCAndroid.class);
-			} else {
-				logo = R.drawable.yellowlogo;
-				message = "Network is connected.";
-				if (!EdcConnectionService.EdcRunning()) {
-					if (allSetsDone) {
-						EdcStart();
-						if (EdcConnectionService.EdcRunning()) {
-							logo = R.drawable.greenlogo;
-							message += "\n" + "EDC service is running.";
-							new EdcNotification(startingActivityContext, logo, EdcConnectionService.messageTitle, message, Notification.FLAG_NO_CLEAR, EDCAndroid.class);
-						} else {
-							message += "\n" + "EDC service is not running.\nCheck EDC Settings";
-							new EdcNotification(startingActivityContext, logo, EdcConnectionService.messageTitle, message, Notification.FLAG_NO_CLEAR, EDCAndroid.class);
-						}
-					}
-					message += "\n" + "EDC service is not running.\nCheck EDC Settings";
-					new EdcNotification(startingActivityContext, logo, EdcConnectionService.messageTitle, message, Notification.FLAG_NO_CLEAR, EDCAndroid.class);
+		int logo;
+		String message = "";
+		if (!EdcConnectionService.networkIsConnected(startingActivityContext)) {
+			logo = R.drawable.redlogo;
+			message = "Network is not connected.";
+			new EdcNotification(startingActivityContext, logo, EdcConnectionService.messageTitle, message, Notification.FLAG_NO_CLEAR, EDCAndroid.class);
+		} else {
+			logo = R.drawable.yellowlogo;
+			message = "Network is connected.";
+			if (!EdcConnectionService.EdcRunning()) {
+				if (allSetsDone) {
+					EdcStart();
 				} else {
-					logo = R.drawable.greenlogo;
-					message += "\n" + "EDC service is running.";
+					message += "\n" + "EDC Service is not running.\nCheck EDC Settings";
 					new EdcNotification(startingActivityContext, logo, EdcConnectionService.messageTitle, message, Notification.FLAG_NO_CLEAR, EDCAndroid.class);
 				}
+			} else {
+				logo = R.drawable.greenlogo;
+				message += "\n" + "EDC Service is running.";
+				new EdcNotification(startingActivityContext, logo, EdcConnectionService.messageTitle, message, Notification.FLAG_NO_CLEAR, EDCAndroid.class);
 			}
-		} else if (allSetsDone) {
-			EdcStart();
 		}
 
 		localLog("END", ENABLE);
 	}
-	
-	public static class pluto extends PreferenceFragment {
 
-		public pluto() {
-		}
-		public String plutoDammi(int i) {
-			return (String) getPreferenceScreen().getPreference(i).getTitle();
-		}
-		
-	}
 
-	
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -265,23 +241,24 @@ public class EDCAndroid extends Activity {
 		localLog("END", ENABLE);
 	}
 
-	
+
 	protected void onDestroy() {
 		super.onDestroy();
 		localLog("BEGIN", ENABLE);
-		unregisterReceiver(controlMessageReceiver);
+		EdcStop();
 		localLog("END", ENABLE);
 	}
 
-	
+
 	@Override
 	protected void onPause() {
 		super.onPause();
 		localLog("BEGIN", ENABLE);
+		finish();
 		localLog("END", ENABLE);
 	}
 
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		localLog("BEGIN", ENABLE);
@@ -296,6 +273,7 @@ public class EDCAndroid extends Activity {
 		case R.id.menu_exit:
 			localLog("END FINISH", ENABLE);
 			EdcStop();
+			new EdcNotification(startingActivityContext, CANCEL_ALL, EdcConnectionService.messageTitle, "", Notification.FLAG_NO_CLEAR, EDCAndroid.class);
 			finish();
 			return true;
 		case R.id.menu_about:
@@ -400,7 +378,7 @@ public class EDCAndroid extends Activity {
 								logo = R.drawable.redlogo;
 								message = "Network is not connected.";
 							}
-							message += "\n" + "EDC service is not running.\nCheck EDC Settings";
+							message += "\n" + "EDC Service is not running.\nCheck EDC Settings";
 							new EdcNotification(startingActivityContext, logo, EdcConnectionService.messageTitle, message, Notification.FLAG_NO_CLEAR, EDCAndroid.class);
 						}
 					}
@@ -565,7 +543,7 @@ public class EDCAndroid extends Activity {
 			localLog("END", ENABLE);
 		}
 	}
-	
+
 
 	public static void localLog(String message, boolean enabled) {
 		if (!enabled) return;
@@ -627,7 +605,7 @@ public class EDCAndroid extends Activity {
 			}
 		}
 	}
-	
+
 	public static void localLog(String message, String assetID) {
 		StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
 		StackTraceElement e = stacktrace[3];
@@ -657,7 +635,7 @@ public class EDCAndroid extends Activity {
 			}
 		}
 	}
-	
+
 	public static void localLog() {
 		StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
 		StackTraceElement e = stacktrace[3];

@@ -39,7 +39,6 @@ import com.eurotech.edcandroid.tools.SensorSelection;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -330,7 +329,7 @@ public class EdcConnectionService extends Service implements EdcCallbackHandler 
 		String message = "Network is connected.";
 		if (EdcRunning()) {
 			logo = R.drawable.greenlogo;
-			message += "\n" + "EDC service is running.";
+			message += "\n" + "EDC Service is running.";
 		} else {
 			EdcConnect();
 			if (EdcRunning()) {
@@ -358,11 +357,11 @@ public class EdcConnectionService extends Service implements EdcCallbackHandler 
 				registerReceiver(receiverManager, managerFilter);
 
 				logo = R.drawable.greenlogo;
-				message += "\n" + "EDC service is running.";
+				message += "\n" + "EDC Service is running.";
 				connectToSensors();
 				scheduleNextSensorRead();
 			} else {
-				message += "\n" + "EDC service is not running.\nCheck EDC Settings";
+				message += "\n" + "EDC Service is not running.\nCheck EDC Settings";
 			}
 		}
 		new EdcNotification(localContext, logo, messageTitle, message, Notification.FLAG_NO_CLEAR, EDCAndroid.class);
@@ -400,7 +399,6 @@ public class EdcConnectionService extends Service implements EdcCallbackHandler 
 
 			EDCAndroid.localLog("BEGIN", EDCAndroid.ENABLE);
 			EdcDisconnect();
-			CancelEdcNotification(localContext);
 		}
 
 
@@ -1372,17 +1370,6 @@ public class EdcConnectionService extends Service implements EdcCallbackHandler 
 		}
 	}
 
-
-
-	public static void CancelEdcNotification(Context context) {
-
-		EDCAndroid.localLog("BEGIN", EDCAndroid.ENABLE);
-
-		NotificationManager nm = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-		nm.cancelAll();
-
-		EDCAndroid.localLog("END", EDCAndroid.ENABLE);
-	}
 
 
 

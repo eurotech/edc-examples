@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Everyware Device Cloud Android Demo</string>
+    <string name="app_name">Everyware Android</string>
     <string name="menu_item_settings">Settings</string>
     <string name="menu_item_logfile_open">Open internal logfile</string>
     <string name="menu_item_logfile_close">Close internal logfile</string>
@@ -11,7 +11,7 @@
     <string name="menu_item_exit">Stop &amp; Exit</string>
     <string name="pref_connectivity_title">Connectivity</string>
     <string name="pref_gateway_title">Android Gateway</string>
-    <string name="Desc">Android Demo</string>
+    <string name="Desc">Android Application</string>
     <string name="title">Title</string>
 
     <!-- Clound connect screen -->

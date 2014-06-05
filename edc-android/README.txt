@@ -1,6 +1,6 @@
 +----------------------------------------------------------------+
 |                                                                |
-| Everyware Device Cloud (EDC): Android Demo Application v.1.0.0 |
+| Everyware Device Cloud (EDC): Android Application v.1.0.0      |
 |                                                                |
 +----------------------------------------------------------------+
 
@@ -11,6 +11,7 @@
 The Edc Android application demonstrates the use of the Edc platform from a Android smartphone.
 The user, after registering to e broker, can publish, control-publish, auto-publish, and receive
 messages directly on the smartphone.
+The application apk can be found inside ./releases/<ver.>
 
 
 The Applicaation allows the following actions, corresponding to the indicated icons shown on its
