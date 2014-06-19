@@ -2,6 +2,7 @@
 
 # Package Files #
 *.jar
+!edc-android/libs/*.jar
 *.war
 *.ear
 
