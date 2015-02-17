@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+		<title>EDC Everyware Device Cloud</title>
+		<!--Load the CSS -->
+		<link type="text/css" href="css/overcast/jquery-ui-1.8.22.custom.css" rel="stylesheet" />
+
+
+		<!--Load the AJAX API-->
+		<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+		<script type="text/javascript" src="googlecharts/js/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="googlecharts/js/jquery-ui-1.8.21.custom.min.js"></script>
+		
+
+		<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui-1.8.22.custom.min.js"></script>
+		<script type="text/javascript" src="js/base64.js"></script>
+		
+		<script type="text/javascript" src="jquery/jquery-1.6.4.js"></script>
+		<script type='text/javascript' src="jquery/jquery.maphilight.min.js"></script>
+		
+
+		<script type="text/javascript" src="jquery/jquery.atmosphere.js"></script>
+		<script type="text/javascript" src="jquery/getstreams.js"></script>
+		
+<script type="text/javascript">
+//added to fix IE issue 
+// jQuery.support.cors = true;
+
+//Load the Visualization API and the ready-made Google table visualization
+google.load('visualization', '1', {'packages':['table']});
+// google.load("visualization", "1", {packages:["corechart"]});
+
+// Set a callback to run when the API is loaded.
+google.setOnLoadCallback($.init);
+
+// Send the query to the data source.
+
+//$(function (){
+$(function init(){
+
+	//
+	// use the jquery sortable plugin to give the page a dashboard look and feel
+    $( ".portlet" ).addClass( "ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" )
+        .find( ".portlet-header" )
+            .addClass( "ui-widget-header ui-corner-all" )
+            .prepend( "<span class='ui-icon ui-icon-minusthick'></span>")
+            .end()
+        .find( ".portlet-content" );
+
+    $( ".portlet-header .ui-icon" ).click(function() {
+        $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
+        $( this ).parents( ".portlet:first" ).find( ".portlet-content" ).toggle();
+    });
+
+    $( ".column" ).disableSelection();
+
+				// Tabs
+				$('#tabs').tabs();
+
+				// Dialog
+				$('#dialog').dialog({
+// 					autoOpen: false,
+					modal: true,
+					width: 300,
+					buttons: {
+						"Login": function() {
+							$(this).dialog("close");
+						    var dsUrl    = "https://api-sandbox.everyware-cloud.com/gvds";
+// 						    var dsUrl    = "http://edc-apis.elasticbeanstalk.com/gvds";
+					     	var username = $("input#username").attr("value");
+						    var password = $("input#password").attr("value");
+						    var clientID   = $("input#clientID").attr("value");
+							var getTopic   = $("input#getTopic").attr("value");
+							var postTopic   = $("input#postTopic").attr("value");
+// 							var refresh_time_txt="2000";
+// 							var refresh_time = parseInt(refresh_time_txt,10);
+
+						    $.ajax({
+						        type: "GET",
+						        url:  dsUrl+"/login",
+
+						      //Removed to fix IE issue    
+						        xhrFields: {
+						            withCredentials: true
+						        },          
+						        beforeSend : function(req) {
+						            req.setRequestHeader('Authorization', "Basic " +Base64.encode(username+":"+password))
+						        //added to fix IE issue    
+// 						            req.withCredentials = true;
+						        }
+						    }).done(function( msg ) {
+// 						    	alert("You successfully logged in");	
+						    	$("p").html("Welcome, "+username);
+// Table
+
+
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'Table',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
+						            query: "SELECT c3 LABEL c3 'C3'",
+						            refreshInterval: 1,
+						            containerId: 'chart_table_c3'
+						        });
+						        wrapper.draw();
+
+
+// Column Chart T4
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'ColumnChart',
+// 						            chartType: 'BubbleChart',
+// 						            chartType: 'ScatterChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
+// 						            query: "SELECT it4, it5, it6 LABEL it4 'Toggle 4', it5 'Toggle 5', it6 'Toggle 6'",
+						            query: "SELECT receivedOn, it4 LABEL it4 'Toggle 4'",
+						            refreshInterval: 1,
+						            options: {
+										backgroundColor : "none",
+						                colors:['#FFCC00'],
+						                vAxis: {viewWindow : {min: 0 ,max: 1}, textStyle : {color: "black"}, baselineColor: "gray", textPosition: "none"},
+						                hAxis: {textStyle : {color: "gray"}, baselineColor: "gray", textPosition: "none"},
+						                legend: {position: 'bottom'},
+// 						                chartArea : {left: 50},
+						                bar : {groupWidth : '50%'},
+						                width: 180,
+						                height: 100
+						            },
+						            containerId: 'chart_gauge_t4'
+						        });
+						        wrapper.draw();
+
+// Column Chart T5
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'ColumnChart',
+// 						            chartType: 'BubbleChart',
+// 						            chartType: 'ScatterChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
+// 						            query: "SELECT it4, it5, it6 LABEL it4 'Toggle 4', it5 'Toggle 5', it6 'Toggle 6'",
+						            query: "SELECT receivedOn, it5 LABEL it5 'Toggle 5'",
+						            refreshInterval: 1,
+						            options: {
+										backgroundColor : "none",
+						                colors:['#0033FF'],
+						                vAxis: {viewWindow : {min: 0 ,max: 1}, textStyle : {color: "black"}, baselineColor: "gray", textPosition: "none"},
+						                hAxis: {textStyle : {color: "gray"}, baselineColor: "gray", textPosition: "none"},
+						                legend: {position: 'bottom'},
+						                chartArea : {left: 40},
+						                bar : {groupWidth : '50%'},
+						                width: 180,
+						                height: 100
+						            },
+						            containerId: 'chart_gauge_t5'
+						        });
+						        wrapper.draw();
+						        
+// Column Chart T6
+
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'ColumnChart',
+// 						            chartType: 'BubbleChart',
+// 						            chartType: 'ScatterChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
+// 						            query: "SELECT it4, it5, it6 LABEL it4 'Toggle 4', it5 'Toggle 5', it6 'Toggle 6'",
+						            query: "SELECT receivedOn, it6 LABEL it6 'Toggle 6'",
+						            refreshInterval: 1,
+						            options: {
+										backgroundColor : "none",
+						                colors:['#CC0000'],
+						                vAxis: {viewWindow : {min: 0 ,max: 1}, textStyle : {color: "black"}, baselineColor: "gray", textPosition: "none"},
+						                hAxis: {textStyle : {color: "gray"}, baselineColor: "gray", textPosition: "none"},
+						                legend: {position: 'bottom'},
+						                chartArea : {left: 50},
+						                bar : {groupWidth : '50%'},
+						                width: 180,
+						                height: 100
+						            },
+						            containerId: 'chart_gauge_t6'
+						        });
+						        wrapper.draw();
+						        
+// 						        var wrapper = new google.visualization.ChartWrapper({
+// 						            chartType: 'Gauge',
+// 						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
+// 						            query: "SELECT it4 LABEL it4 'T4'",
+// 						            refreshInterval: 1,
+// 						            options: {
+// 						            	min: 0, max: 1,
+// 						                minorTicks: 0, 
+// 						                majorTicks: 0,
+// 						                redFrom: 0, redTo: 0.5,
+// 						                greenFrom: 0.5, greenTo: 1,
+// 						                height: 100
+// 						            },
+// 						            containerId: 'chart_gauge_t4'
+// 						        });
+// 						        wrapper.draw();
+						        
+// // Gauge T5
+// 						        var wrapper = new google.visualization.ChartWrapper({
+// 						            chartType: 'Gauge',
+// 						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
+// 						            query: "SELECT it5 LABEL it5 'T5'",
+// 						            refreshInterval: 1,
+// 						            options: {
+// 						            	min: 0, max: 1,
+// 						                minorTicks: 0, 
+// 						                majorTicks: 0,
+// 						                redFrom: 0, redTo: 0.5,
+// 						                greenFrom: 0.5, greenTo: 1,
+// 						                height: 100
+// 						            },
+// 						            containerId: 'chart_gauge_t5'
+// 						        });
+// 						        wrapper.draw();
+
+// // Gauge T6
+// 						        var wrapper = new google.visualization.ChartWrapper({
+// 						            chartType: 'Gauge',
+// 						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
+// 						            query: "SELECT it6 LABEL it6 'T6'",
+// 						            refreshInterval: 1,
+// 						            options: {
+// 						            	min: 0, max: 1,
+// 						                minorTicks: 0, 
+// 						                majorTicks: 0,
+// 						                redFrom: 0, redTo: 0.5,
+// 						                greenFrom: 0.5, greenTo: 1,
+// 						                height: 100
+// 						            },
+// 						            containerId: 'chart_gauge_t6'
+// 						        });
+// 						        wrapper.draw();
+// Gauge Qc
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'Gauge',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
+						            query: "SELECT qc LABEL qc 'QC'",
+						            refreshInterval: 1,
+						            options: {
+						            	min: 0, max: 30,
+						                minorTicks: 2, 
+						                greenFrom: 10, greenTo: 20,
+						                yellowFrom: 20, yellowTo: 25,
+						                redFrom: 25, redTo: 30,
+						                height: 170
+						            },
+						            containerId: 'chart_gauge_qc'
+						        });
+						        wrapper.draw();
+						        
+						        // LineChart
+				        
+						        
+						        var wrapper = new google.visualization.ChartWrapper({
+						            chartType: 'LineChart',
+						            dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=20',
+						            query: "SELECT receivedOn, qc format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
+						            refreshInterval: 1,
+						            options: {
+						                curveType: 'function',
+						                legend: {position: 'top'},
+// 						                hAxis: {title: 'Time', baseline: 'continuous', format: 'HH:mm:ss.SSS', gridlines: {count: 10}},
+						                hAxis: {title: 'Time', format: 'HH:mm:ss', gridlines: {count: 10}},
+						                pointSize: 1,
+						                height: 200,
+						                width: 550,
+						            },
+						            containerId: 'chart_line'
+						        });
+						        wrapper.draw();
+
+								doDemo(username,password,clientID,postTopic,getTopic);	
+						    })
+						    .fail(function( msg ) {    	
+						    	alert("Failed to login: "+msg.status+" - "+msg.statusText);
+						    });
+
+						}
+					}
+				
+				
+				});
+
+$(function() {
+		$( "#check" ).button();
+		$( "#format" ).buttonset();
+});
+			
+
+}); //end of init function
+
+
+
+//NEW PART
+
+function doDemo (username,password,clientID,postTopic,getTopic) {
+
+var led1status="";
+var led2status="";
+var led3status="";
+var led4status="";
+var led4redStatus="";
+var led4greenStatus="";
+var led4blueStatus="";
+var clickLed1="";
+var clickLed2="";
+var clickLed3="";
+var clickLed4="";
+var clickLed4red="";
+var clickLed4green="";
+var clickLed4blue="";
+window.led3String = ""
+window.c3String = ""
+window.t5String="";
+window.t6String="";
+window.qcString = ""
+var XMLData1="";
+var XMLData2="";
+var XMLData3="";
+var XMLData4="";
+var redIsOn="";
+var greenIsOn="";
+var blueIsOn="";
+var readRed="";
+var readGreen="";
+var readBlue="";
+var XMLrule1="";
+var XMLrule2="";
+var XMLReset="";
+var apiURL="https://api-sandbox.everyware-cloud.com/v2/messages/searchByTopic.xml?topic=";
+var publishURL="https://api-sandbox.everyware-cloud.com/v2/messages/publish.xml";
+var logoutURL= "https://api-sandbox.everyware-cloud.com/gvds/logout";
+// var apiURL="http://edc-apis.elasticbeanstalk.com/v2/messages/searchByTopic.xml?topic=";
+// var publishURL="http://edc-apis.elasticbeanstalk.com/v2/messages/publish.xml";
+// var logoutURL= "http://edc-apis.elasticbeanstalk.com/gvds/logout";
+//GET METRICS
+// // var refresh_time_txt= $("input#refresh_time").attr("value");
+// var refresh_time_txt="5000";
+// var refresh_time = parseInt(refresh_time_txt,10);
+
+	$(document).ready(function(){
+
+
+					setInterval(function() {
+					readRed="";
+					readGreen="";
+					readBlue="";
+// 				    var url = "https://api-sandbox.everyware-cloud.com/v2/messages/searchByTopic.xml?topic="+username+"/"+clientID+"/"+getTopic;
+				    var url = apiURL+username+"/"+clientID+"/"+getTopic;
+					function make_base_auth(user, password) {
+					var tok = user + ':' + password;
+					var hash = btoa(tok);
+					return "Basic " + hash;
+					}
+
+					$.ajax
+					({
+				    type: "GET",
+				    url: url, 
+				    dataType: 'xml',
+				    async : true,
+				    data: '{}',
+				    beforeSend: function (xhr){ 
+				        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				    },
+			        success: function(xml){
+			        	$(xml).find('receivedOn').first().each(function(){
+			        		var sTime = $(this).text();
+			        	}); 
+			            $(xml).find('metrics').first().each(function(){
+			            	$(this).find('metric').each(function(){
+			              var sName = $(this).find('name').text();
+			              var sType = $(this).find('type').text();
+			              var sValue = $(this).find('value').text();
+
+			              if(sName=='c3'){
+//			            	  $("<li></li>").html("Name: " + sName + ", Type: " + sType+ ", Value: " + sValue).appendTo("#messages ul");
+			            	  window.c3String=$(this).find('value').text();
+								
+			            	  $('div.c3-text').text(window.c3String).css({'background-color' : 'none', 'font-weight' : 'bolder', 'position': 'absolute', 
+			            			'left': '205px', 'top': '330px', 'color': 'white', 'font-family': 'tahoma', 'font-size': '11pt', 'padding-top': '19px', 'padding-bottom': '19px', 
+			            			'padding-right': '13px', 'padding-left': '13px'});
+			              }
+			              
+			              if(sName=='qc'){
+			            	  window.qcString=$(this).find('value').text();
+			            	  $('div.qc-text').text(window.qcString).css({'background-color' : 'none', 'font-weight' : 'bolder', 'position': 'absolute', 
+			            			'left': '555px', 'top': '331px', 'color': 'white', 'font-family': 'tahoma', 'font-size': '11pt', 'padding-top': '19px', 'padding-bottom': '19px', 
+			            			'padding-right': '20px', 'padding-left': '20px'});
+			              }
+			              
+			              if(sName=='LED1'){
+			            	  window.led1String=$(this).find('value').text();
+			            	  var ledID="1";
+			            	  var led1color="gold";
+			            	  var gotLed1Value="";
+			            	  var ledstatus=led1status;
+			            	  
+			            	  if(sValue=='true'){
+			            		  gotLed1Value=!gotLed1Value;
+			            	  }
+						      if(!clickLed1){
+				            	  displayLedStatus(ledID,gotLed1Value,led1color);  
+						      }
+						      clickLed1="";
+			              }
+
+
+			              if(sName=='LED2'){
+			            	  window.led2String=$(this).find('value').text();
+			            	  var ledID="2";
+			            	  var led2color="gold";
+			            	  var gotLed2Value="";
+			            	  var ledstatus=led2status;
+			            	  
+			            	  if(sValue=='true'){
+			            		  gotLed2Value=!gotLed2Value;
+			            	  }
+						      if(!clickLed2){
+				            	  displayLedStatus(ledID,gotLed2Value,led2color);  
+						      }
+						      clickLed2="";
+			              }
+			              
+	            		  
+			              
+			              if(sName=='LED3'){
+			            	  window.led3String=$(this).find('value').text();
+			            	  var ledID="3";
+			            	  var led3color="gold";
+			            	  var gotLed3Value="";
+			            	  var ledstatus=led3status;
+			            	  
+			            	  if(sValue=='true'){
+			            		  gotLed3Value=!gotLed3Value;
+			            	  }
+						      if(!clickLed3){
+				            	  displayLedStatus(ledID,gotLed3Value,led3color);  
+						      }
+						      clickLed3="";
+			              }
+			              
+			              
+			              if(sName=='LED4red' || sName=='LED4green' || sName=='LED4blue') {
+			            	  
+			           
+			              		if(sName=='LED4red'){
+								  readRed=!readRed;
+
+			            	  	  window.led4rString=$(this).find('value').text();
+							  	  redIsOn="";
+			            	      var ledID="4"
+			            	      var gotLed4Value="";
+			            	      var led4color="red";
+			            		  if(sValue=='true'){
+			            			  gotLed4Value=!gotLed4Value;
+			            			  redIsOn=!redIsOn;
+			            	 		 }
+			              		}
+			              
+			            		if(sName=='LED4green'){
+			            			readGreen=!readGreen;
+			            		  window.led4gString=$(this).find('value').text();
+								  greenIsOn="";
+			           		 	  var ledID="4"
+			          	 	 	  var gotLed4Value="";
+			          	  		  var led4color="green";
+			            		  if(sValue=='true'){
+			            			  gotLed4Value=!gotLed4Value;
+			            			  greenIsOn=!greenIsOn;
+			            		  }
+			             	 }
+				            	
+			            		if(sName=='LED4blue'){
+			            			readBlue=!readBlue;
+			            		  window.led4gString=$(this).find('value').text();
+								  blueIsOn="";
+			           		 	  var ledID="4"
+			          	 	 	  var gotLed4Value="";
+			          	  		  var led4color="blue";
+			            		  if(sValue=='true'){
+			            			  gotLed4Value=!gotLed4Value;
+			            			  blueIsOn=!blueIsOn;
+			            		  }
+			             	 }
+								if(readRed && readGreen && readBlue) {
+						    	 	 if(!clickLed4){
+				          		  		  displayLed4();  
+						 	     		}
+						 	     		clickLed4="";	
+				            	  }
+			              }
+			              
+			              if(sName=='t4'){
+			            	  window.t4String=$(this).find('value').text();
+			            	  var toggleID="4"
+			            	  var gotToggle4Value="";
+			            	  
+			            	  if(sValue=='true'){
+			            		  gotToggle4Value=!gotToggle4Value;
+			            	  }
+				            	displayToggleStatus(toggleID,gotToggle4Value);  
+			              }
+			              
+			              if(sName=='t5'){
+			            	  window.t5String=$(this).find('value').text();
+			            	  var toggleID="5"
+			            	  var gotToggle5Value="";
+
+			            	  
+			            	  if(sValue=='true'){
+			            		  gotToggle5Value=!gotToggle5Value;
+			            	  }
+				            	displayToggleStatus(toggleID,gotToggle5Value);  
+			              }
+			              
+			              if(sName=='t6'){
+			            	  window.t6String=$(this).find('value').text();
+			            	  var toggleID="6"
+			            	  var gotToggle6Value="";
+			            	  
+			            	  if(sValue=='true'){
+			            		  gotToggle6Value=!gotToggle6Value;
+			            	  }
+				            	displayToggleStatus(toggleID,gotToggle6Value);  
+			              } 
+			              
+			              
+			            });
+			            });
+			          },
+			          error: function() {
+			            alert("An error occurred while processing XML file.");
+			          }
+				});
+					}, 1000);
+
+
+			});
+
+
+
+			
+//LED 1 
+$(document).ready(function() {
+
+	   $("#led1").click(function() {
+		 
+		    clickLed1=!clickLed1;
+
+		 	var light="false"; 
+			var opacity="0.1";  
+			background_color="gold";
+			if (!led1status){
+
+				opacity="1";
+			  	light = "true";
+			}
+			
+
+			
+			led1status=!led1status;
+		
+			$(this).css({'background-color':background_color,'opacity':opacity});
+
+//             var url = "https://api-sandbox.everyware-cloud.com/v2/messages/publish.xml";
+            var url = publishURL;
+			function make_base_auth(user, password) {
+			var tok = user + ':' + password;
+			var hash = btoa(tok);
+			return "Basic " + hash;
+			}
+			
+			var ledID="1";
+			var ledName="light";
+			var publishTopic="$EDC/" + username + "/" + clientID + "/" + postTopic;
+			makeXML(username,clientID,publishTopic,ledName,light,ledID);
+			
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLData1,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});
+			 
+			var ledID="1";
+			var ledName="light";
+			var publishTopic=username + "/" + clientID + "/" +postTopic;
+			makeXML(username,clientID,publishTopic,ledName,light,ledID);
+
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLData1,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});
+	   }); // end of click function
+	 });	
+
+//LED 2
+$(document).ready(function() {
+
+	   $("#led2").click(function() {
+		 
+		    clickLed2=!clickLed2;
+		 	var light="false"; 
+			var opacity="0.1";  
+			
+			if (!led2status){
+				opacity="1";
+			  	light = "true";
+			}
+						
+			led2status=!led2status;
+						
+			color=$(this).css("background-color");
+			background_color=$(this).css("color");
+
+			$(this).css({'background-color':background_color,'color':color,'opacity':opacity});
+
+//             var url = "https://api-sandbox.everyware-cloud.com/v2/messages/publish.xml";
+            var url = publishURL;
+            
+			function make_base_auth(user, password) {
+			var tok = user + ':' + password;
+			var hash = btoa(tok);
+			return "Basic " + hash;
+			}
+			
+			var ledID="2";
+			var ledName="light";
+			var publishTopic="$EDC/" + username + "/" + clientID + "/" + postTopic;
+			makeXML(username,clientID,publishTopic,ledName,light,ledID);
+
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLData2,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});
+			 
+			var ledID="2";
+			var ledName="light";
+			var publishTopic=username + "/" + clientID + "/" + postTopic;
+			makeXML(username,clientID,publishTopic,ledName,light,ledID);
+
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLData2,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});	 
+	   }); // end of click function
+	 });
+
+//LED 3
+$(document).ready(function() {
+
+	   $("#led3").click(function() {
+		 
+		    clickLed3=!clickLed3;
+		 	var light="false"; 
+			var opacity="0.1";  
+
+			
+			if (!led3status){
+				opacity="1";
+			  	light = "true";
+			}
+			
+			led3status=!led3status;
+						
+			color=$(this).css("background-color");
+			background_color=$(this).css("color");
+
+			$(this).css({'background-color':background_color,'color':color,'opacity':opacity});
+		
+
+//             var url = "https://api-sandbox.everyware-cloud.com/v2/messages/publish.xml";
+            var url = publishURL;
+            
+			function make_base_auth(user, password) {
+			var tok = user + ':' + password;
+			var hash = btoa(tok);
+			return "Basic " + hash;
+			}
+			
+			var ledID="3";
+			var ledName="light";
+			var publishTopic="$EDC/" + username + "/" + clientID + "/" + postTopic;
+			makeXML(username,clientID,publishTopic,ledName,light,ledID);
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLData3,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});
+			
+			var ledID="3";
+			var ledName="light"; 
+			var publishTopic=username + "/" + clientID + "/" + postTopic;
+			makeXML(username,clientID,publishTopic,ledName,light,ledID);
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLData3,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});
+			
+			
+	   }); // end of click function
+	 });
+
+
+
+
+//LED 4 RED
+$(document).ready(function() {
+
+	  	   $("#led4red").click(function() {
+
+// 		   var ledColor   = $("#ledcolor").attr("value");
+		   var ledColor   = "red"
+		   clickLed4red=!clickLed4red;
+		 	var light="false"; 
+			var opacity="0.4";  
+
+
+			color=$(this).css("background-color");
+			background_color=$(this).css("color");
+
+			if (!led4redStatus){
+				opacity="1";
+			  	light = "true";
+			}
+
+// 			$(this).css({'background-color':ledColor,'opacity':opacity});
+			
+			led4redStatus=!led4redStatus;
+
+//             var url = "https://api-sandbox.everyware-cloud.com/v2/messages/publish.xml";
+            var url = publishURL;
+            
+			function make_base_auth(user, password) {
+			var tok = user + ':' + password;
+			var hash = btoa(tok);
+			return "Basic " + hash;
+			}
+			
+			var ledID="4";
+			var ledName=ledColor;
+			var publishTopic="$EDC/" + username + "/" + clientID + "/" + postTopic;
+			makeXML(username,clientID,publishTopic,ledName,light,ledID);
+
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLData4,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});
+			 
+			var ledID="4";
+			var ledName=ledColor;
+			var publishTopic=username + "/" + clientID + "/" + postTopic;
+			makeXML(username,clientID,publishTopic,ledName,light,ledID);
+
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLData4,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});
+			
+	   }); // end of click function
+	 });
+	 
+	 
+//LED 4 GREEN
+$(document).ready(function() {
+
+	  	   $("#led4green").click(function() {
+
+//		   var ledColor   = $("#ledcolor").attr("value");
+ 		   var ledColor   = "green"
+		   clickLed4green=!clickLed4green;
+		 	var light="false"; 
+			var opacity="0.4";  
+
+
+			color=$(this).css("background-color");
+			background_color=$(this).css("color");
+
+			if (!led4greenStatus){
+				opacity="1";
+			  	light = "true";
+			}
+
+// 			$(this).css({'background-color':ledColor,'opacity':opacity});
+			
+			led4greenStatus=!led4greenStatus;
+
+//             var url = "https://api-sandbox.everyware-cloud.com/v2/messages/publish.xml";
+            var url = publishURL;
+            
+			function make_base_auth(user, password) {
+			var tok = user + ':' + password;
+			var hash = btoa(tok);
+			return "Basic " + hash;
+			}
+			
+			var ledID="4";
+			var ledName=ledColor;
+			var publishTopic="$EDC/" + username + "/" + clientID + "/" + postTopic;
+			makeXML(username,clientID,publishTopic,ledName,light,ledID);
+			
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLData4,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});
+			 
+			var ledID="4";
+			var ledName=ledColor;
+			var publishTopic=username + "/" + clientID + "/" + postTopic;
+			makeXML(username,clientID,publishTopic,ledName,light,ledID);
+			
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLData4,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});
+			
+	   }); // end of click function
+	 });
+
+//LED 4 BLUE
+$(document).ready(function() {
+
+	  	   $("#led4blue").click(function() {
+
+//		   var ledColor   = $("#ledcolor").attr("value");
+ 		   var ledColor   = "blue"
+		   clickLed4blue=!clickLed4blue;
+		 	var light="false"; 
+			var opacity="0.4";  
+
+
+			color=$(this).css("background-color");
+			background_color=$(this).css("color");
+
+			if (!led4blueStatus){
+				opacity="1";
+			  	light = "true";
+			}
+
+// 			$(this).css({'background-color':ledColor,'opacity':opacity});
+			
+			led4blueStatus=!led4blueStatus;
+
+//             var url = "https://api-sandbox.everyware-cloud.com/v2/messages/publish.xml";
+            var url = publishURL;
+            
+			function make_base_auth(user, password) {
+			var tok = user + ':' + password;
+			var hash = btoa(tok);
+			return "Basic " + hash;
+			}
+			
+			var ledID="4";
+			var ledName=ledColor;
+			var publishTopic="$EDC/" + username + "/" + clientID + "/" + postTopic;
+			makeXML(username,clientID,publishTopic,ledName,light,ledID);
+
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLData4,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});
+			 
+			var ledID="4";
+			var ledName=ledColor;
+			var publishTopic=username + "/" + clientID + "/" + postTopic;
+			makeXML(username,clientID,publishTopic,ledName,light,ledID);
+
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLData4,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});
+			
+	   }); // end of click function
+	 });
+
+
+//RESET COUNTER C3
+$(document).ready(function() {
+
+	  	   $("#reset_c3").click(function() {
+
+			 
+
+
+//             var url = "https://api-sandbox.everyware-cloud.com/v2/messages/publish.xml";
+            var url = publishURL;
+            
+			function make_base_auth(user, password) {
+			var tok = user + ':' + password;
+			var hash = btoa(tok);
+			return "Basic " + hash;
+			}
+			
+			var counterID="c3";
+			var resetMetric="value";
+			var resetValue = "true";
+			var resetTopic="eurotech/demo/resetcnt";
+			makeResetXML(username,clientID,resetTopic,resetMetric,resetValue,counterID);
+
+			$.ajax
+				({
+			    type: "POST",
+			    url: url,
+			    contentType: 'application/xml',
+			    async : true,
+			    beforeSend: function (xhr){ 
+			        xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+			    },
+			    processData: true,
+                data: XMLReset,
+
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(errorThrown);
+                }, success: function(data, textStatus, XMLHttpRequest){
+//                    alert("Succeeded");
+                }
+			});
+			 
+	   }); // end of click function
+	 });
+
+$('#logout').click(
+        function(e){
+        e.preventDefault();
+        
+$('<div id="confirmLogout" title="Logout">Are you sure you want to log out?</div>').dialog(
+            {
+            modal: true,
+            height: 120, 
+            width:350,
+            show:"blind",
+            hide: "blind",
+            buttons:{
+                "Yes":function() {
+                    $.ajax({ 
+//                     	 url: "https://api-sandbox.everyware-cloud.com/gvds/logout",
+                    	 url: logoutURL,
+                        complete:
+                        	function() {
+                            $('#confirmLogout').html("Logged out!");
+                        	  $('.ui-dialog-buttonpane').css('display','none');
+                            var dlg = $("#confirmLogout").parents(".ui-dialog:first");
+                            dlg.animate({ width: 250},120);  
+                            setTimeout(function(){$("#confirmLogout").dialog("close")},1000);
+                            setTimeout(function(){location.reload();},1000);    
+                            } 
+                        });
+                    },
+                "No":function() {
+                    $("#confirmLogout").dialog("close");
+                    }
+            },
+            close:function(){
+                 $("#confirmLogout").remove();
+            }
+            });
+
+return false; 
+    }); 
+    
+function displayLedStatus(ledID,gotLedValue,ledNcolor){
+
+
+	 if(ledID=='1'){
+		 var ledchip="#led1";
+	 }	else if (ledID=='2') {
+		var ledchip="#led2";
+	 } else if (ledID=='3') {
+		var ledchip="#led3";
+	 } else if (ledID=='4') {
+		var ledchip="#led4";
+	 }
+	 
+
+	 if(gotLedValue){
+		 $(function() {
+			newLedStatus="";
+			newLedStatus=!newLedStatus;
+			
+		 	$(ledchip).animate({
+		 		backgroundColor: ledNcolor,
+		 		color: "red",
+		 		opacity: "1",
+		 	}, 10 );
+		 });
+
+		 } else {
+
+ 			newLedStatus="";
+		 	$(function() {
+
+		 		$(ledchip).animate({
+		 			backgroundColor: "red",
+		 			color: ledNcolor,
+		 			opacity: "0.1",
+		 		}, 10 );
+		 });
+		 	
+		 	}
+	 
+	 if(ledID=='1'){
+		 led1status=newLedStatus;
+	 }	else if (ledID=='2') {
+		 led2status=newLedStatus;
+	 }  else if (ledID=='3') {
+		 led3status=newLedStatus;
+	 }  else if (ledID=='4') {
+		 led4status=newLedStatus;
+	 }
+	 
+} //end of displayLedStatus
+
+
+function displayLed4(){
+
+  var ledchip="#led4";
+  var gotLedValue="";
+  var rgbcolor="white";
+  var newLedStatus="";
+  led4redStatus="";
+  led4greenStatus="";
+  led4blueStatus="";
+  
+  if(redIsOn && (!greenIsOn && !blueIsOn)){
+// 	  alert("red= " + redIsOn);
+// 	  alert("green= " + greenIsOn);
+// 	  alert("blue= " + blueIsOn);
+	  led4redStatus=!led4redStatus;
+	  gotLedValue=!gotLedValue;
+	  rgbcolor="red";
+		 $(function() {
+				
+			 	$("#led4red").animate({
+			 		backgroundColor: "red",
+			 		color: "red",
+			 		opacity: "0.6",
+			 	}, 10 );
+			 	$("#led4green").animate({
+			 		backgroundColor: "green",
+			 		color: "green",
+			 		opacity: "0.4",
+			 	}, 10 );
+			 	$("#led4blue").animate({
+			 		backgroundColor: "blue",
+			 		color: "blue",
+			 		opacity: "0.4",
+			 	}, 10 );
+			 });
+		 
+  } else if(greenIsOn && (!redIsOn && !blueIsOn)){
+	  led4greenStatus=!led4greenStatus;
+	  gotLedValue=!gotLedValue;
+	  rgbcolor="green";
+		 $(function() {
+				
+			 	$("#led4red").animate({
+			 		backgroundColor: "red",
+			 		color: "red",
+			 		opacity: "0.4",
+			 	}, 10 );
+			 	$("#led4green").animate({
+			 		backgroundColor: "green",
+			 		color: "green",
+			 		opacity: "0.6",
+			 	}, 10 );
+			 	$("#led4blue").animate({
+			 		backgroundColor: "blue",
+			 		color: "blue",
+			 		opacity: "0.4",
+			 	}, 10 );
+			 });
+  } else if(blueIsOn && (!greenIsOn && !redIsOn)){
+	  led4blueStatus=!led4blueStatus;
+	  gotLedValue=!gotLedValue;
+	  rgbcolor="blue";
+		 $(function() {
+				
+			 	$("#led4red").animate({
+			 		backgroundColor: "red",
+			 		color: "red",
+			 		opacity: "0.4",
+			 	}, 10 );
+			 	$("#led4green").animate({
+			 		backgroundColor: "green",
+			 		color: "green",
+			 		opacity: "0.4",
+			 	}, 10 );
+			 	$("#led4blue").animate({
+			 		backgroundColor: "blue",
+			 		color: "blue",
+			 		opacity: "0.6",
+			 	}, 10 );
+			 });
+  } else if(redIsOn && greenIsOn && !blueIsOn){
+	  led4redStatus=!led4redStatus;
+	  led4greenStatus=!led4greenStatus;	  
+	  gotLedValue=!gotLedValue;
+	  rgbcolor="yellow";
+		 $(function() {
+				
+			 	$("#led4red").animate({
+			 		backgroundColor: "red",
+			 		color: "red",
+			 		opacity: "0.6",
+			 	}, 10 );
+			 	$("#led4green").animate({
+			 		backgroundColor: "green",
+			 		color: "green",
+			 		opacity: "0.6",
+			 	}, 10 );
+			 	$("#led4blue").animate({
+			 		backgroundColor: "blue",
+			 		color: "blue",
+			 		opacity: "0.4",
+			 	}, 10 );
+			 });
+  } else if(redIsOn && !greenIsOn && blueIsOn){
+	  led4redStatus=!led4redStatus;
+	  led4blueStatus=!led4blueStatus;	  
+	  gotLedValue=!gotLedValue;
+	  rgbcolor="purple";
+		 $(function() {
+				
+			 	$("#led4red").animate({
+			 		backgroundColor: "red",
+			 		color: "red",
+			 		opacity: "0.6",
+			 	}, 10 );
+			 	$("#led4green").animate({
+			 		backgroundColor: "green",
+			 		color: "green",
+			 		opacity: "0.4",
+			 	}, 10 );
+			 	$("#led4blue").animate({
+			 		backgroundColor: "blue",
+			 		color: "blue",
+			 		opacity: "0.6",
+			 	}, 10 );
+			 });
+  } else if(!redIsOn && greenIsOn && blueIsOn){
+	  led4greenStatus=!led4greenStatus;
+	  led4blueStatus=!led4blueStatus;	  
+	  gotLedValue=!gotLedValue;
+	  rgbcolor="#00CCCC";
+		 $(function() {
+				
+			 	$("#led4red").animate({
+			 		backgroundColor: "red",
+			 		color: "red",
+			 		opacity: "0.4",
+			 	}, 10 );
+			 	$("#led4green").animate({
+			 		backgroundColor: "green",
+			 		color: "green",
+			 		opacity: "0.6",
+			 	}, 10 );
+			 	$("#led4blue").animate({
+			 		backgroundColor: "blue",
+			 		color: "blue",
+			 		opacity: "0.6",
+			 	}, 10 );
+			 });
+  } else if(redIsOn && greenIsOn && blueIsOn){
+	  led4redStatus=!led4redStatus;
+	  led4greenStatus=!led4greenStatus;
+	  led4blueStatus=!led4blueStatus;	  
+	  gotLedValue=!gotLedValue;
+// 	  rgbcolor="#99FFFF";
+	  rgbcolor="white";
+		 $(function() {
+				
+			 	$("#led4red").animate({
+			 		backgroundColor: "red",
+			 		color: "red",
+			 		opacity: "0.6",
+			 	}, 10 );
+			 	$("#led4green").animate({
+			 		backgroundColor: "green",
+			 		color: "green",
+			 		opacity: "0.6",
+			 	}, 10 );
+			 	$("#led4blue").animate({
+			 		backgroundColor: "blue",
+			 		color: "blue",
+			 		opacity: "0.6",
+			 	}, 10 );
+			 });
+  } else {
+	  led4redStatus="";
+	  led4greenStatus="";
+	  led4blueStatus="";
+		 $(function() {
+				
+			 	$("#led4red").animate({
+			 		backgroundColor: "red",
+			 		color: "red",
+			 		opacity: "0.4",
+			 	}, 10 );
+			 	$("#led4green").animate({
+			 		backgroundColor: "green",
+			 		color: "green",
+			 		opacity: "0.4",
+			 	}, 10 );
+			 	$("#led4blue").animate({
+			 		backgroundColor: "blue",
+			 		color: "blue",
+			 		opacity: "0.4",
+			 	}, 10 );
+			 });
+  }
+
+		
+		
+		
+// 	 }
+	 
+
+
+	 if(gotLedValue){
+			
+			newLedStatus=!newLedStatus;	
+		 $(function() {
+	
+		 	$(ledchip).animate({
+		 		backgroundColor: rgbcolor,
+		 		color: "red",
+		 		opacity: "1",
+		 	}, 10 );
+		 });
+
+		 } else {
+
+			newLedStatus="";
+		 	$(function() {
+
+		 		$(ledchip).animate({
+		 			backgroundColor: "red",
+		 			color: rgbcolor,
+		 			opacity: "0.1",
+		 		}, 10 );
+		 });
+		 	
+		 	}
+     
+	 led4status=newLedStatus;
+} //end of displayLed4
+
+function displayToggleStatus(toggleID,gotToggleValue){
+
+
+	 if(toggleID == '4'){
+		 var togglechip="#toggle4"
+	 }	else if (toggleID == '5') {
+		var togglechip="#toggle5"
+	 } else if (toggleID == '6') {
+		var togglechip="#toggle6"
+	 }
+	 
+
+	 if(gotToggleValue){
+		 $(function() {
+
+			
+		 	$(togglechip).animate({
+		 		backgroundColor: "green",
+		 		color: "red",
+		 		opacity: "0.4",
+		 	}, 10 );
+		 });
+
+		 } else {
+
+
+		 	$(function() {
+
+		 		$(togglechip).animate({
+		 			backgroundColor: "red",
+		 			color: "green",
+		 			opacity: "0.4",
+		 		}, 10 );
+		 });
+		 	
+		 	}
+	 
+} //end of displayLedStatus
+
+function makeXML(username,clientID,publishTopic,name,lightValue,ledID){
+	var XMLData0;
+	XMLData0 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+	"<message xmlns=\"http://eurotech.com/edc/2.0\">" +
+// 	  "<receivedOn>2012-07-19T14:22:00.774Z</receivedOn>" +
+// 	  "<topic>"+username + "/" + clientID + "/" +postTopic + "/" + ledID + "</topic>" +
+// 	  "<topic>"+"$EDC/" + username + "/" + clientID + "/" +postTopic + "/" + ledID + "</topic>" +
+	  "<topic>"+ publishTopic + "/" + ledID + "</topic>" +
+	  "<payload>" +
+	    "<metrics>" +
+	      "<metric>" +
+	        "<name>" + name +"</name>" +
+	        "<type>String</type>" +
+	        "<value>" + lightValue + "</value>" +
+	      "</metric>" +
+	    "</metrics>" +
+// 	    "<sentOn>2012-07-19T14:22:10.774Z</sentOn>" +
+	  "</payload>" +
+	"</message>";
+    console.log('makeXML: ' + XMLData0);
+
+	 if(ledID=='1'){
+		 XMLData1=XMLData0;
+	 }	else if (ledID=='2') {
+		 XMLData2=XMLData0;
+	 }  else if (ledID=='3') {
+		 XMLData3=XMLData0;
+	 } else if (ledID=='4') {
+		 XMLData4=XMLData0;
+	 }
+}
+
+
+function makeResetXML(username,clientID,resetTopic,resetMetric,resetValue,counterID){	
+	var XMLData0;
+	XMLData0 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+	"<message xmlns=\"http://eurotech.com/edc/2.0\">" +
+	  "<receivedOn>2012-07-19T14:22:00.774Z</receivedOn>" +
+// 	  "<topic>"+ username + "/" + clientID + "/" + resetTopic + "/" + counterID + "</topic>" +
+	  "<topic>"+ "$EDC/" + username + "/" + clientID + "/" + resetTopic + "/" + counterID + "</topic>" +
+	  "<payload>" +
+	    "<metrics>" +
+	      "<metric>" +
+	        "<name>" + resetMetric +"</name>" +
+	        "<type>String</type>" +
+	        "<value>" + resetValue + "</value>" +
+	      "</metric>" +
+	    "</metrics>" +
+	    "<sentOn>2012-07-19T14:22:10.774Z</sentOn>" +
+	  "</payload>" +
+	"</message>";
+
+
+
+		 XMLReset=XMLData0;
+
+}
+
+// RULES
+   
+
+ 
+  
+  
+ 
+ 
+}
+
+
+
+		</script>
+		<style type="text/css">
+			/*demo page css*/
+			body{ font: 62.5% "Trebuchet MS", sans-serif; margin: 50px;}
+			.demoHeaders { margin-top: 2em; }
+			.ui-tab-content, .ui-tabs-panel{overflow: auto;}
+			#format { margin-top: 2em; }
+			#led1 {
+			 	   width:24px;
+ 				   height: 24px;
+  	  			   border-radius:100%;
+                   background-color:red;
+                   color : gold;
+                   position: absolute; 
+                   left:348px;
+/*                    top: 313px; */
+                   top: 195px;
+                   border : 1px;
+                   border-color: gray;
+/*                    background: #fff; */
+                   background: red;
+                   opacity: 0.1;
+                   z-index:50;
+                   border-style:solid;
+/* 					border-width:15px; */
+				}
+			#led2 {
+			 	   width:24px;
+ 				   height: 24px;
+  	  			   border-radius:100%;
+                   background-color:red;
+                   color : gold;
+                   position: absolute; 
+                   left:348px;
+/*                    top: 351px; */
+                   top: 225px;                   
+                   border : 1px;
+                   border-color: gray;
+/*                    background: #fff; */
+                   background: red;
+                   opacity: 0.1;
+                   z-index:50;
+                   border-style:solid;
+/* 					border-width:15px; */
+				}
+			#led3 {
+			 	   width:24px;
+ 				   height: 24px;
+  	  			   border-radius:100%;
+                   background-color:red;
+                   color : gold;
+                   position: absolute; 
+                   left:348px;
+/*                    top: 389px; */
+                   top: 254px;
+                   border : 1px;
+                   border-color: gray;
+/*                    background: #fff; */
+                   background: red;
+                   opacity: 0.1;
+                   z-index:50;
+                   border-style:solid;
+/* 					border-width:15px; */
+				}
+			#led4 {
+			 	   width:24px;
+ 				   height: 24px;
+  	  			   border-radius:100%;
+                   background-color:red;
+                   color : gold;
+                   position: absolute; 
+                   left:419px;
+/*                    top: 313px; */
+                   top: 195px;
+                   border : 1px;
+                   border-color: gray;
+/*                    background: #fff; */
+                   background: red;
+                   opacity: 0.1;
+                   z-index:50;
+                   border-style:solid;
+/* 					border-width:15px; */
+				}
+				
+				#led4red {
+			 	   width: 47px;
+ 				   height: 13px;
+                   background-color:red;
+                   color : red;
+                   position: absolute; 
+                   left: 415px; 
+                   top: 226px;
+                   border : 1px;
+                   border-color: gray;
+                   background: red;
+                   opacity: 0.4;
+                   z-index:50;
+                   border-style:solid;
+				}
+				#led4green {
+			 	   width: 47px;
+ 				   height: 13px;
+                   background-color:green;
+                   color : green;
+                   position: absolute; 
+                   left: 415px; 
+                   top: 240px;
+                   border : 1px;
+                   border-color: gray;
+                   background: green;
+                   opacity: 0.4;
+                   z-index:50;
+                   border-style:solid;
+				}
+
+				#led4blue {
+			 	   width: 47px;
+ 				   height: 13px;
+                   background-color:blue;
+                   color : blue;
+                   position: absolute; 
+                   left: 415px; 
+                   top: 254px;
+                   border : 1px;
+                   border-color: gray;
+                   background: blue;
+                   opacity: 0.4;
+                   z-index:50;
+                   border-style:solid;
+				}					
+			#toggle4 { width: 45px; height: 48px; padding: 0.4em; position: relative; background: red; z-index : 50; opacity: 0.4}
+			#toggle4 h3 { margin: 0; padding: 0.4em; text-align: center; }
+			#toggle5 { width: 45px; height: 48px; padding: 0.4em; position: relative; background: red; z-index : 50; opacity: 0.4}
+			#toggle5 h3 { margin: 0; padding: 0.4em; text-align: center; }
+			#toggle6 { width: 45px; height: 48px; padding: 0.4em; position: relative; background: red; z-index : 50; opacity: 0.4}
+			#toggle6 h3 { margin: 0; padding: 0.4em; text-align: center; }
+		</style>
+	</head>
+	<body>
+	
+<div id="container"  style="position: relative; width : 1300px; height: 600px; margin:0px auto; border-radius: 1em; background-color: #EEEEEE;">
+		
+<!-- 		<h1>Everyware Cloud</h1> -->
+		<div style="position: absolute; height : 3em; padding: 0.45em">
+			<img alt="" src="imagemap/EC_logo.5.png" >
+		</div>
+		<div id="logout"  style="position: absolute; left :1200px; top: 10px; font-size: 12px; color : blue; text-decoration:underline; cursor: hand; cursor: pointer; ">logout</div> 
+<!-- 		<center> -->
+
+	<div id="welcome_msg" 
+	style="position: absolute; left :1050px; top: 0px; font-size: 12px; color : black;">
+		<p></p>
+	</div>
+
+	
+
+
+
+
+						<img src="imagemap/CLOUD_EDC.2.4.png" alt="" class="ui-widget-content ui-corner-all" 
+						style="position: absolute; top: 39px; left: 10px; border-radius: 1em; margin: 10px; padding: 4px 0;"/>
+
+<!-- 						<img src="imagemap/CLOUD_EDC.2.4.png" alt="" style="position: absolute; top: 0px; left: 0px;"/> -->
+
+
+
+<!-- 		</center> -->
+
+<!-- 		<!-- Tabs -->
+<!-- 		<h2 class="demoHeaders">Tabs</h2> -->
+			<br />
+		<div id="tabs" style="position: absolute; left: 25px; width: 600px; height: 530px;top: 49px; left: 690px;">
+			<ul>
+				<li><a href="#tabs-1">PLC inputs</a></li>
+				<li><a href="#tabs-2">Quad Counter</a></li>
+<!-- 				<li><a href="#tabs-3">Rules</a></li> -->
+				<li><a href="#tabs-4">Data Streams</a></li>
+<!-- 				<li><a href="#tabs-5">Settings</a></li> -->
+			</ul>
+			
+			<div id="tabs-1" >
+			  <div class="portlet"style="height: 100px; width: 550px;">
+			   <div class="portlet-header" >Counter</div>
+			    <div  class="row" style="margin-left: 70px; padding: 8px; height: 100px; width: 125px;display: inline-block;"> 
+        			<div id="chart_table_c3"></div>
+        			<button id="reset_c3" style="position: absolute; top: 85px; left: 380px; height: 55px; width: 100px;display: inline-block;">Reset Counter</button>
+      			</div>
+<!--       			<div  class="row" style="height: 100px; width: 110px;display: inline-block;">  -->
+<!--         			<button id="reset_c3"></button> -->
+<!--       			</div> -->
+    		 </div>
+    		 
+    		 <br />
+			<div  class="column"> 
+			  <div class="portlet"style="height: 150px; width: 550px;">
+				<div class="portlet-header">Toggles</div>
+				
+					<div  class="row" style="height: 150px; width: 180px;display: inline-block;"> 
+<!-- 					<center> -->
+						<div id="chart_gauge_t4" class="portlet-content"></div>
+<!-- 					</center> -->
+					</div>
+					
+                    <div  class="row" style="height: 150px; width: 180px;display: inline-block;"> 
+<!-- 					<center> -->
+						<div id="chart_gauge_t5" class="portlet-content"></div>
+<!-- 					</center> -->
+					</div>
+					<div  class="row" style="height: 150px; width: 180px;display: inline-block;"> 
+<!-- 					<center> -->
+						<div id="chart_gauge_t6" class="portlet-content"></div>
+<!-- 					</center> -->
+					</div>
+			  </div>
+			</div>
+
+ 		        
+   			 	<br />
+					<div class="portlet"style="height: 200px; width: 550px;">
+        			<div class="portlet-header"> Quad Counter</div>
+        			<center>
+ 		       		<div id="chart_gauge_qc"></div>
+					</center>
+   			 	</div>
+
+
+			</div>
+			
+			<div id="tabs-2">
+					<div class="row">
+<!--  					   <div class="portlet" style="height: 100px; width: 550px;"> -->
+ 					       <div class="portlet-header">Qc</div>
+ 					       			<center>
+ 					       				<div id="chart_line" class="portlet-content"></div>
+ 					       			 </center>
+<!--  					   </div> -->
+				  </div>
+
+			</div>
+
+<!-- 			<div id="tabs-3"> -->
+<!-- 				<form> -->
+<!-- 					<input type="checkbox" id="check_rule1" value="check1"/><label for="check_rule1">Rule 1: High Instantaneous Qc value (>10) - e-mail sent to  <input id="emailAddress_r1" value="demo@eurotech.com" size="40"><br> </label><br> -->
+<!-- 					<input type="checkbox" id="check_rule2" value="check2"/><label for="check_rule2">Rule 2: High Average Qc value (>10 over the last 10 sec)- e-mail sent to  <input id="emailAddress_r2" value="demo@eurotech.com" size="40"><br></label> <br> -->
+<!-- 					<input type="checkbox" id="check_rule3" value="check3"/><label for="check_rule3">Rule 3: turn ON/OFF </label> <br>  -->
+<!-- 					<div class="column" style="position : absolute; left : 100px"> -->
+<!-- 							<input type="radio" id="check_led1" name="radio" /><label for="check_led1">LED 1</label><br>  -->
+<!-- 							<input type="radio" id="check_led2" name="radio" checked="check_led2" /><label for="radio2">LED 2</label><br>  -->
+<!-- 							<input type="radio" id="check_led3" name="radio" /><label for="check_led3">LED 3</label><br>  -->
+
+<!-- 					</div> -->
+<!-- 					<div class="column" style="position : absolute; left : 300px"> -->
+<!-- 							<input type="radio" id="check_led4red" name="radio" /><label for="check_led4red">LED 4 red</label><br>  -->
+<!-- 							<input type="radio" id="check_led4green" name="radio" checked="check_led4green" /><label for="radio2">LED 4 green</label><br>  -->
+<!-- 							<input type="radio" id="check_led4blue" name="radio" /><label for="check_led4blue">LED 4 blue</label><br>  -->
+
+<!-- 					</div> -->
+<!-- 					<br /> <br /> <br /> <br /> -->
+<!-- 					<input type="checkbox" id="check_rule4" value="check4"/><label for="check_rule4">Rule 4: Change LEDs color from quad counter</label><br> -->
+<!-- 				</form> -->
+				
+<!-- 				  <br/><br/> -->
+<!-- 				  <div>  -->
+<!--  					 <input type="button" id="createRules" value="Submit selected Rules" style="display: inline-block;"/> -->
+<!--  					 <input type="button" id="deleteRules" value="Delete selected Rules" style="display: inline-block;"/> -->
+<!--  				  </div> -->
+<!-- 			</div> -->
+			
+			<div id="tabs-4" style="overflow-y: scroll;height: 450px;">
+			<tr>
+				<td></td>
+					<td><input type="submit" id="getstreams" size="60" value="Get Streams" onclick="getStreams();" /></td>
+				<tr>
+
+
+				<div id="content_stream" style="font: Trebuchet MS ;font-size: 12px;"></div>
+				<div id="messages_stream" style="font: Trebuchet MS; font-size: 12px;"></div>
+					
+
+			
+			
+			</div>
+	
+<!-- Settings -->			
+<!-- 			<div id="tabs-5"> -->
+<!-- Refresh interval -->
+<!-- 		<div id="refresh_form" class="ui-widget-content ui-corner-all"> -->
+<!-- 			<br /> -->
+<!-- 			<table> -->
+<!-- 					<td >Refresh interval (sec)</td> -->
+<!-- 					<td><input type="text" id="refresh_time" size="5" value="5" /></td> -->
+<!-- 			</table> -->
+<!-- 		</div>	 -->
+<!-- 			</div> -->
+		</div>
+
+		<button id="led1" class="ui-widget-content ui-corner-all"></button>
+		<button id="led2" class="ui-widget-content ui-corner-all"></button>
+		<button id="led3" class="ui-widget-content ui-corner-all"></button>
+		<button id="led4" class="ui-widget-content ui-corner-all"></button>
+		<button id="led4red" class="ui-widget-content ui-corner-all"></button>		
+		<button id="led4green" class="ui-widget-content ui-corner-all"></button>
+		<button id="led4blue" class="ui-widget-content ui-corner-all"></button>		
+		
+		<div id="toggle4" class="ui-widget-content ui-corner-all" style="position: absolute; left: 285px; top: 330px;"></div> 
+		<div id="toggle5" class="ui-widget-content ui-corner-all" style="position: absolute; left: 375px; top: 330px;"></div>
+		<div id="toggle6" class="ui-widget-content ui-corner-all" style="position: absolute; left: 464px; top: 330px;"></div>
+<!-- 		<button id="led4red" class="ui-widget-content ui-corner-all" style="position: absolute; left: 415px; top: 226px;"></button> -->
+<!-- 		<div id="led4green" class="ui-widget-content ui-corner-all" style="position: absolute; left: 415px; top: 240px;"></div> -->
+<!-- 		<div id="led4green" class="ui-widget-content ui-corner-all" style="position: absolute; left: 415px; top: 253px;"></div>		 -->
+<!-- Led 4 color menu -->
+
+<!-- 		<select text="Led4colormenu" id="ledcolor" class="ui-widget-content ui-corner-all" style="position: absolute; left: 1005px; top: 202px; height: 28px; width: 60px;"> -->
+<!-- 		<select text="Led4colormenu" id="ledcolor" class="ui-widget-content ui-corner-all" style="position: absolute; left: 420px; top: 164px; height: 28px; width: 60px;"> -->
+
+<!--  					 <option value="red"> red </option> -->
+<!-- 					 <option value="green"> green </option> -->
+<!--  					 <option value="blue"> blue </option> -->
+<!-- 		</select> -->
+		
+	
+		<div class="c3-text"></div>
+		<div class="qc-text"></div>
+
+
+		<!-- ui-dialog -->
+		<div id="dialog" title="Everyware Cloud Login">
+		<div id="form">
+			<br />
+			<table>
+				<tr>
+				<tr>
+				<tr>
+					<td >Username:</td>
+					<td><input type="text" id="username" size="30" value="" /></td>
+				<tr>
+				<tr>
+					<td ">Password:</td>
+					<td><input type="password" id="password" size="30" value="" /></td>
+				<tr>
+				<tr>
+					<td >Asset ID:</td>
+					<td><input type="text" id="clientID" size="30" value="" /></td>
+				<tr>				
+				<tr>
+					<td >Subscribe topic:</td>
+					<td><input type="text" id="getTopic" size="30" value=""/></td>
+				<tr>
+				<tr>
+					<td>Publish topic:</td>
+					<td><input type="text" id="postTopic" size="30" value=""/></td>
+				<tr>
+			</table>
+
+
+
+		</div>
+		</div>
+		
+</div>
+		
+	</body>
+</html>
+
+

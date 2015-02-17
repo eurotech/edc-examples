@@ -1,0 +1,48 @@
+.row {
+	width: 100%;
+	float: left;
+	padding-bottom: 0px;
+}
+
+.column {
+	width: 50%;
+	float: left;
+	padding-bottom: 100px;
+}
+
+.portlet {
+	margin: 0 1em 1em 0;
+}
+
+div.portlet-header {
+	margin: 0em;
+	padding: 5px;
+	border-top: 0px;
+	border-left: 0px;
+	border-right: 0px;
+	border-bottom-right-radius: 0px;
+	border-bottom-left-radius: 0px;
+}
+
+.portlet-header .ui-icon {
+	float: right;
+}
+
+div.portlet-content {
+	overflow: auto;
+	height: 216px;
+}
+
+.ui-sortable-placeholder {
+	border: 1px dotted black;
+	visibility: visible !important;
+	height: 50px !important;
+}
+
+.ui-sortable-placeholder * {
+	visibility: hidden;
+}
+
+div.ui-widget {
+	font-size: 0.9em;
+}
