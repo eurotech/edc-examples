@@ -10,7 +10,13 @@
 	<name>edc-examples</name>
 
 	<properties>
+		<deployment.package.version>1.0.0</deployment.package.version>
+		<tycho-version>0.18.1</tycho-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
+		<kura.basedir>${project.basedir}/../../kura/kura/kura</kura.basedir>
+		<kura.bundle.versions>2.1.0.${kura.build.version}</kura.bundle.versions>
 	</properties>
 
 	<dependencies>
@@ -28,5 +34,117 @@
 		<module>edc-java-client-gps</module>
 		<module>edc-rest</module>
 		<module>edc-rest-endpoint</module>
+		<module>com.eurotech.framework.edcdevkit</module>
 	</modules>
+
+	<repositories>
+		<repository>
+			<id>kura-common</id>
+			<layout>p2</layout>
+			<url>file://${kura.basedir}/target-definition/common/repository</url>
+		</repository>
+		<repository>
+			<id>kura-equinox</id>
+			<layout>p2</layout>
+			<url>file://${kura.basedir}/target-definition/equinox_3.8.1/repository</url>
+		</repository>
+	</repositories>
+
+	<build>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>1.0-beta-6</version>
+            </extension>
+        </extensions>
+		<plugins>
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.7</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<target>
+						<artifact>
+							<groupId>org.eclipse.kura</groupId>
+							<artifactId>target-definition</artifactId>
+<!--
+							<version>1.0.0-SNAPSHOT</version>
+-->
+							<classifier>kura-equinox_3.8.1</classifier>
+						</artifact>
+					</target>
+					<environments>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86</arch>
+						</environment>
+					</environments>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-packaging-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<strictVersions>false</strictVersions>
+					<format>${kura.build.version}</format>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<compilerArgument>-warn:[+|-]warning_tokens_separated_by_comma</compilerArgument>
+					<!-- <compilerArgument>-err:-forbidden</compilerArgument> -->
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<providerHint>junit4</providerHint>
+					<parallel>both</parallel>
+					<useUnlimitedThreads>true</useUnlimitedThreads>
+					<argLine>-Deurotech.framework.mode=emulator -Dequinox.ds.print=true</argLine>
+					<dependencies>
+						<dependency>
+							<type>p2-installable-unit</type>
+							<artifactId>org.eclipse.equinox.ds</artifactId>
+						</dependency>
+					</dependencies>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
