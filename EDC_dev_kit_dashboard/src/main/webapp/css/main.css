@@ -1,0 +1,134 @@
+/*demo page css*/
+body{ font: 62.5% "Trebuchet MS", sans-serif; margin: 50px;}
+.demoHeaders { margin-top: 2em; }
+.ui-tab-content, .ui-tabs-panel{overflow: auto;}
+#format { margin-top: 2em; }
+#led1 {
+	width:24px;
+	height: 24px;
+	border-radius:100%;
+	background-color:red;
+	color : gold;
+	position: absolute; 
+	left:348px;
+	/*                    top: 313px; */
+	top: 195px;
+	border : 1px;
+	border-color: gray;
+	/*                    background: #fff; */
+	background: red;
+	opacity: 0.1;
+	z-index:50;
+	border-style:solid;
+	/* 					border-width:15px; */
+}
+#led2 {
+	width:24px;
+	height: 24px;
+	border-radius:100%;
+	background-color:red;
+	color : gold;
+	position: absolute; 
+	left:348px;
+	/*                    top: 351px; */
+	top: 225px;                   
+	border : 1px;
+	border-color: gray;
+	/*                    background: #fff; */
+	background: red;
+	opacity: 0.1;
+	z-index:50;
+	border-style:solid;
+	/* 					border-width:15px; */
+}
+#led3 {
+	width:24px;
+	height: 24px;
+	border-radius:100%;
+	background-color:red;
+	color : gold;
+	position: absolute; 
+	left:348px;
+	/*                    top: 389px; */
+	top: 254px;
+	border : 1px;
+	border-color: gray;
+	/*                    background: #fff; */
+	background: red;
+	opacity: 0.1;
+	z-index:50;
+	border-style:solid;
+	/* 					border-width:15px; */
+}
+#led4 {
+	width:24px;
+	height: 24px;
+	border-radius:100%;
+	background-color:red;
+	color : gold;
+	position: absolute; 
+	left:419px;
+	/*                    top: 313px; */
+	top: 195px;
+	border : 1px;
+	border-color: gray;
+	/*                    background: #fff; */
+	background: red;
+	opacity: 0.1;
+	z-index:50;
+	border-style:solid;
+	/* 					border-width:15px; */
+}
+
+#led4red {
+	width: 47px;
+	height: 13px;
+	background-color:red;
+	color : red;
+	position: absolute; 
+	left: 415px; 
+	top: 226px;
+	border : 1px;
+	border-color: gray;
+	background: red;
+	opacity: 0.4;
+	z-index:50;
+	border-style:solid;
+}
+#led4green {
+	width: 47px;
+	height: 13px;
+	background-color:green;
+	color : green;
+	position: absolute; 
+	left: 415px; 
+	top: 240px;
+	border : 1px;
+	border-color: gray;
+	background: green;
+	opacity: 0.4;
+	z-index:50;
+	border-style:solid;
+}
+
+#led4blue {
+	width: 47px;
+	height: 13px;
+	background-color:blue;
+	color : blue;
+	position: absolute; 
+	left: 415px; 
+	top: 254px;
+	border : 1px;
+	border-color: gray;
+	background: blue;
+	opacity: 0.4;
+	z-index:50;
+	border-style:solid;
+}					
+#toggle4 { width: 45px; height: 48px; padding: 0.4em; position: relative; background: red; z-index : 50; opacity: 0.4}
+#toggle4 h3 { margin: 0; padding: 0.4em; text-align: center; }
+#toggle5 { width: 45px; height: 48px; padding: 0.4em; position: relative; background: red; z-index : 50; opacity: 0.4}
+#toggle5 h3 { margin: 0; padding: 0.4em; text-align: center; }
+#toggle6 { width: 45px; height: 48px; padding: 0.4em; position: relative; background: red; z-index : 50; opacity: 0.4}
+#toggle6 h3 { margin: 0; padding: 0.4em; text-align: center; }
