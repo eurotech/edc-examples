@@ -40,10 +40,10 @@ $(function init(){
 					type: "GET",
 					url:  dsUrl+"/login",
 
-			      //Removed to fix IE issue    
+			      //Removed to fix IE issue
 			      xhrFields: {
 			      	withCredentials: true
-			      },          
+			      },
 			      beforeSend : function(req) {
 			      	req.setRequestHeader('Authorization', "Basic " +Base64.encode(username+":"+password))
 			      }
@@ -54,17 +54,16 @@ $(function init(){
 						chartType: 'Table',
 						dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
 						query: "SELECT c3 LABEL c3 'C3'",
-						refreshInterval: 1,
+						refreshInterval: 5,
 						containerId: 'chart_table_c3'
 					});
 					wrapper.draw();
 					// Column Chart T4
 					var wrapper = new google.visualization.ChartWrapper({
 						chartType: 'ColumnChart',
-						chartType: 'ScatterChart',
 						dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
 						query: "SELECT receivedOn, it4 LABEL it4 'Toggle 4'",
-						refreshInterval: 1,
+						refreshInterval: 5,
 						options: {
 							backgroundColor : "none",
 							colors:['#FFCC00'],
@@ -83,7 +82,7 @@ $(function init(){
 						chartType: 'ColumnChart',
 						dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
 						query: "SELECT receivedOn, it5 LABEL it5 'Toggle 5'",
-						refreshInterval: 1,
+						refreshInterval: 5,
 						options: {
 							backgroundColor : "none",
 							colors:['#0033FF'],
@@ -103,7 +102,7 @@ $(function init(){
 						chartType: 'ColumnChart',
 						dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
 						query: "SELECT receivedOn, it6 LABEL it6 'Toggle 6'",
-						refreshInterval: 1,
+						refreshInterval: 5,
 						options: {
 							backgroundColor : "none",
 							colors:['#CC0000'],
@@ -123,10 +122,10 @@ $(function init(){
 						chartType: 'Gauge',
 						dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=1',
 						query: "SELECT qc LABEL qc 'QC'",
-						refreshInterval: 1,
+						refreshInterval: 5,
 						options: {
 							min: 0, max: 30,
-							minorTicks: 2, 
+							minorTicks: 2,
 							greenFrom: 10, greenTo: 20,
 							yellowFrom: 20, yellowTo: 25,
 							redFrom: 25, redTo: 30,
@@ -135,12 +134,12 @@ $(function init(){
 						containerId: 'chart_gauge_qc'
 					});
 					wrapper.draw();
-					// LineChart			        
+					// LineChart
 					var wrapper = new google.visualization.ChartWrapper({
 						chartType: 'LineChart',
 						dataSourceUrl: dsUrl+'?topic='+encodeURIComponent(username+"/"+clientID+"/"+getTopic)+'&limit=20',
 						query: "SELECT receivedOn, qc format receivedOn 'MMM dd, yyyy HH:mm:ss.SSS'",
-						refreshInterval: 1,
+						refreshInterval: 5,
 						options: {
 							curveType: 'function',
 							legend: {position: 'top'},
@@ -152,16 +151,15 @@ $(function init(){
 						containerId: 'chart_line'
 					});
 					wrapper.draw();
-					doDemo(username,password,clientID,postTopic,getTopic);	
-				}).fail(function( msg ) {    	
+					doDemo(username,password,clientID,postTopic,getTopic);
+				}).fail(function( msg ) {
 					alert("Failed to login: "+msg.status+" - "+msg.statusText);
 				});
 			}
-		}			
+		}
 	});
 	$(function() {
 		$( "#check" ).button();
 		$( "#format" ).buttonset();
-	});		
+	});
 }); //end of init function
-

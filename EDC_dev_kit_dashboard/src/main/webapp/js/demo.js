@@ -51,17 +51,17 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 
 			$.ajax({
 				type: "GET",
-				url: url, 
+				url: url,
 				dataType: 'xml',
 				async : true,
 				data: '{}',
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				success: function(xml){
 					$(xml).find('receivedOn').first().each(function(){
 						var sTime = $(this).text();
-					}); 
+					});
 					$(xml).find('metrics').first().each(function(){
 						$(this).find('metric').each(function(){
 							var sName = $(this).find('name').text();
@@ -70,16 +70,16 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 
 							if(sName=='c3'){
 								window.c3String=$(this).find('value').text();
-								
-								$('div.c3-text').text(window.c3String).css({'background-color' : 'none', 'font-weight' : 'bolder', 'position': 'absolute', 
-									'left': '205px', 'top': '330px', 'color': 'white', 'font-family': 'tahoma', 'font-size': '11pt', 'padding-top': '19px', 'padding-bottom': '19px', 
+
+								$('div.c3-text').text(window.c3String).css({'background-color' : 'none', 'font-weight' : 'bolder', 'position': 'absolute',
+									'left': '205px', 'top': '330px', 'color': 'white', 'font-family': 'tahoma', 'font-size': '11pt', 'padding-top': '19px', 'padding-bottom': '19px',
 									'padding-right': '13px', 'padding-left': '13px'});
-							}	
+							}
 
 							if(sName=='qc'){
 								window.qcString=$(this).find('value').text();
-								$('div.qc-text').text(window.qcString).css({'background-color' : 'none', 'font-weight' : 'bolder', 'position': 'absolute', 
-									'left': '555px', 'top': '331px', 'color': 'white', 'font-family': 'tahoma', 'font-size': '11pt', 'padding-top': '19px', 'padding-bottom': '19px', 
+								$('div.qc-text').text(window.qcString).css({'background-color' : 'none', 'font-weight' : 'bolder', 'position': 'absolute',
+									'left': '555px', 'top': '331px', 'color': 'white', 'font-family': 'tahoma', 'font-size': '11pt', 'padding-top': '19px', 'padding-bottom': '19px',
 									'padding-right': '20px', 'padding-left': '20px'});
 							}
 
@@ -94,7 +94,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 									gotLed1Value=!gotLed1Value;
 								}
 								if(!clickLed1){
-									displayLedStatus(ledID,gotLed1Value,led1color);  
+									displayLedStatus(ledID,gotLed1Value,led1color);
 								}
 								clickLed1="";
 							}
@@ -110,7 +110,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 									gotLed2Value=!gotLed2Value;
 								}
 								if(!clickLed2){
-									displayLedStatus(ledID,gotLed2Value,led2color);  
+									displayLedStatus(ledID,gotLed2Value,led2color);
 								}
 								clickLed2="";
 							}
@@ -126,7 +126,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 									gotLed3Value=!gotLed3Value;
 								}
 								if(!clickLed3){
-									displayLedStatus(ledID,gotLed3Value,led3color);  
+									displayLedStatus(ledID,gotLed3Value,led3color);
 								}
 								clickLed3="";
 							}
@@ -157,7 +157,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 										gotLed4Value=!gotLed4Value;
 										greenIsOn=!greenIsOn;
 									}
-								}	
+								}
 
 								if(sName=='LED4blue'){
 									readBlue=!readBlue;
@@ -173,9 +173,9 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 								}
 								if(readRed && readGreen && readBlue) {
 									if(!clickLed4){
-										displayLed4();  
+										displayLed4();
 									}
-									clickLed4="";	
+									clickLed4="";
 								}
 							}
 
@@ -187,7 +187,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 								if(sValue=='true'){
 									gotToggle4Value=!gotToggle4Value;
 								}
-								displayToggleStatus(toggleID,gotToggle4Value);  
+								displayToggleStatus(toggleID,gotToggle4Value);
 							}
 
 							if(sName=='t5'){
@@ -199,7 +199,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 								if(sValue=='true'){
 									gotToggle5Value=!gotToggle5Value;
 								}
-								displayToggleStatus(toggleID,gotToggle5Value);  
+								displayToggleStatus(toggleID,gotToggle5Value);
 							}
 
 							if(sName=='t6'){
@@ -210,8 +210,8 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 								if(sValue=='true'){
 									gotToggle6Value=!gotToggle6Value;
 								}
-								displayToggleStatus(toggleID,gotToggle6Value);  
-							} 
+								displayToggleStatus(toggleID,gotToggle6Value);
+							}
 
 
 						});
@@ -223,16 +223,16 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 		}, 1000);
 	});
 
-	//LED 1 
+	//LED 1
 	$(document).ready(function() {
 		$("#led1").click(function() {
 			clickLed1=!clickLed1;
-			var light="false"; 
-			var opacity="0.1";  
+			var light="false";
+			var opacity="0.1";
 			background_color="gold";
 			if (!led1status){
 				opacity="1";
-				light = "true";		
+				light = "true";
 			}
 
 			led1status=!led1status;
@@ -243,26 +243,26 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				var hash = btoa(tok);
 				return "Basic " + hash;
 			}
-			
+
 			var ledID="1";
 			var ledName="light";
 			var publishTopic="$EDC/" + username + "/" + clientID + "/" + postTopic;
 			makeXML(username,clientID,publishTopic,ledName,light,ledID);
-			
+
 			$.ajax({
 				type: "POST",
 				url: url,
 				contentType: 'application/xml',
 				async : true,
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				processData: true,
 				data: XMLData1,
 
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					alert(errorThrown);
-				}, 
+				},
 				success: function(data, textStatus, XMLHttpRequest){
 					//alert("Succeeded");
 				}
@@ -278,8 +278,8 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				url: url,
 				contentType: 'application/xml',
 				async : true,
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				processData: true,
 				data: XMLData1,
@@ -290,14 +290,14 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				}
 			});
 	   	}); // end of click function
-	});	
+	});
 
 	//LED 2
 	$(document).ready(function() {
 		$("#led2").click(function() {
 			clickLed2=!clickLed2;
-			var light="false"; 
-			var opacity="0.1";  
+			var light="false";
+			var opacity="0.1";
 			if (!led2status){
 				opacity="1";
 				light = "true";
@@ -323,8 +323,8 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				url: url,
 				contentType: 'application/xml',
 				async : true,
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				processData: true,
 				data: XMLData2,
@@ -334,7 +334,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 					//alert("Succeeded");
 				}
 			});
-			
+
 			var ledID="2";
 			var ledName="light";
 			var publishTopic=username + "/" + clientID + "/" + postTopic;
@@ -344,8 +344,8 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				url: url,
 				contentType: 'application/xml',
 				async : true,
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				processData: true,
 				data: XMLData2,
@@ -354,7 +354,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				}, success: function(data, textStatus, XMLHttpRequest){
 					//alert("Succeeded");
 				}
-			});	 
+			});
 	   	}); // end of click function
 	});
 
@@ -362,8 +362,8 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 	$(document).ready(function() {
 		$("#led3").click(function() {
 			clickLed3=!clickLed3;
-			var light="false"; 
-			var opacity="0.1";  
+			var light="false";
+			var opacity="0.1";
 
 			if (!led3status){
 				opacity="1";
@@ -373,7 +373,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 			color=$(this).css("background-color");
 			background_color=$(this).css("color");
 			$(this).css({'background-color':background_color,'color':color,'opacity':opacity});
-			
+
 			var url = publishURL;
 			function make_base_auth(user, password) {
 				var tok = user + ':' + password;
@@ -390,8 +390,8 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				url: url,
 				contentType: 'application/xml',
 				async : true,
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				processData: true,
 				data: XMLData3,
@@ -403,7 +403,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 			});
 
 			var ledID="3";
-			var ledName="light"; 
+			var ledName="light";
 			var publishTopic=username + "/" + clientID + "/" + postTopic;
 			makeXML(username,clientID,publishTopic,ledName,light,ledID);
 			$.ajax({
@@ -411,8 +411,8 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				url: url,
 				contentType: 'application/xml',
 				async : true,
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				processData: true,
 				data: XMLData3,
@@ -430,18 +430,18 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 		$("#led4red").click(function() {
 			var ledColor   = "red"
 			clickLed4red=!clickLed4red;
-			var light="false"; 
-			var opacity="0.4";  
+			var light="false";
+			var opacity="0.4";
 			color=$(this).css("background-color");
 			background_color=$(this).css("color");
-		
+
 			if (!led4redStatus){
 				opacity="1";
 				light = "true";
 			}
 
 			led4redStatus=!led4redStatus;
-			
+
 			var url = publishURL;
 			function make_base_auth(user, password) {
 				var tok = user + ':' + password;
@@ -459,8 +459,8 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				url: url,
 				contentType: 'application/xml',
 				async : true,
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				processData: true,
 				data: XMLData4,
@@ -481,8 +481,8 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				url: url,
 				contentType: 'application/xml',
 				async : true,
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				processData: true,
 				data: XMLData4,
@@ -501,8 +501,8 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 		$("#led4green").click(function() {
 			var ledColor   = "green"
 			clickLed4green=!clickLed4green;
-			var light="false"; 
-			var opacity="0.4";  
+			var light="false";
+			var opacity="0.4";
 
 			color=$(this).css("background-color");
 			background_color=$(this).css("color");
@@ -512,7 +512,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				light = "true";
 			}
 			led4greenStatus=!led4greenStatus;
-			
+
 			var url = publishURL;
 			function make_base_auth(user, password) {
 				var tok = user + ':' + password;
@@ -530,14 +530,14 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				url: url,
 				contentType: 'application/xml',
 				async : true,
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				processData: true,
 				data: XMLData4,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					alert(errorThrown);
-				}, 
+				},
 				success: function(data, textStatus, XMLHttpRequest){
 					//alert("Succeeded");
 				}
@@ -552,14 +552,14 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				url: url,
 				contentType: 'application/xml',
 				async : true,
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				processData: true,
 				data: XMLData4,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					alert(errorThrown);
-				}, 
+				},
 				success: function(data, textStatus, XMLHttpRequest){
 					//alert("Succeeded");
 				}
@@ -572,8 +572,8 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 		$("#led4blue").click(function() {
 			var ledColor   = "blue"
 			clickLed4blue=!clickLed4blue;
-			var light="false"; 
-			var opacity="0.4";  
+			var light="false";
+			var opacity="0.4";
 
 			color=$(this).css("background-color");
 			background_color=$(this).css("color");
@@ -601,14 +601,14 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				url: url,
 				contentType: 'application/xml',
 				async : true,
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				processData: true,
 				data: XMLData4,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					alert(errorThrown);
-				}, 
+				},
 				success: function(data, textStatus, XMLHttpRequest){
 					//alert("Succeeded");
 				}
@@ -624,14 +624,14 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				url: url,
 				contentType: 'application/xml',
 				async : true,
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				processData: true,
 				data: XMLData4,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					alert(errorThrown);
-				}, 
+				},
 				success: function(data, textStatus, XMLHttpRequest){
 					//alert("Succeeded");
 				}
@@ -653,7 +653,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 			var counterID="c3";
 			var resetMetric="value";
 			var resetValue = "true";
-			var resetTopic="eurotech/demo/resetcnt";
+			var resetTopic=postTopic + "/resetcnt";
 			makeResetXML(username,clientID,resetTopic,resetMetric,resetValue,counterID);
 
 			$.ajax({
@@ -661,14 +661,14 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				url: url,
 				contentType: 'application/xml',
 				async : true,
-				beforeSend: function (xhr){ 
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password)); 
+				beforeSend: function (xhr){
+					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
 				processData: true,
 				data: XMLReset,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					alert(errorThrown);
-				}, 
+				},
 				success: function(data, textStatus, XMLHttpRequest){
 					//alert("Succeeded");
 				}
@@ -681,22 +681,22 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 
 		$('<div id="confirmLogout" title="Logout">Are you sure you want to log out?</div>').dialog({
 			modal: true,
-			height: 120, 
+			height: 120,
 			width:350,
 			show:"blind",
 			hide: "blind",
 			buttons:{
 				"Yes":function() {
-					$.ajax({ 
+					$.ajax({
 						url: logoutURL,
 						complete:function() {
 							$('#confirmLogout').html("Logged out!");
 							$('.ui-dialog-buttonpane').css('display','none');
 							var dlg = $("#confirmLogout").parents(".ui-dialog:first");
-							dlg.animate({ width: 250},120);  
+							dlg.animate({ width: 250},120);
 							setTimeout(function(){$("#confirmLogout").dialog("close")},1000);
-							setTimeout(function(){location.reload();},1000);    
-						} 
+							setTimeout(function(){location.reload();},1000);
+						}
 					});
 				},
 				"No":function() {
@@ -707,6 +707,6 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				$("#confirmLogout").remove();
 			}
 		});
-		return false; 
-	}); 
+		return false;
+	});
 }

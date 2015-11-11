@@ -169,6 +169,10 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 			}
 		doConnection=true;
 		configured = false;
+		
+		// Releasing the CloudApplicationClient
+        s_logger.info("Releasing CloudClient...");
+        m_cloudAppClient.release();
 	}
 	
 	public void updated(Map<String,Object> properties)
@@ -271,7 +275,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 				
 			}
 
-			//s_logger.debug("Checking for an active MQtt connection...");
+			s_logger.debug("Checking for an active MQtt connection...");
 			clientIsConnected = m_cloudAppClient.isConnected(); 
 
 			if(!clientIsConnected) {
@@ -288,9 +292,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 		s_logger.info("Successfully connected the Cloud Client");
 		try {
 			iJustConnected = true;
-			m_cloudAppClient.controlSubscribe(topic + "/led/#", 0);
-			m_cloudAppClient.controlSubscribe(topic + "/resetcnt/#", 0);
-			m_cloudAppClient.controlSubscribe(topic + "/alarm", 0);
+			m_cloudAppClient.controlSubscribe(topic + "/#", 0);
 			
 			String assetIdEth0 = m_systemService.getPrimaryMacAddress();
 			m_cloudAppClient.subscribe("RulesAssistant/"+ topic + "/led/#",0);
@@ -632,10 +634,22 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 	private void ProcessPayload(Properties props, String topic) {
 		String controlTopic = modbusProperties.getProperty("controlTopic");
 
-		if (topic.contains(controlTopic + "/led")) {
-			s_logger.debug("topic contains '" + controlTopic + "/led' ");
-			ProcessLEDMessage( topic.substring(topic.indexOf("led/") + 4), props);
+		if (topic.contains(controlTopic + "/1")) {
+			s_logger.debug("topic contains '" + controlTopic + "/1' ");
+			ProcessLEDMessage( "1", props);
 
+		} else if (topic.contains(controlTopic + "/2")) {
+			s_logger.debug("topic contains '" + controlTopic + "/2' ");
+			ProcessLEDMessage( "2", props);
+
+		} else if (topic.contains(controlTopic + "/3")) {
+			s_logger.debug("topic contains '" + controlTopic + "/3' ");
+			ProcessLEDMessage( "3", props);
+			
+		} else if (topic.contains(controlTopic + "/4")) {
+			s_logger.debug("topic contains '" + controlTopic + "/4' ");
+			ProcessLEDMessage( "4", props);
+			
 		} else if(topic.contains(controlTopic + "/resetcnt")) {
 			s_logger.debug("topic contains '" + controlTopic + "/resetcnt' ");
 			ProcessResetMessage( topic.substring(topic.indexOf("resetcnt/") + 9), props);
@@ -675,6 +689,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 	// reset counter values
 	private void ProcessResetMessage( String counter, Properties props)
 	{
+		s_logger.warn("Process Reset " + counter + " with value " + Boolean.parseBoolean((String)props.get("value")));
 		try {
 			if(counter.equals("c3"))
 				clearCounter( 3, Boolean.parseBoolean((String)props.get("value")));
@@ -695,6 +710,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 	{
 		boolean TurnON = true;
 		boolean TurnOFF = false;
+		int offset = 3;
 		try
 		{
 			switch(counter) {
@@ -711,7 +727,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 			default:	s_logger.warn("Error in clearCounter - Counter " + counter + " is not valid.");
 						break;
 			}
-			m_protocolDevice.writeSingleCoil(slaveAddr, 3072 + counter, On?TurnON:TurnOFF);
+			m_protocolDevice.writeSingleCoil(slaveAddr, 3072 + counter - 1, On?TurnON:TurnOFF);
 		}
 		catch (Exception e) {
 			e.printStackTrace();

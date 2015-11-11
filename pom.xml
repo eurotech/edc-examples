@@ -15,7 +15,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
-		<kura.basedir>${project.basedir}/../../kura/kura/kura</kura.basedir>
+		<kura.basedir>${project.basedir}/../../kura/kura</kura.basedir>
 		<kura.bundle.versions>2.1.0.${kura.build.version}</kura.bundle.versions>
 	</properties>
 
