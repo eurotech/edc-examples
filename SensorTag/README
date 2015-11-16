@@ -1,0 +1,11 @@
+The Eurotech SensorTag application is based on the TI SensorTag app that can be found here: https://git.ti.com/sensortag-20-android
+
+New features:
+  * support to EDC
+  * luxometer tab
+  * Eurotech and EDC logos
+
+Known issues:
+  * when a cloud configuration is set and the configuration panel is opened, the fields are empty.
+  * sometimes, when the sensors tab is opened, the list is empty
+  * sometimes the service discovery fails.

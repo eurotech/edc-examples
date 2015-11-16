@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:fillViewport="true">
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/cloud_config_dialog">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cloud_config_dialog_cloud_account"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/cloud_account_label"
+            android:layout_alignBottom="@+id/cloud_account"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10dp" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cloud_account"
+            android:inputType="text"
+            android:layout_marginLeft="0dp"
+            android:layout_toEndOf="@+id/cloud_account_label"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cloud_config_dialog_username"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/cloud_username_label"
+            android:layout_alignBottom="@+id/cloud_username"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10dp" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cloud_username"
+            android:inputType="text"
+            android:layout_marginLeft="0dp"
+            android:layout_toEndOf="@+id/cloud_username_label"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/cloud_account_label" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cloud_config_dialog_password"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/cloud_password_label"
+            android:layout_alignBottom="@+id/cloud_password"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10dp" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cloud_password"
+            android:inputType="textPassword"
+            android:ems="10"
+            android:layout_marginLeft="0dp"
+            android:layout_toEndOf="@+id/cloud_password_label"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/cloud_username_label" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cloud_config_dialog_client_id"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/cloud_client_id_label"
+            android:layout_alignBottom="@+id/cloud_client_id"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10dp" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cloud_client_id"
+            android:inputType="text"
+            android:layout_marginLeft="0dp"
+            android:layout_toEndOf="@+id/cloud_client_id_label"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/cloud_password_label" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cloud_config_dialog_asset_id"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/cloud_asset_id_label"
+            android:layout_alignBottom="@+id/cloud_asset_id"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10dp" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cloud_asset_id"
+            android:inputType="text"
+            android:layout_marginLeft="0dp"
+            android:layout_toEndOf="@+id/cloud_asset_id_label"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/cloud_client_id_label" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cloud_config_dialog_cloud_broker_address"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/cloud_broker_address_label"
+            android:layout_alignBottom="@+id/cloud_broker_address"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10dp" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cloud_broker_address"
+            android:inputType="text"
+            android:layout_marginLeft="0dp"
+            android:layout_toEndOf="@+id/cloud_broker_address_label"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/cloud_asset_id_label" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cloud_config_dialog_broker_port"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/cloud_broker_port_label"
+            android:layout_alignBottom="@+id/cloud_broker_port"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10dp" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cloud_broker_port"
+            android:inputType="text"
+            android:layout_marginLeft="0dp"
+            android:layout_toEndOf="@+id/cloud_broker_port_label"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/cloud_broker_address_label" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cloud_config_dialog_publish_topic"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/cloud_publish_topic_label"
+            android:layout_alignBottom="@+id/cloud_publish_topic"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10dp" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cloud_publish_topic"
+            android:inputType="text"
+            android:layout_marginLeft="0dp"
+            android:layout_toEndOf="@+id/cloud_publish_topic_label"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/cloud_broker_port_label" />
+
+    </RelativeLayout>
+</ScrollView>

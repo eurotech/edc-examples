@@ -1,0 +1,2 @@
+configurations.create("default")
+artifacts.add("default", file('org.eclipse.paho.client.mqttv3-1.0.2.jar'))

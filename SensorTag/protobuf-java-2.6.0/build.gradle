@@ -1,0 +1,2 @@
+configurations.create("default")
+artifacts.add("default", file('protobuf-java-2.6.0.jar'))

@@ -1,0 +1,2 @@
+configurations.create("default")
+artifacts.add("default", file('slf4j-api-1.6.4.jar'))
