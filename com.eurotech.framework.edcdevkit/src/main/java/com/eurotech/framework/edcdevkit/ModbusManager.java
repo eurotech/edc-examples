@@ -606,9 +606,13 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 		
 		for( int index = 0; index < Names.length; index++)
 		{
-			String key = (String)Names[index];
-			String value = (String)msg.getMetric(key);
-			props.put(key, value);
+         try{
+			   String key = (String)Names[index];
+			   String value = (String)msg.getMetric(key);
+			   props.put(key, value);
+         } catch (Exception ex) {
+				s_logger.error("Error processing metric {}", Names[index]);
+			}
 		}
 		ProcessPayload(props, topic);
 	}

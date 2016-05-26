@@ -31,7 +31,7 @@
 	var XMLrule2="";
 	var XMLReset="";
 	var apiURL="https://api-sandbox.everyware-cloud.com/v2/messages/searchByTopic.xml?topic=";
-	var publishURL="https://api-sandbox.everyware-cloud.com/v2/messages/publish.xml";
+	var publishURL="https://api-sandbox.everyware-cloud.com/v2/devices/sendRequest.xml";
 	var logoutURL= "https://api-sandbox.everyware-cloud.com/gvds/logout";
 
 

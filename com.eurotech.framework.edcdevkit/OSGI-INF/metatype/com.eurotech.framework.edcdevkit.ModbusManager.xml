@@ -34,7 +34,7 @@
             type="String"
             cardinality="0"
             required="true"
-            default="/dev/ttyUSB0"
+            default="/dev/ttyO4"
             description="Serial Port Name (such as /dev/ttyUSB0), or TCP Port (such as 3040)"/>
         
         <AD id="ipAddress"  
@@ -126,7 +126,7 @@
             type="String"
             cardinality="0" 
             required="false"
-            default="eurotech/demo"
+            default="POST/eurotech/demo"
             description="The base control topic to receive controls from the Cloud."/>
 
         <AD id="pollInterval"  
