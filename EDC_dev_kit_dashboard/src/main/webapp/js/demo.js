@@ -261,31 +261,9 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				data: XMLData1,
 
 				error: function(XMLHttpRequest, textStatus, errorThrown){
-					alert(errorThrown);
+					//alert(errorThrown);
 				},
 				success: function(data, textStatus, XMLHttpRequest){
-					//alert("Succeeded");
-				}
-			});
-
-			var ledID="1";
-			var ledName="light";
-			var publishTopic=username + "/" + clientID + "/" +postTopic;
-			makeXML(username,clientID,publishTopic,ledName,light,ledID);
-
-			$.ajax({
-				type: "POST",
-				url: url,
-				contentType: 'application/xml',
-				async : true,
-				beforeSend: function (xhr){
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
-				},
-				processData: true,
-				data: XMLData1,
-				error: function(XMLHttpRequest, textStatus, errorThrown){
-					alert(errorThrown);
-				}, success: function(data, textStatus, XMLHttpRequest){
 					//alert("Succeeded");
 				}
 			});
@@ -329,28 +307,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				processData: true,
 				data: XMLData2,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
-					alert(errorThrown);
-				}, success: function(data, textStatus, XMLHttpRequest){
-					//alert("Succeeded");
-				}
-			});
-
-			var ledID="2";
-			var ledName="light";
-			var publishTopic=username + "/" + clientID + "/" + postTopic;
-			makeXML(username,clientID,publishTopic,ledName,light,ledID);
-			$.ajax({
-				type: "POST",
-				url: url,
-				contentType: 'application/xml',
-				async : true,
-				beforeSend: function (xhr){
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
-				},
-				processData: true,
-				data: XMLData2,
-				error: function(XMLHttpRequest, textStatus, errorThrown){
-					alert(errorThrown);
+					//alert(errorThrown);
 				}, success: function(data, textStatus, XMLHttpRequest){
 					//alert("Succeeded");
 				}
@@ -396,32 +353,12 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				processData: true,
 				data: XMLData3,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
-					alert(errorThrown);
+					//alert(errorThrown);
 				}, success: function(data, textStatus, XMLHttpRequest){
 				//alert("Succeeded");
 				}
 			});
 
-			var ledID="3";
-			var ledName="light";
-			var publishTopic=username + "/" + clientID + "/" + postTopic;
-			makeXML(username,clientID,publishTopic,ledName,light,ledID);
-			$.ajax({
-				type: "POST",
-				url: url,
-				contentType: 'application/xml',
-				async : true,
-				beforeSend: function (xhr){
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
-				},
-				processData: true,
-				data: XMLData3,
-				error: function(XMLHttpRequest, textStatus, errorThrown){
-					alert(errorThrown);
-				}, success: function(data, textStatus, XMLHttpRequest){
-					//alert("Succeeded");
-				}
-			});
 		}); // end of click function
 	});
 
@@ -465,29 +402,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				processData: true,
 				data: XMLData4,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
-					alert(errorThrown);
-				}, success: function(data, textStatus, XMLHttpRequest){
-					//alert("Succeeded");
-				}
-			});
-
-			var ledID="4";
-			var ledName=ledColor;
-			var publishTopic=username + "/" + clientID + "/" + postTopic;
-			makeXML(username,clientID,publishTopic,ledName,light,ledID);
-
-			$.ajax({
-				type: "POST",
-				url: url,
-				contentType: 'application/xml',
-				async : true,
-				beforeSend: function (xhr){
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
-				},
-				processData: true,
-				data: XMLData4,
-				error: function(XMLHttpRequest, textStatus, errorThrown){
-					alert(errorThrown);
+					//alert(errorThrown);
 				}, success: function(data, textStatus, XMLHttpRequest){
 					//alert("Succeeded");
 				}
@@ -536,29 +451,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				processData: true,
 				data: XMLData4,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
-					alert(errorThrown);
-				},
-				success: function(data, textStatus, XMLHttpRequest){
-					//alert("Succeeded");
-				}
-			});
-
-			var ledID="4";
-			var ledName=ledColor;
-			var publishTopic=username + "/" + clientID + "/" + postTopic;
-			makeXML(username,clientID,publishTopic,ledName,light,ledID);
-			$.ajax({
-				type: "POST",
-				url: url,
-				contentType: 'application/xml',
-				async : true,
-				beforeSend: function (xhr){
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
-				},
-				processData: true,
-				data: XMLData4,
-				error: function(XMLHttpRequest, textStatus, errorThrown){
-					alert(errorThrown);
+					//alert(errorThrown);
 				},
 				success: function(data, textStatus, XMLHttpRequest){
 					//alert("Succeeded");
@@ -607,35 +500,13 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				processData: true,
 				data: XMLData4,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
-					alert(errorThrown);
+					//alert(errorThrown);
 				},
 				success: function(data, textStatus, XMLHttpRequest){
 					//alert("Succeeded");
 				}
 			});
 
-			var ledID="4";
-			var ledName=ledColor;
-			var publishTopic=username + "/" + clientID + "/" + postTopic;
-			makeXML(username,clientID,publishTopic,ledName,light,ledID);
-
-			$.ajax({
-				type: "POST",
-				url: url,
-				contentType: 'application/xml',
-				async : true,
-				beforeSend: function (xhr){
-					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
-				},
-				processData: true,
-				data: XMLData4,
-				error: function(XMLHttpRequest, textStatus, errorThrown){
-					alert(errorThrown);
-				},
-				success: function(data, textStatus, XMLHttpRequest){
-					//alert("Succeeded");
-				}
-			});
 	   	}); // end of click function
 	});
 
@@ -667,7 +538,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				processData: true,
 				data: XMLReset,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
-					alert(errorThrown);
+					//alert(errorThrown);
 				},
 				success: function(data, textStatus, XMLHttpRequest){
 					//alert("Succeeded");
