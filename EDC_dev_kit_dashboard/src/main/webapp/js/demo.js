@@ -259,7 +259,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				},
 				processData: true,
 				data: XMLData1,
-
+				timeout: 1000,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					//alert(errorThrown);
 				},
@@ -267,6 +267,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 					//alert("Succeeded");
 				}
 			});
+			
 	   	}); // end of click function
 	});
 
@@ -306,6 +307,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				},
 				processData: true,
 				data: XMLData2,
+				timeout: 1000,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					//alert(errorThrown);
 				}, success: function(data, textStatus, XMLHttpRequest){
@@ -352,13 +354,13 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				},
 				processData: true,
 				data: XMLData3,
+				timeout: 1000,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					//alert(errorThrown);
 				}, success: function(data, textStatus, XMLHttpRequest){
 				//alert("Succeeded");
 				}
 			});
-
 		}); // end of click function
 	});
 
@@ -390,7 +392,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 			var ledName=ledColor;
 			var publishTopic="$EDC/" + username + "/" + clientID + "/" + postTopic;
 			makeXML(username,clientID,publishTopic,ledName,light,ledID);
-
+			
 			$.ajax({
 				type: "POST",
 				url: url,
@@ -401,6 +403,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				},
 				processData: true,
 				data: XMLData4,
+				timeout: 1000,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					//alert(errorThrown);
 				}, success: function(data, textStatus, XMLHttpRequest){
@@ -450,6 +453,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				},
 				processData: true,
 				data: XMLData4,
+				timeout: 1000,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					//alert(errorThrown);
 				},
@@ -499,6 +503,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				},
 				processData: true,
 				data: XMLData4,
+				timeout: 1000,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					//alert(errorThrown);
 				},
@@ -506,7 +511,6 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 					//alert("Succeeded");
 				}
 			});
-
 	   	}); // end of click function
 	});
 
@@ -521,6 +525,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				return "Basic " + hash;
 			}
 
+			
 			var counterID="c3";
 			var resetMetric="value";
 			var resetValue = "true";
@@ -537,6 +542,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				},
 				processData: true,
 				data: XMLReset,
+				timeout: 1000,
 				error: function(XMLHttpRequest, textStatus, errorThrown){
 					//alert(errorThrown);
 				},
@@ -581,3 +587,4 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 		return false;
 	});
 }
+
