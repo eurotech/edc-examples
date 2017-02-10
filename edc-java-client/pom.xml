@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>com.eurotech.cloud</groupId>
 			<artifactId>edc-client</artifactId>
-			<version>3.0.4</version>
+			<version>4.2.3</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
