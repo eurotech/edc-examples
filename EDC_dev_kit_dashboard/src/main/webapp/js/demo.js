@@ -54,7 +54,7 @@ function doDemo (username,password,clientID,postTopic,getTopic) {
 				url: url,
 				dataType: 'xml',
 				async : true,
-				data: '{}',
+				data: {},
 				beforeSend: function (xhr){
 					xhr.setRequestHeader('Authorization', make_base_auth(username, password));
 				},
