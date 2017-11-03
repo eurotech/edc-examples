@@ -1,15 +1,15 @@
 #Deployment Plugin Project File
-#Fri Nov 03 11:55:24 CET 2017
+#Fri Nov 03 12:08:47 CET 2017
 build.ant.name=<.>/com.eurotech.framework.edcdevkit_build.xml
 build.dp.file=<.>/com.eurotech.framework.edcdevkit.dp
 build.location=
-bundles.0.bundle_path=/Users/cristiano.dealti/Desktop/plugins/com.eurotech.framework.edcdevkit_1.0.3.201711031155.jar
+bundles.0.bundle_path=/Users/cristiano.dealti/Desktop/plugins/com.eurotech.framework.edcdevkit_1.0.3.201711031208.jar
 bundles.0.customizer=false
 bundles.0.headers.count=0
 bundles.0.missing=false
-bundles.0.name=bundles/com.eurotech.framework.edcdevkit_1.0.3.201711031155.jar
+bundles.0.name=bundles/com.eurotech.framework.edcdevkit_1.0.3.201711031208.jar
 bundles.0.symbolic_name=com.eurotech.framework.edcdevkit;singleton\:\=true
-bundles.0.version=1.0.3.201711031155
+bundles.0.version=1.0.3.201711031208
 bundles.count=1
 certificates.count=0
 general.signbundles=false
