@@ -1,27 +1,20 @@
 #Deployment Plugin Project File
-#Tue Nov 10 15:03:42 CET 2015
+#Fri Nov 03 11:55:24 CET 2017
 build.ant.name=<.>/com.eurotech.framework.edcdevkit_build.xml
 build.dp.file=<.>/com.eurotech.framework.edcdevkit.dp
 build.location=
-bundles.0.bundle_path=<.>/target/com.eurotech.framework.edcdevkit-1.0.2-SNAPSHOT.jar
+bundles.0.bundle_path=/Users/cristiano.dealti/Desktop/plugins/com.eurotech.framework.edcdevkit_1.0.3.201711031155.jar
 bundles.0.customizer=false
 bundles.0.headers.count=0
 bundles.0.missing=false
-bundles.0.name=bundles/com.eurotech.framework.edcdevkit-1.0.2-SNAPSHOT.jar
+bundles.0.name=bundles/com.eurotech.framework.edcdevkit_1.0.3.201711031155.jar
 bundles.0.symbolic_name=com.eurotech.framework.edcdevkit;singleton\:\=true
-bundles.0.version=1.0.2
-bundles.1.bundle_path=/Users/pierantonio.merlino/Work/Kura/dev/develop/kura/kura/org.eclipse.kura.protocol.modbus/target/org.eclipse.kura.protocol.modbus-1.0.2-SNAPSHOT.jar
-bundles.1.customizer=false
-bundles.1.headers.count=0
-bundles.1.missing=false
-bundles.1.name=bundles/org.eclipse.kura.protocol.modbus-1.0.2-SNAPSHOT.jar
-bundles.1.symbolic_name=org.eclipse.kura.protocol.modbus;singleton\:\=true
-bundles.1.version=1.0.2.201511091022
-bundles.count=2
+bundles.0.version=1.0.3.201711031155
+bundles.count=1
 certificates.count=0
 general.signbundles=false
 headers.other.headers=
 headers.symbolic.name=com.eurotech.framework.edcdevkit
-headers.version=1.0.0
+headers.version=1.0.1
 resources.count=0
 

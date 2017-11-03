@@ -23,10 +23,8 @@
             cardinality="0"
             required="false"
             default="RS232"
-            description="Serial Mode (RS232 or RS485), or TCP for TCP-encapsulated Modbus.">
+            description="Serial Mode (RS232 only).">
             <Option label="RS-232" value="RS232"/>
-            <Option label="RS-485" value="RS485"/>
-            <Option label="TCP" value="ETHERTCP"/>
 		</AD>
         
         <AD id="port"
@@ -37,14 +35,6 @@
             default="/dev/ttyO4"
             description="Serial Port Name (such as /dev/ttyUSB0), or TCP Port (such as 3040)"/>
         
-        <AD id="ipAddress"  
-            name="ipAddress"
-            type="String"
-            cardinality="0" 
-            required="false"
-            default="" 
-            description="IP address of Modbus server (TCP mode only)."/>
-
         <AD id="baudRate"  
             name="baudRate"
             type="String"
